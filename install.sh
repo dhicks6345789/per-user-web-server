@@ -55,6 +55,37 @@ fi
 
 echo Installing web server \""$servertitle"\"...
 
+# Make sure Git (distributed source code control system) is installed.
+if [ ! -d "/etc/git" ]; then
+    apt-get install -y git
+fi
+
+# Install Pangolin (server that handles SSL tunneling and user authentication).
+if [ $sslhandler = "pangolin" ]; then
+    if [ ! -d "/etc/pangolin" ]; then
+        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
+    fi
+fi
+
+# Install Web Console (runs server-side scripts with a simple user interface, also acts as a basic web server) via Git.
+if [ ! -d "web-console" ]; then
+    git clone https://github.com/dhicks6345789/web-console.git
+fi
+cd web-console
+git pull
+cd ..
+
+
+
+
+
+
+
+
+
+
+
+
 exit 0
 
 

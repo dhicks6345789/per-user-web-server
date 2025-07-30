@@ -56,7 +56,7 @@ fi
 echo Installing web server \""$servertitle"\"...
 
 # Make sure Git (distributed source code control system) is installed.
-if [ ! -d "/etc/git" ]; then
+if [ ! -d "/usr/bin/git" ]; then
     apt-get install -y git
 fi
 

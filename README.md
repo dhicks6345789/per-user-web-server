@@ -18,7 +18,7 @@ This project has been tested on a Debian 13 "Trixie" server (August 2025) runnin
 
 You should probably run this script on a virtual machine (VM) dedicated to running this service, something that is backed up / able to be restored to a known-working checkpoint. Running this script on an existing machine with other services installed might give unpredictable results, although if you know what you're doing it is just a (hopefully well-commented) Bash script and you can check through it to see exactly what is being done and how that might intefere with your current setup.
 
-The VM used for this server can probably be quite small (tested on a VM with 4GB of RAM and 128GB of storage), at least initially - how much RAM/CPU/storage you need is going to depend on how many users you have and how much they'll be using the server.
+The VM used for this server can probably be quite small, at least initially. The suggested reasonable minimum for Debian Trixie is 2 GB of RAM and 40 GB of storage, if you're using a hosting provider like AWS then their smallest available VM should be okay - for something like AWS, you should be able to manage with the resources available in the free pricing tier. Exactly how much RAM / CPU / storage you are going to need will depend on how many users you have and how much they'll be using the server, but you can probably set up a minimal test server initially and add more RAM / CPU / storage to it later.
 
 #### Domain / DNS
 

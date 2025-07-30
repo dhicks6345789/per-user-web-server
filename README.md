@@ -1,7 +1,7 @@
 # per-user-web-server
 A script to configure a Debian installation as a web server, with a sub-directory for each of a set of users.
 
-Intended by use for situations where you want to let each of a set of users host their own web site, but still private within your organisation. Ideal for schools and similar institutions.
+Intended by use for situations where you want to let each of a set of users host their own web site, or basic "intranet", but still private within your organisation. Ideal for schools and similar institutions.
 
 ## What Does This Project Do?
 This project provides a setup script that is intended for people who want a (hopefully) simple, one-step mechanism to set up a web server for hosting user websites, complete with user authentication with default access to only your users.

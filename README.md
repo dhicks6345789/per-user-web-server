@@ -24,6 +24,8 @@ The VM used for this server can probably be quite small (tested on a VM with 4GB
 
 You will need the ability to set up a [sub-domain](https://en.wikipedia.org/wiki/Subdomain) (e.g. webserver.example.com) and point it at your server. Generally, this means having access to the DNS configuration for your domain name.
 
+In theory, you could set this server up as your domain's default web server, i.e. at "www.example.com". However, this would give you a public website showing the nmain WebConsole menu page, which probably isn't want you want for your public-facing website. You might do better to install a standard web server alongside this setup and have that serve any public-facing web pages. Possible todo: add an option to install an instance of [Caddy](https://caddyserver.com/) to handle this.
+
 ### Users
 
 You will need some way of getting a list of users in CSV format onto the server. That can be a one-off operation, manually edited to add / remove users, but some way of getting a list of users from your system updated at least daily would probably be best. If you are in a school, this list will probably be from your school's Management Information System (MIS) or from Google Workspace / Microsoft 365. Some example scripts are included to help with that process.

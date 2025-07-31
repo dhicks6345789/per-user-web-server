@@ -73,7 +73,7 @@ fi
 # Make sure Go (programming language, used by Web Console) is installed.
 if [ ! -f "/usr/bin/go" ]; then
     if [ $debianversion = "bookworm" ]; then
-        cp debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
+        cp per-user-we-server/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
         apt-get update
         apt install -y -t bookworm-backports golang-go
     else

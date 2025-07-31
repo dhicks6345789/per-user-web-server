@@ -61,12 +61,12 @@ fi
 echo Installing web server \""$SERVERTITLE"\"...
 
 # Make sure Git (distributed source code control system) is installed.
-if [ ! -d "/usr/bin/git" ]; then
+if [ ! -f "/usr/bin/git" ]; then
     apt-get install -y git
 fi
 
 # Make sure Go (programming language) is installed.
-if [ ! -d "/usr/bin/go" ]; then
+if [ ! -f "/usr/bin/go" ]; then
     if [ $debianversion = "bookworm" ]; then
         cp debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
         apt-get update

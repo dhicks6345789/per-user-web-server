@@ -83,6 +83,14 @@ if [ $SSLHANDLER = "pangolin" ]; then
     fi
 fi
 
+# Update the Ace (in-browser Javascript text editor, used by Web Console) source code (Git) folder.
+if [ ! -d "ace-builds" ]; then
+    git clone https://github.com/ajaxorg/ace-builds.git
+fi
+cd ace-builds
+git pull
+cd ..
+
 # Install Web Console (runs server-side scripts with a simple user interface, also acts as a basic web server) via Git.
 if [ ! -d "web-console" ]; then
     git clone https://github.com/dhicks6345789/web-console.git

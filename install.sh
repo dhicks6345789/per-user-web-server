@@ -14,26 +14,26 @@ copyOrDownload () {
 }
 
 # Set default command-line flag values.
-servertitle="Web Server"
-sslhandler="pangolin"
-servername=`dnsdomainname`
+SERVERTITLE="Web Server"
+SSLHANDLER="pangolin"
+SERVERNAME=`dnsdomainname`
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
     case "$1" in
         -servername)
             shift
-            servername=$1
+            SERVERNAME=$1
             shift
             ;;
         -servertitle)
             shift
-            servertitle=$1
+            SERVERTITLE=$1
             shift
             ;;
         -sslhandler)
             shift
-            sslhandler=$1
+            SSLHANDLER=$1
             shift
             ;;
         *)
@@ -48,7 +48,7 @@ done
 debianversion=`cat /etc/os-release | grep CODENAME | sed 's/=/\n/g' | grep -v CODENAME`
 
 # Check all required flags are set, print a usage message if not.
-if [ -z "$servername" ]; then
+if [ -z "$SERVERNAME" ]; then
     echo "Usage: install.sh [-servername SERVERNAME] [-servertitle SERVERTITLE] [-sslhandler pangolin | tunnel | none]"
     echo "Optional: SERVERNAME: The full domain name of this server (e.g. webserver.example.com). Deafaults to the value provided by dnsdomainname."
     echo "Optional: SERVERTITLE: A title for the web server (e.g. \"My Company Web Server\". Defaults to \"Web Server\"." 
@@ -58,7 +58,7 @@ if [ -z "$servername" ]; then
     exit 1;
 fi
 
-echo Installing web server \""$servertitle"\"...
+echo Installing web server \""$SERVERTITLE"\"...
 
 # Make sure Git (distributed source code control system) is installed.
 if [ ! -d "/usr/bin/git" ]; then
@@ -77,7 +77,7 @@ if [ ! -d "/usr/bin/go" ]; then
 fi
 
 # Install Pangolin (server that handles SSL tunneling and user authentication).
-if [ $sslhandler = "pangolin" ]; then
+if [ $SSLHANDLER = "pangolin" ]; then
     if [ ! -d "/etc/pangolin" ]; then
         wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
     fi

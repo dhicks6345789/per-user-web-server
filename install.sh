@@ -43,7 +43,9 @@ while test $# -gt 0; do
     esac
 done
 
-echo $servername
+
+# Figure out the version (by release codename) of Debian we are using.
+debianversion=`cat /etc/os-release | grep CODENAME | sed 's/=/\n/g' | grep -v CODENAME`
 
 # Check all required flags are set, print a usage message if not.
 if [ -z "$servername" ]; then
@@ -65,7 +67,13 @@ fi
 
 # Make sure Go (programming language) is installed.
 if [ ! -d "/usr/bin/go" ]; then
-    apt-get install -y golang
+    if [ $debianversion = "bookworm" ]; then
+        cp debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
+        apt-get update
+        apt install -t bookworm-backports golang-go
+    else
+        apt-get install -y golang
+    fi
 fi
 
 # Install Pangolin (server that handles SSL tunneling and user authentication).

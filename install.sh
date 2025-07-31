@@ -60,6 +60,11 @@ fi
 
 echo Installing web server \""$SERVERTITLE"\"...
 
+# Make sure sudo (run commands as root) is installed.
+if [ ! -f "/usr/bin/sudo" ]; then
+    apt-get install -y sudo
+fi
+
 # Make sure Git (distributed source code control system) is installed.
 if [ ! -f "/usr/bin/git" ]; then
     apt-get install -y git

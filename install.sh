@@ -16,6 +16,7 @@ copyOrDownload () {
 # Set default command-line flag values.
 servertitle="Web Server"
 sslhandler="pangolin"
+# dnsdomainname
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do

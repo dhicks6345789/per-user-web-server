@@ -43,6 +43,8 @@ while test $# -gt 0; do
     esac
 done
 
+echo $servername
+
 # Check all required flags are set, print a usage message if not.
 if [ -z "$servername" ]; then
     echo "Usage: install.sh [-servername SERVERNAME] [-servertitle SERVERTITLE] [-sslhandler pangolin | tunnel | none]"

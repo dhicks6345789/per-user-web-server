@@ -63,6 +63,11 @@ if [ ! -d "/usr/bin/git" ]; then
     apt-get install -y git
 fi
 
+# Make sure Go (programming language) is installed.
+if [ ! -d "/usr/bin/go" ]; then
+    apt-get install -y golang
+fi
+
 # Install Pangolin (server that handles SSL tunneling and user authentication).
 if [ $sslhandler = "pangolin" ]; then
     if [ ! -d "/etc/pangolin" ]; then

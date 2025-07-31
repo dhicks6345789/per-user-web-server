@@ -16,7 +16,7 @@ copyOrDownload () {
 # Set default command-line flag values.
 servertitle="Web Server"
 sslhandler="pangolin"
-# dnsdomainname
+servername=$dnsdomainname
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -46,11 +46,11 @@ done
 # Check all required flags are set, print a usage message if not.
 if [ -z "$servername" ] || [ -z "$dbpassword" ]; then
     echo "Usage: install.sh [-servername SERVERNAME] [-servertitle SERVERTITLE] [-sslhandler pangolin | tunnel | none]"
-    echo "SERVERNAME: The full domain name of this server (e.g. webserver.example.com)."
+    echo "Optional: SERVERNAME: The full domain name of this server (e.g. webserver.example.com). Deafaults to the value provided by dnsdomainname."
     echo "Optional: SERVERTITLE: A title for the web server (e.g. \"My Company Web Server\". Defaults to \"Web Server\"." 
     echo "Optional: \"pangolin\" or \"tunnel\" as SSL Handler options. If \"tunnel\", the server will be configured assuming an SSL tunneling"
     echo "          service (Cloudflare, NGrok, etc) will be used to provide SSL ingress. If \"pangolin\", a Pangolin server will be installed"
-    echo "          and set up to auto-configure SSL. If \"none\" (the default), neither option will be configured for."
+    echo "          and set up to auto-configure SSL. If \"none\" (the default), neither option will be configured for. Defaults to Pangolin."
     exit 1;
 fi
 

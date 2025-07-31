@@ -65,7 +65,7 @@ if [ ! -f "/usr/bin/git" ]; then
     apt-get install -y git
 fi
 
-# Make sure Go (programming language) is installed.
+# Make sure Go (programming language, used by Web Console) is installed.
 if [ ! -f "/usr/bin/go" ]; then
     if [ $debianversion = "bookworm" ]; then
         cp debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
@@ -73,13 +73,6 @@ if [ ! -f "/usr/bin/go" ]; then
         apt install -y -t bookworm-backports golang-go
     else
         apt-get install -y golang
-    fi
-fi
-
-# Install Pangolin (server that handles SSL tunneling and user authentication).
-if [ $SSLHANDLER = "pangolin" ]; then
-    if [ ! -d "/etc/pangolin" ]; then
-        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
     fi
 fi
 
@@ -100,9 +93,13 @@ git pull
 bash build.sh
 cd ..
 
-
-
-
+# Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
+if [ $SSLHANDLER = "pangolin" ]; then
+    if [ ! -d "/etc/pangolin" ]; then
+        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
+        ./installer
+    fi
+fi
 
 
 

@@ -70,7 +70,7 @@ if [ ! -d "/usr/bin/go" ]; then
     if [ $debianversion = "bookworm" ]; then
         cp debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
         apt-get update
-        apt install -t bookworm-backports golang-go
+        apt install -y -t bookworm-backports golang-go
     else
         apt-get install -y golang
     fi

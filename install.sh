@@ -44,7 +44,7 @@ while test $# -gt 0; do
 done
 
 # Check all required flags are set, print a usage message if not.
-if [ -z "$servername" ] || [ -z "$dbpassword" ]; then
+if [ -z "$servername" ]; then
     echo "Usage: install.sh [-servername SERVERNAME] [-servertitle SERVERTITLE] [-sslhandler pangolin | tunnel | none]"
     echo "Optional: SERVERNAME: The full domain name of this server (e.g. webserver.example.com). Deafaults to the value provided by dnsdomainname."
     echo "Optional: SERVERTITLE: A title for the web server (e.g. \"My Company Web Server\". Defaults to \"Web Server\"." 

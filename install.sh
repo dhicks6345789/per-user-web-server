@@ -76,6 +76,7 @@ if [ ! -d "web-console" ]; then
 fi
 cd web-console
 git pull
+bash build.sh
 cd ..
 
 

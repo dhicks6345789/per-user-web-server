@@ -1,7 +1,7 @@
 name: pangolin
 services:
   pangolin:
-    image: fosrl/pangolin:1.1.0
+    image: fosrl/pangolin:1.7.3
     container_name: pangolin
     restart: unless-stopped
     volumes:
@@ -15,7 +15,7 @@ services:
       - pangolin_network
 
   traefik:
-    image: traefik:v3.3.3
+    image: traefik:v3.4.1
     container_name: traefik
     restart: unless-stopped
     ports:

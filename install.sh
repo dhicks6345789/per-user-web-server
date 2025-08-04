@@ -18,6 +18,12 @@ SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 
+CLOUDFLARED_TOKEN=""
+CLOUDFLARE_API_TOKEN=""
+CLOUDFLARE_ACCOUNT_ID=""
+CLOUDFLARE_TUNNEL_ID=""
+CLOUDFLARE_ZONE_ID=""
+
 # Read user-defined command-line flags.
 while test $# -gt 0; do
     case "$1" in
@@ -48,7 +54,7 @@ done
 debianversion=`cat /etc/os-release | grep CODENAME | sed 's/=/\n/g' | grep -v CODENAME`
 
 # Check all required flags are set, print a usage message if not.
-if [ -z "$SERVERNAME" ]; then
+if [ -z "$SERVERNAME" ] || [ -z "$CLOUDFLARED_TOKEN" ] || [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_TUNNEL_ID" ] || [ -z "$CLOUDFLARE_ZONE_ID" ]; then
     echo "Usage: install.sh [-servername SERVERNAME] [-servertitle SERVERTITLE] [-sslhandler pangolin | tunnel | none]"
     echo "Optional: SERVERNAME: The full domain name of this server (e.g. webserver.example.com). Deafaults to the value provided by dnsdomainname."
     echo "Optional: SERVERTITLE: A title for the web server (e.g. \"My Company Web Server\". Defaults to \"Web Server\"." 

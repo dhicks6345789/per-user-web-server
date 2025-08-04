@@ -3,6 +3,8 @@ A script to configure a Debian installation as a web server, with a sub-director
 
 Intended by use for situations where you want to let each of a set of users host their own web site, or basic "intranet", but still private within your organisation. Ideal for schools and similar institutions.
 
+**Note: as of 4th August 2025, still very much a work-in-progress, not actually working yet. The documentation below is curently more a to-do list than actual features.**
+
 ## What Does This Project Do?
 This project provides a setup script that is intended for people who want a (hopefully) simple, one-step mechanism to set up a web server for hosting user websites, complete with user authentication with default access to only your users.
 

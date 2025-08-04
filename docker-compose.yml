@@ -67,3 +67,8 @@ services:
     depends_on:
       - traefik
       - cloudflared
+
+networks:
+  pangolin_network:
+    driver: bridge
+    name: pangolin_network

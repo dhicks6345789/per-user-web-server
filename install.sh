@@ -137,7 +137,12 @@ if [ $SSLHANDLER = "pangolin" ]; then
     fi
 fi
 
-
+cp per-user-web-server/docker-compose.yml ./docker-compose.yml
+sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
+sed -i "s/{{CLOUDFLARE_API_TOKEN}}/$CLOUDFLARE_API_TOKEN/g" docker-compose.yml
+sed -i "s/{{CLOUDFLARE_ACCOUNT_ID}}/$CLOUDFLARE_ACCOUNT_ID/g" docker-compose.yml
+sed -i "s/{{CLOUDFLARE_TUNNEL_ID}}/$CLOUDFLARE_TUNNEL_ID/g" docker-compose.yml
+sed -i "s/{{CLOUDFLARE_ZONE_ID}}/$CLOUDFLARE_ZONE_ID/g" docker-compose.yml
 
 
 

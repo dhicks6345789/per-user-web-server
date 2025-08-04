@@ -42,6 +42,31 @@ while test $# -gt 0; do
             SSLHANDLER=$1
             shift
             ;;
+        -cloudflared_token)
+            shift
+            CLOUDFLARED_TOKEN=$1
+            shift
+            ;;
+        -cloudflared_api_token)
+            shift
+            CLOUDFLARE_API_TOKEN=$1
+            shift
+            ;;
+        -cloudflared_account_id)
+            shift
+            CLOUDFLARE_ACCOUNT_ID=$1
+            shift
+            ;;
+        -cloudflared_tunnel_id)
+            shift
+            CLOUDFLARE_TUNNEL_ID=$1
+            shift
+            ;;
+        -cloudflare_zone_id)
+            shift
+            CLOUDFLARE_ZONE_ID=$1
+            shift
+            ;;
         *)
             echo "$1 is not a recognized flag."
             exit 1;

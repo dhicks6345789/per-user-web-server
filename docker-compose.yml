@@ -58,12 +58,14 @@ services:
       - CLOUDFLARE_ACCOUNT_ID={{CLOUDFLARE_ACCOUNT_ID}}
       - CLOUDFLARE_TUNNEL_ID={{CLOUDFLARE_TUNNEL_ID}}
       - CLOUDFLARE_ZONE_ID={{CLOUDFLARE_ZONE_ID}}
-      - TRAEFIK_SERVICE_ENDPOINT=http://traefik:80
+      - TRAEFIK_SERVICE_ENDPOINT=https://traefik:443
       - TRAEFIK_API_ENDPOINT=http://traefik:8080
-      - TRAEFIK_ENTRYPOINT=web
-    restart: unless-stopped
+      - TRAEFIK_ENTRYPOINTS=web,websecure
+      - POLL_INTERVAL=10s  # Added to configure polling interval
+      - SKIP_TLS_ROUTES=false  # Include TLS-enabled routes
+      - LOG_LEVEL=debug
     networks:
-      - pangolin
+      - pangolin_network
     depends_on:
       - traefik
       - cloudflared

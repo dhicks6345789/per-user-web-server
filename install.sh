@@ -17,12 +17,6 @@ copyOrDownload () {
 SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
-
-#CLOUDFLARED_TOKEN=""
-#CLOUDFLARE_API_TOKEN=""
-#CLOUDFLARE_ACCOUNT_ID=""
-#CLOUDFLARE_TUNNEL_ID=""
-#CLOUDFLARE_ZONE_ID=""
 INSTALL_PANGOLIN=false
 
 # Read user-defined command-line flags.
@@ -153,6 +147,11 @@ fi
 # Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
 if [ $INSTALL_PANGOLIN = true ]; then
     if [ ! -d "/etc/pangolin" ]; then
+        clear;
+        echo Handing over to Pangolin installation script.
+        if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
+            echo Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select no when asked if you want to install Gerbil, Pangolin's tunneling component.
+        fi
         wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
         ./installer
     fi

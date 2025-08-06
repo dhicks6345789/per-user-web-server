@@ -43,4 +43,7 @@ This project is mostly just an installation script, along with some template con
 - The [Rclone](https://rclone.org/) file sync tool. Each user site can be built from files hosted on your choice of cloud storage system, handy for schools with users on Google Workspace / Micropsoft 365 - each user simply has a "website" folder in their home storage area where they can put / edit HTML / CSSD / Javascript files, or Markdown files and Hugo templates, and that folder is published to the web server.
 
 ## Installation
-The instllation is plit into two parts, the Pangolin setup and the web server setup. This is so the two operations can be carried out on separate servers, although running both on a single server should also be perfectly possible.
+The instllation is split into two parts, the Pangolin setup and the web server setup. This is so the two operations can be carried out on separate servers, although running both on a single server should also be perfectly possible.
+
+### Option 1 - One server running WebConsole, Pangolin, Cloudlfare Tunnels
+In Cloudflare's control panel, you will need to create a tunnel - from the main Control Panel, select "Zero Trust" from the left-hand menu, then "Networks", then "Tunnels".

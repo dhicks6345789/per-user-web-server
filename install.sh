@@ -79,7 +79,8 @@ done
 debianversion=`cat /etc/os-release | grep CODENAME | sed 's/=/\n/g' | grep -v CODENAME`
 
 # Check all required flags are set, print a usage message if not.
-if [ -z "$SERVERNAME" ] || [ -z "$CLOUDFLARED_TOKEN" ] || [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_TUNNEL_ID" ] || [ -z "$CLOUDFLARE_ZONE_ID" ]; then
+#if [ -z "$SERVERNAME" ] || [ -z "$CLOUDFLARED_TOKEN" ] || [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_TUNNEL_ID" ] || [ -z "$CLOUDFLARE_ZONE_ID" ]; then
+if [ -z "$SERVERNAME" ]; then
     echo "Usage: install.sh [-servername SERVERNAME] [-servertitle SERVERTITLE] [-sslhandler pangolin | tunnel | none]"
     echo "Optional: SERVERNAME: The full domain name of this server (e.g. webserver.example.com). Deafaults to the value provided by dnsdomainname."
     echo "Optional: SERVERTITLE: A title for the web server (e.g. \"My Company Web Server\". Defaults to \"Web Server\"." 
@@ -129,13 +130,13 @@ git pull
 bash build.sh
 cd ..
 
-# Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
-if [ $SSLHANDLER = "pangolin" ]; then
-    if [ ! -d "/etc/pangolin" ]; then
-        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
-        ./installer
-    fi
-fi
+## Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
+#if [ $SSLHANDLER = "pangolin" ]; then
+#    if [ ! -d "/etc/pangolin" ]; then
+#        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
+#        ./installer
+#    fi
+#fi
 
 #cp per-user-web-server/docker-compose.yml ./docker-compose.yml
 #sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml

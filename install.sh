@@ -131,7 +131,7 @@ bash build.sh
 cd ..
 
 # If the user has supplied a token for Cloudflare, install cloudflared.
-if [ ! -z "$CLOUDFLARED_TOKEN"]; then
+if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
     # Add cloudflare gpg key.
     mkdir -p --mode=0755 /usr/share/keyrings
     curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null

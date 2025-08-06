@@ -23,6 +23,7 @@ SERVERNAME=`dnsdomainname`
 #CLOUDFLARE_ACCOUNT_ID=""
 #CLOUDFLARE_TUNNEL_ID=""
 #CLOUDFLARE_ZONE_ID=""
+INSTALL_PANGOLIN=false
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -46,6 +47,10 @@ while test $# -gt 0; do
             shift
             CLOUDFLARED_TOKEN=$1
             shift
+            ;;
+        -pangolin)
+            shift
+            INSTALL_PANGOLIN=true
             ;;
         -cloudflared_api_token)
             shift
@@ -145,13 +150,13 @@ if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
     cloudflared service install $CLOUDFLARED_TOKEN
 fi
 
-## Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
-#if [ $SSLHANDLER = "pangolin" ]; then
-#    if [ ! -d "/etc/pangolin" ]; then
-#        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
-#        ./installer
-#    fi
-#fi
+# Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
+if [ $INSTALL_PANGOLIN = true ]; then
+    if [ ! -d "/etc/pangolin" ]; then
+        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
+        ./installer
+    fi
+fi
 
 #cp per-user-web-server/docker-compose.yml ./docker-compose.yml
 #sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml

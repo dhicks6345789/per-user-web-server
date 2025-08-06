@@ -130,6 +130,21 @@ git pull
 bash build.sh
 cd ..
 
+# If the user has supplied a token for Cloudflare, install cloudflared.
+if [ ! -z "$CLOUDFLAREDTOKEN"]; then
+    # Add cloudflare gpg key.
+    mkdir -p --mode=0755 /usr/share/keyrings
+    curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+
+    # Add Cloudflare repo to the apt repositories.
+    echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
+
+    # Install cloudflared.
+    apt-get update && apt-get install cloudflared
+
+    cloudflared service install $CLOUDFLAREDTOKEN
+fi
+
 ## Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
 #if [ $SSLHANDLER = "pangolin" ]; then
 #    if [ ! -d "/etc/pangolin" ]; then

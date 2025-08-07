@@ -20,7 +20,7 @@ You should probably run this script on a virtual machine (VM) dedicated to runni
 The VM used for this server can probably be quite small, at least initially. The suggested reasonable minimum for Debian Trixie is 2 GB of RAM and 40 GB of storage, if you're using a hosting provider like AWS then their smallest available VM should be okay - for something like AWS, you might be able to manage with the resources available in the free pricing tier. Exactly how much RAM / CPU / storage you are going to need will depend on how many users you have and how much they'll be using the server, but you can probably set up a minimal test server initially and add more RAM / CPU / storage to it later.
 
 #### Domain / DNS
-You will need the ability to set up [sub-domains](https://en.wikipedia.org/wiki/Subdomain) to point it at your server. Generally, this means having access to the DNS configuration for your domain name. For the full setup, you will need two sub-domains - one for the Pangolin server (e.g. pangolin.example.com) and one for the web server (webserver-example.com). Both sub-domains can point at the same physical (or virtual) server, or they can be separate servers if you want.
+You will need the ability to set up [sub-domains](https://en.wikipedia.org/wiki/Subdomain) to point it at your server. Generally, this means having access to the DNS configuration for your domain name. For the full setup, you will need two sub-domains - one for the Pangolin server (e.g. pangolin.example.com) and one for the web server (e.g. webserver.example.com). Both sub-domains can point at the same physical (or virtual) server, or they can be separate servers if you want.
 
 In theory, you could set this web server up as your domain's default web server, i.e. at "www.example.com". However, this would give you a public website showing the main WebConsole menu page, which probably isn't want you want for your public-facing website. You might do better to install a standard web server alongside this setup and have that serve any public-facing web pages.
 
@@ -45,11 +45,11 @@ This project is mostly just an installation script, along with some template con
 ## Installation
 The instllation is split into two parts, the Pangolin setup and the web server setup. This is so the two operations can be carried out on separate servers, although running both on a single server is also fine.
 
-### Option 1 - One server running WebConsole, Pangolin, Cloudlfare Tunnels
-This will give you a self-contained setup running on a single server.
+### Option 1 - One server running WebConsole, Pangolin and Cloudlfare Tunnels Inside Docker.
+This will give you a setup running on a single server. It extends the Pangolin Docker-based setup to include Webconsole and Cloudflare's tunnel client, with all the components running in one Docker project.
 
 In Cloudflare's control panel, you will need to create a tunnel - from the main Control Panel, select "Zero Trust" from the left-hand menu, then "Networks", then "Tunnels".
 
-You will need to assign two public hostnames to that one tunnel. One for Pangolin ("pangolin.example.com") and one for Web Console ("website.example.com"). In the "service" settings for each of the public hostnames, the service type / URL is simply "HTTPS" and "localhost". Under "Additional application settings" -> "TLS", turn on the "No TLS Verify" option. This skips checking the (self-signed) HTTPS certificate provided to the Cloudflare tunneling client by the Pangolin server (which is all internal traffic inside the VM itself, so shouldn't be a problem).
+You will need to assign two public hostnames to that one tunnel. One for Pangolin ("pangolin.example.com") and one for Web Console ("website.example.com"). In the "service" settings for each of the public hostnames, the service type / URL is simply "HTTPS" and "traefik". Under "Additional application settings" -> "TLS", turn on the "No TLS Verify" option. This skips checking the (self-signed) HTTPS certificate provided to the Cloudflare tunneling client by the Pangolin server (which is all internal traffic inside the VM itself, so shouldn't be a problem).
 
 The install script will take care of installing the Cloudflare client, you just need to provide the "cloudflared_token" value to the installer. This is the token found in the "Overview" tab in the edit section for your tunnel. You just want the long (184 characters) value at the end of the "Run the following command" section.

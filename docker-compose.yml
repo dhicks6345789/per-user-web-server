@@ -3,6 +3,7 @@ services:
   webconsole:
     image: {{WEBCONSOLE_DOCKER_IMAGE}}
     container_name: webconsole
+    command: /usr/local/bin/webconsole --debug --localOnly false
     volumes:
       - /etc/webconsole:/etc/webconsole
 

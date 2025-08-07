@@ -188,6 +188,8 @@ if [ $INSTALL_PANGOLIN = true ]; then
     fi
 fi
 
+cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
+
 
 
 exit 0

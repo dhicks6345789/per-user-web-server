@@ -101,6 +101,11 @@ if [ ! -f "/usr/bin/git" ]; then
     apt-get install -y git
 fi
 
+# Make sure Curl (used for downloading web-based resources) is installed.
+if [ ! -f "/usr/bin/curl" ]; then
+    apt-get install -y curl
+fi
+
 # Make sure Go (programming language, used by Web Console) is installed.
 if [ ! -f "/usr/bin/go" ]; then
     if [ $debianversion = "bookworm" ]; then

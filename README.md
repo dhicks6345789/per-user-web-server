@@ -53,3 +53,8 @@ In Cloudflare's control panel, you will need to create a tunnel - from the main 
 You will need to assign two public hostnames to that one tunnel. One for Pangolin ("pangolin.example.com") and one for Web Console ("website.example.com"). In the "service" settings for each of the public hostnames, the service type / URL is simply "HTTPS" and "traefik". Under "Additional application settings" -> "TLS", turn on the "No TLS Verify" option. This skips checking the (self-signed) HTTPS certificate provided to the Cloudflare tunneling client by the Pangolin server (which is all internal traffic inside the VM itself, so shouldn't be a problem).
 
 The install script will take care of installing the Cloudflare client, you just need to provide the "cloudflared_token" value to the installer. This is the token found in the "Overview" tab in the edit section for your tunnel. You just want the long (184 characters) value at the end of the "Run the following command" section.
+
+Example:
+'''
+install.sh
+'''

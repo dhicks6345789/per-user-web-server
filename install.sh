@@ -148,31 +148,29 @@ fi
 
 # Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
 if [ $INSTALL_PANGOLIN = true ]; then
-    #if [ ! -d "/etc/pangolin" ]; then
-        clear;
-        echo Handing over to Pangolin installation script.
-        if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-            echo Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select no when asked if you want to install Gerbil, Pangolin\'s tunneling component.
-        fi
+    clear;
+    echo Handing over to Pangolin installation script.
+    if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
+        echo Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select no when asked if you want to install Gerbil, Pangolin\'s tunneling component.
+    fi
+    
+    wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
+    ./installer
         
-        wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
-        ./installer
+    if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
+        # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
+        systemctl stop webconsole
+        systemctl disable webconsole
         
-        if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-            # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
-            systemctl stop webconsole
-            systemctl disable webconsole
+        cp per-user-web-server/Dockerfile ./Dockerfile
+        WEBCONSOLE_DOCKER_IMAGE=`docker build . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
             
-            cp per-user-web-server/Dockerfile ./Dockerfile
-            WEBCONSOLE_DOCKER_IMAGE=`docker build . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
+        cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
+        sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
             
-            cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
-            sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
-            sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
-            
-            docker compose up -d
-        fi
-    #fi
+        docker compose up -d
+    fi
 fi
 
 

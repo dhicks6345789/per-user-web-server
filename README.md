@@ -3,7 +3,7 @@ Configures a Debian installation as a web server, with a sub-directory for each 
 
 Intended by use for situations where you want to let each of a set of users host their own web site, or basic "intranet", but still private within your organisation. Ideal for schools and similar institutions.
 
-**Note: as of 6th August 2025, still very much a work-in-progress, not actually working yet. The documentation below is curently more a to-do list than actual features.**
+**Note: as of 7th August 2025, still very much a work-in-progress, not actually working yet. The documentation below is curently more a to-do list than actual features.**
 
 ## What Does This Project Do?
 This project provides setup scripts that are intended for people who want a (hopefully) simple mechanism to set up a web server for hosting user websites, complete with user authentication with default access to only your users.
@@ -47,3 +47,5 @@ The instllation is split into two parts, the Pangolin setup and the web server s
 
 ### Option 1 - One server running WebConsole, Pangolin, Cloudlfare Tunnels
 In Cloudflare's control panel, you will need to create a tunnel - from the main Control Panel, select "Zero Trust" from the left-hand menu, then "Networks", then "Tunnels".
+
+You will need to assign two public hostnames to that one tunnel. One for Pangolin ("pangolin.example.com") and one for Web Console ("website.example.com"). In the "service" settings for each of the public hostnames, the service type / URL is simply "HTTPS" and "localhost". Under "Additional application settings" -> "TLS", turn on the "No TLS Verify" option. This skips checking the (self-signed) HTTPS certificate provided to the Cloudflare tunneling client by the Pangolin server (which is all internal traffic inside the VM itself, so shouldn't be a problem).

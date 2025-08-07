@@ -2,4 +2,4 @@ title: Update Users
 description: Updates the site with any new users found.
 public: Y
 progress: N
-command: python3 run.py
+command: bash run.sh

@@ -120,7 +120,7 @@ cd ace-builds
 git pull
 cd ..
 
-# Install Web Console (runs server-side scripts with a simple user interface, also acts as a basic web server) via Git.
+# Build Web Console (runs server-side scripts with a simple user interface, also acts as a basic web server) via Git.
 if [ ! -d "web-console" ]; then
     git clone https://github.com/dhicks6345789/web-console.git
 fi
@@ -129,39 +129,51 @@ git pull
 bash build.sh
 cd ..
 
-# If the user has supplied a token for Cloudflare, install cloudflared.
-if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-    # Add cloudflare gpg key.
-    mkdir -p --mode=0755 /usr/share/keyrings
-    curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+# If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
+if [ $INSTALL_PANGOLIN = false ]; then
+    if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
+        # Add cloudflare gpg key.
+        mkdir -p --mode=0755 /usr/share/keyrings
+        curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
 
-    # Add Cloudflare repo to the apt repositories.
-    echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
+        # Add Cloudflare repo to the apt repositories.
+        echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
 
-    # Install cloudflared.
-    apt-get update && apt-get install cloudflared
+        # Install cloudflared.
+        apt-get update && apt-get install cloudflared
 
-    cloudflared service install $CLOUDFLARED_TOKEN
+        cloudflared service install $CLOUDFLARED_TOKEN
+    fi
 fi
 
 # Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
 if [ $INSTALL_PANGOLIN = true ]; then
-    if [ ! -d "/etc/pangolin" ]; then
+    #if [ ! -d "/etc/pangolin" ]; then
         clear;
         echo Handing over to Pangolin installation script.
         if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-            echo Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select no when asked if you want to install Gerbil, Pangolin's tunneling component.
+            echo Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select no when asked if you want to install Gerbil, Pangolin\'s tunneling component.
         fi
+        
         wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
         ./installer
-    fi
+        
+        if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
+            # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
+            systemctl stop webconsole
+            systemctl disable webconsole
+            
+            cp per-user-web-server/Dockerfile ./Dockerfile
+            WEBCONSOLE_DOCKER_IMAGE=`docker build . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
+            
+            cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
+            sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
+            sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
+            
+            docker compose up -d
+        fi
+    #fi
 fi
-
-cp per-user-web-server/docker-compose.yml ./docker-compose.yml
-sed -i "s/{{WEBCONSOLE__TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
-sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
-
-
 
 
 

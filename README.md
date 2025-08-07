@@ -54,9 +54,9 @@ You will need to assign two public hostnames to that one tunnel. One for Pangoli
 
 The install script will take care of installing the Cloudflare client, you just need to provide the "cloudflared_token" value to the installer. This is the token found in the "Overview" tab in the edit section for your tunnel. You just want the long (184 characters) value at the end of the "Run the following command" section.
 
-Example:
+From the command line on your server, run the following:
 ```
 git clone https://github.com/dhicks6345789/per-user-web-server.git
 bash per-user-web-server/install.sh -pangolin -cloudflared_token TOKEN_GOES_HERE
 ```
-Note: the docker-compose.yml provided in this project will replace the default one provided by the Pangolin install script. It's similar to the Pangolin version, but includes Cloudflared and Webconsole. You might also notice it doesn't expose any network ports (ports 80 or 443) as the defaukt Pangolin setup does, so this Pangolin instance won't be available on your internal network, only at the end of the Cloudflare tunnel that also runs inside Docker.
+Note: the docker-compose.yml provided in this project will replace the default one provided by the Pangolin install script. It's similar to the Pangolin version, but includes Cloudflared and Webconsole. You might also notice it doesn't expose any network ports (ports 80 or 443) as the default Pangolin setup does, so this Pangolin instance won't be available on your internal network, only at the end of the Cloudflare tunnel that also runs inside Docker.

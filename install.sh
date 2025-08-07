@@ -166,6 +166,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
         # Compile the Docker image for Webconsole.
         cp per-user-web-server/Dockerfile ./Dockerfile
+        docker build . 2>&1 | grep "writing image"
         WEBCONSOLE_DOCKER_IMAGE=`docker build . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
         echo Generated WEBCONSOLE_DOCKER_IMAGE value:
         echo $WEBCONSOLE_DOCKER_IMAGE

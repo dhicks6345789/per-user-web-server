@@ -164,7 +164,9 @@ if [ $INSTALL_PANGOLIN = true ]; then
         
         cp per-user-web-server/Dockerfile ./Dockerfile
         WEBCONSOLE_DOCKER_IMAGE=`docker build . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
-            
+
+        echo WEBCONSOLE_DOCKER_IMAGE:
+        echo $WEBCONSOLE_DOCKER_IMAGE
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml

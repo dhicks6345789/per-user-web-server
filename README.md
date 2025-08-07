@@ -45,7 +45,7 @@ This project is mostly just an installation script, along with some template con
 ## Installation
 The instllation is split into two parts, the Pangolin setup and the web server setup. This is so the two operations can be carried out on separate servers, although running both on a single server is also fine.
 
-### Option 1 - One server running WebConsole, Pangolin and Cloudlfare Tunnels Inside Docker.
+### Option 1 - One server running WebConsole, Pangolin and Cloudflare Tunnels Inside Docker.
 This will give you a setup running on a single server. It extends the Pangolin Docker-based setup to include Webconsole and Cloudflare's tunnel client, with all the components running in one Docker project.
 
 In Cloudflare's control panel, you will need to create a tunnel - from the main Control Panel, select "Zero Trust" from the left-hand menu, then "Networks", then "Tunnels".
@@ -59,6 +59,8 @@ From the command line on your server, run the following:
 git clone https://github.com/dhicks6345789/per-user-web-server.git
 bash per-user-web-server/install.sh -pangolin -cloudflared_token TOKEN_GOES_HERE
 ```
+Note: the (very simple) Dockerfile used to compile the Webconsole container currently uses "python:3.12-slim-bookworm" as a base, which provides a Python environment. If you want Webconsole to be able to run things otrher that Python you will need to install them into the "Webconsole" container somehow, either by changing / adding to the existing Dockerfile, or maybe by adding components via apt when the container is running. If you do the latter, bear in mind your additions will disapear every time you shut down / restart the container.
+
 Note: the docker-compose.yml provided in this project will replace the default one provided by the Pangolin install script. It's similar to the Pangolin version, but includes Cloudflared and Webconsole. You might also notice it doesn't expose any network ports (ports 80 or 443) as the default Pangolin setup does, so this Pangolin instance won't be available on your internal network, only at the end of the Cloudflare tunnel that also runs inside Docker.
 
 After running the above, you should be able to access the Pangolin interface on your sub-domain (pangolin.example.com). After setting up the initial admin user credentials, Organisation and Site, go to the "Resources" section, add a Resource, give your new resource a name, select the (default) "HTTPS Resource" option, and enter your second sub-domain (website.example.com). When asked to set up a Target, set the "Method" as "HTTP", "IP / Hostname" as "webconsole" and "Port" as "8090". After hitting "Save All Settings" you should, hopefully, be able to access the Webconsole server via your subdomain.

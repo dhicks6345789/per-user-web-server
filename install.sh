@@ -157,31 +157,15 @@ if [ $INSTALL_PANGOLIN = true ]; then
     fi
 fi
 
-#cp per-user-web-server/docker-compose.yml ./docker-compose.yml
-#sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
-#sed -i "s/{{CLOUDFLARE_API_TOKEN}}/$CLOUDFLARE_API_TOKEN/g" docker-compose.yml
-#sed -i "s/{{CLOUDFLARE_ACCOUNT_ID}}/$CLOUDFLARE_ACCOUNT_ID/g" docker-compose.yml
-#sed -i "s/{{CLOUDFLARE_TUNNEL_ID}}/$CLOUDFLARE_TUNNEL_ID/g" docker-compose.yml
-#sed -i "s/{{CLOUDFLARE_ZONE_ID}}/$CLOUDFLARE_ZONE_ID/g" docker-compose.yml
-
+cp per-user-web-server/docker-compose.yml ./docker-compose.yml
+sed -i "s/{{WEBCONSOLE__TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
+sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
 
 
 
 
 exit 0
-
-
-# Make sure the Apache web server is installed.
-if [ ! -d "/etc/apache2" ]; then
-    apt install -y apache2
-    rm /var/www/html/index.html
-fi
-
-# Get Moodle via Git.
-if [ ! -d "moodle" ]; then
-    git clone -b $moodlebranch git://git.moodle.org/moodle.git
-fi
 
 # Create / set up the Moodle database.
 mysql --user=root --password=$dbpassword -e "CREATE DATABASE moodle DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
@@ -218,18 +202,3 @@ if [ ! -f "/var/spool/cron/crontabs/root" ]; then
     rm crontab
 fi
 
-# Restart Apache so any changes take effect.
-service apache2 restart
-
-# Optionally, install Caddy web server.
-if [ $sslhandler = "caddy" ]; then
-    if [ ! -d "/etc/caddy" ]; then
-        apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
-        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
-        apt update
-        apt install caddy
-    fi
-
-    # To do: add Caddy config here, configure to act as HTTPS proxy for Apache.
-fi

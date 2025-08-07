@@ -158,19 +158,24 @@ if [ $INSTALL_PANGOLIN = true ]; then
     ./installer
         
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
+        echo Installing cloudflared and Webconsole inside Docker.
+    
         # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
         systemctl stop webconsole
         systemctl disable webconsole
-        
+
+        # Compile the Docker image for Webconsole.
         cp per-user-web-server/Dockerfile ./Dockerfile
         WEBCONSOLE_DOCKER_IMAGE=`docker build . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
-
-        echo WEBCONSOLE_DOCKER_IMAGE:
+        echo Generated WEBCONSOLE_DOCKER_IMAGE value:
         echo $WEBCONSOLE_DOCKER_IMAGE
+
+        # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
-            
+
+        # Start up the Docker containers.
         docker compose up -d
     fi
 fi
@@ -178,28 +183,6 @@ fi
 
 
 exit 0
-
-# Create / set up the Moodle database.
-mysql --user=root --password=$dbpassword -e "CREATE DATABASE moodle DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql --user=root --password=$dbpassword -e "GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,CREATE TEMPORARY TABLES,DROP,INDEX,ALTER ON moodle.* TO 'moodleuser'@'localhost' IDENTIFIED BY '$dbpassword';"
-
-# Set up the Moodle data folder.
-if [ ! -d "/var/lib/moodle" ]; then
-    mkdir /var/lib/moodle
-    chown www-data:www-data /var/lib/moodle
-fi
-
-# Copy the Moodle code to the web server.
-cp -r moodle/* /var/www/html
-rm /var/www/html/config-dist.php
-copyOrDownload config.php /var/www/html/config.php 0644
-sed -i "s/{{DBPASSWORD}}/$dbpassword/g" /var/www/html/config.php
-sed -i "s/{{SERVERNAME}}/$servername/g" /var/www/html/config.php
-if [ $sslhandler = "tunnel" ] || [ $sslhandler = "caddy" ]; then
-    sed -i "s/{{SSLPROXY}}/true/g" /var/www/html/config.php
-else
-    sed -i "s/{{SSLPROXY}}/false/g" /var/www/html/config.php
-fi
 
 # Make sure DOS2Unix is installed.
 if [ ! -f "/usr/bin/dos2unix" ]; then
@@ -213,4 +196,3 @@ if [ ! -f "/var/spool/cron/crontabs/root" ]; then
     crontab crontab
     rm crontab
 fi
-

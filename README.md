@@ -46,6 +46,8 @@ This project is mostly just an installation script, along with some template con
 The instllation is split into two parts, the Pangolin setup and the web server setup. This is so the two operations can be carried out on separate servers, although running both on a single server is also fine.
 
 ### Option 1 - One server running WebConsole, Pangolin, Cloudlfare Tunnels
+This will give you a self-contained setup running on a single server.
+
 In Cloudflare's control panel, you will need to create a tunnel - from the main Control Panel, select "Zero Trust" from the left-hand menu, then "Networks", then "Tunnels".
 
 You will need to assign two public hostnames to that one tunnel. One for Pangolin ("pangolin.example.com") and one for Web Console ("website.example.com"). In the "service" settings for each of the public hostnames, the service type / URL is simply "HTTPS" and "localhost". Under "Additional application settings" -> "TLS", turn on the "No TLS Verify" option. This skips checking the (self-signed) HTTPS certificate provided to the Cloudflare tunneling client by the Pangolin server (which is all internal traffic inside the VM itself, so shouldn't be a problem).

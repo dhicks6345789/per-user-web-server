@@ -2,8 +2,7 @@
 if [ ! -e /usr/share/doc/python3-pandas ]; then
   apt-get update && apt-get install -y python3-pandas
 fi
-echo $PYTHONPATH
-# /usr/lib/python3/dist-packages/
+export PYTHONPATH="/usr/lib/python3/dist-packages/"
 
 
 

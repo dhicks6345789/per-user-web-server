@@ -66,7 +66,7 @@ def pagedAPICall(theAPIKey, theAPIBaseURL, theAPIURL):
 	while pangolinData["next"] != None:
 		#pageNumber = urllib.parse.parse_qs(urllib.parse.urlparse(pangolinData["next"]).query)["page"][0]
 		#print("Getting records - page " + pageNumber + "...", flush=True)
-		pangolinData = pangolinAPICall(theAPIKey, theAPIBaseURL, pangolinData["next"])
+		pangolinData = APICall(theAPIKey, theAPIBaseURL, pangolinData["next"])
 		for pangolinItem in pangolinData["results"]:
 			result.append(pangolinItem)
 	return result

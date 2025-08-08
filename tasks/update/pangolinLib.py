@@ -39,3 +39,16 @@ def APICall(theAPIKey, theAPIBaseURL, theAPIURL):
 				exit()
 			return APIResponse.json()
 		retries = retries + 1
+
+# A function that calls the Pangolin API, expecting a paged result.
+def pagedAPICall(theAPIKey, theAPIBaseURL, theAPIURL):
+	result = []
+	pangolinData = {}
+	pangolinData["next"] = theAPIURL
+	while pangolinData["next"] != None:
+		#pageNumber = urllib.parse.parse_qs(urllib.parse.urlparse(pangolinData["next"]).query)["page"][0]
+		#print("Getting records - page " + pageNumber + "...", flush=True)
+		pangolinData = pangolinAPICall(theAPIKey, theAPIBaseURL, pangolinData["next"])
+		for pangolinItem in pangolinData["results"]:
+			result.append(pangolinItem)
+	return result

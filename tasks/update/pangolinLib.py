@@ -2,6 +2,9 @@
 import time
 import json
 
+# The Requests library, for handling HTTP / HTTPS requests.
+import requests
+
 
 
 # Reads the given file, returns the entire contents as a single string.

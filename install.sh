@@ -156,9 +156,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     clear;
     echo Handing over to Pangolin installation script.
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-        echo ***
-        echo Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select \"no\" when asked if you want to install Gerbil, Pangolin\'s tunneling component.
-        echo ***\n
+        echo --- Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select \"no\" when asked if you want to install Gerbil, Pangolin\'s tunneling component. ---
     fi
     
     wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
@@ -171,12 +169,13 @@ if [ $INSTALL_PANGOLIN = true ]; then
         systemctl stop webconsole
         systemctl disable webconsole
 
-        # Compile the Docker image for Webconsole.
+        echo Building Docker image for Webconsole - this might take a few minutes...
         cp per-user-web-server/Dockerfile ./Dockerfile
         WEBCONSOLE_DOCKER_IMAGE=`docker build --progress=plain . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
         WEBCONSOLE_DOCKER_IMAGE=`echo $WEBCONSOLE_DOCKER_IMAGE | cut -d " " -f 1`
         echo Generated WEBCONSOLE_DOCKER_IMAGE value:
         echo $WEBCONSOLE_DOCKER_IMAGE
+        echo ...Docker image built.
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml

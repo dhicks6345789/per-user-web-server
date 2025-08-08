@@ -1,9 +1,27 @@
+# Standard Python libraries.
+import json
+
+
+
 # Reads the given file, returns the entire contents as a single string.
 def readFile(theFilename):
 	inHandle = open(theFilename)
 	result = inHandle.read()
 	inHandle.close()
 	return result
+
+# Handy utility function to write a file. Takes a file path and either a single string or an array of strings. If an array, will write each
+# string to the given file path with a newline at the end.
+def writeFile(theFilename, theFileData):
+	fileDataHandle = open(theFilename, "w")
+	if isinstance(theFileData, str):
+		#newFileData = theFileData.encode(encoding="UTF-8", errors="replace")
+		#fileDataHandle.write(str(newFileData))
+		fileDataHandle.write(theFileData)
+	else:
+		for dataLine in theFileData:
+			fileDataHandle.write((str(dataLine) + "\n"))
+	fileDataHandle.close()
 
 # Takes an array of strings, then checks the JSON config file to make sure the required parameters are indeed set.
 # Returns an array of configuration values.

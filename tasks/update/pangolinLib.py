@@ -50,7 +50,8 @@ def APICall(theAPIKey, theAPIBaseURL, theAPIURL):
 
 	retries = 0
 	while retries < 2:
-		APIResponse = requests.get(APIURL, headers = {"Authorization": "token " + theAPIKey})
+		#APIResponse = requests.get(APIURL, headers = {"Authorization": "token " + theAPIKey})
+		APIResponse = requests.get(APIURL, headers = {"Authorization": "Bearer {" + theAPIKEY + "}"})
 		if APIResponse.status_code == 429:
 			retrySeconds = int(APIResponse.headers["Retry-After"])
 			print("WARNING: Pangolin API rate limit hit - pausing for " + str(retrySeconds) + " seconds.", flush=True)

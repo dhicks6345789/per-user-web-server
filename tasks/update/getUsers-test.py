@@ -8,6 +8,7 @@ if not os.path.exists("data"):
 
 with open("data/users.csv", "w", newline="\n") as usersFile:
     usersWriter = csv.writer(usersFile, delimiter=",", quotechar="\"", quoting=csv.QUOTE_ALL)
-    usersWriter.writerow(["User One", "user1"])
-    usersWriter.writerow(["User Two", "user2"])
-    usersWriter.writerow(["User Three", "user3"])
+    usersWriter.writerow(["Username", "Full Name", "Default Password"])
+    usersWriter.writerow(["user1", "User One", "user1"])
+    usersWriter.writerow(["user2", "User Two", "user2"])
+    usersWriter.writerow(["user3", "User Three", "user3"])

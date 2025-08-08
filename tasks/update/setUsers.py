@@ -13,5 +13,5 @@ for userIndex, userRow in users.iterrows():
     print(userRow, flush=True)
 
 config = pangolinLib.loadConfig(configFile="config.json", requiredParameters=["Pangolin", "PangolinAPIBaseURL"])
-print(config, flush=True)
+#print(config, flush=True)
 print(pangolinLib.APICall(config["Pangolin"]["APIKey"], config["PangolinAPIBaseURL"], "orgs"))

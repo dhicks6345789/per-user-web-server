@@ -58,7 +58,7 @@ def APICall(theAPIKey, theAPIBaseURL, theAPIURL):
 			time.sleep(retrySeconds);
 		else:
 			if APIResponse.status_code != 200:
-				print(APIResponse.reason, flush=True)
+				print(APIResponse.headers, flush=True)
 				print("ERROR: Pangolin API return code: " + str(APIResponse.status_code), flush=True)
 				exit()
 			return APIResponse.json()

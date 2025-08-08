@@ -1,8 +1,8 @@
 # Pandas - Python library for handling data, also Excel files.
-if [ ! -e /usr/share/doc/python3-pandas ]; then
-  apt-get update && apt-get install -y python3-pandas
-fi
-export PYTHONPATH="/usr/lib/python3/dist-packages/:/usr/lib/python3.11/dist-packages/"
+#if [ ! -e /usr/share/doc/python3-pandas ]; then
+#  apt-get update && apt-get install -y python3-pandas
+#fi
+#export PYTHONPATH="/usr/lib/python3/dist-packages/:/usr/lib/python3.11/dist-packages/"
 
 
 

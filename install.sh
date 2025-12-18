@@ -112,12 +112,12 @@ if [ $debianversion = "trixie" ]; then
     wget http://ftp.de.debian.org/debian/pool/main/s/software-properties/python3-software-properties_0.111-1_all.deb
     dpkg -i python3-software-properties_0.111-1_all.deb
     rm python3-software-properties_0.111-1_all.deb
-    apt --fix-broken install
+    apt --fix-broken install -y
     
     wget http://ftp.de.debian.org/debian/pool/main/s/software-properties/software-properties-common_0.111-1_all.deb
     dpkg -i software-properties-common_0.111-1_all.deb
     rm software-properties-common_0.111-1_all.deb
-    apt --fix-broken install
+    apt --fix-broken install -y
 fi
 
 # Make sure Go (programming language, used by Web Console) is installed.

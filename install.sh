@@ -106,6 +106,15 @@ if [ ! -f "/usr/bin/curl" ]; then
     apt-get install -y curl
 fi
 
+# 18/12/2025: The Pangolin installer seems to make use of the "add-apt-repository" command. This isn't available in Debian 13 (Trixie) as the "software-properties-common" package has been removed from the distribution.
+# What seems to work is installing "software-properties-common" from a .deb file (making sure its dependencies are installed first).
+if [ $debianversion = "trixie" ]; then
+    apt install -y python3-software-properties
+    http://ftp.de.debian.org/debian/pool/main/s/software-properties/software-properties-common_0.111-1_all.deb
+    dpkg -i software-properties-common_0.111-1_all.deb
+    rm software-properties-common_0.111-1_all.deb
+fi
+
 # Make sure Go (programming language, used by Web Console) is installed.
 if [ ! -f "/usr/bin/go" ]; then
     if [ $debianversion = "bookworm" ]; then

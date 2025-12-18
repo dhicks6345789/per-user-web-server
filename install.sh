@@ -109,10 +109,15 @@ fi
 # 18/12/2025: The Pangolin installer seems to make use of the "add-apt-repository" command. This isn't available in Debian 13 (Trixie) as the "software-properties-common" package has been removed from the distribution.
 # What seems to work is installing "software-properties-common" from a .deb file (making sure its dependencies are installed first).
 if [ $debianversion = "trixie" ]; then
-    apt install -y python3-software-properties
-    http://ftp.de.debian.org/debian/pool/main/s/software-properties/software-properties-common_0.111-1_all.deb
+    wget http://ftp.de.debian.org/debian/pool/main/s/software-properties/python3-software-properties_0.111-1_all.deb
+    dpkg -i python3-software-properties_0.111-1_all.deb
+    rm python3-software-properties_0.111-1_all.deb
+    apt --fix-broken install
+    
+    wget http://ftp.de.debian.org/debian/pool/main/s/software-properties/software-properties-common_0.111-1_all.deb
     dpkg -i software-properties-common_0.111-1_all.deb
     rm software-properties-common_0.111-1_all.deb
+    apt --fix-broken install
 fi
 
 # Make sure Go (programming language, used by Web Console) is installed.

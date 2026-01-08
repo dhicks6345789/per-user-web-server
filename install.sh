@@ -18,7 +18,7 @@ SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
-WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk\/webconsole:0.1-beta.3"
+WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk/webconsole:0.1-beta.3"
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do

@@ -185,15 +185,17 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
         echo Building Docker image for Webconsole - this might take a few minutes...
         cp per-user-web-server/Dockerfile ./Dockerfile
-        WEBCONSOLE_DOCKER_IMAGE=`docker build --progress=plain . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
-        WEBCONSOLE_DOCKER_IMAGE=`echo $WEBCONSOLE_DOCKER_IMAGE | cut -d " " -f 1`
-        echo Generated WEBCONSOLE_DOCKER_IMAGE value:
-        echo $WEBCONSOLE_DOCKER_IMAGE
+        docker build --progress=plain --tag=sansay/peruserweb:0.1 . 2>&1
+        #WEBCONSOLE_DOCKER_IMAGE=`docker build --progress=plain . 2>&1 | grep "writing image" | cut -d " " -f 4 | cut -d ":" -f 2`
+        #WEBCONSOLE_DOCKER_IMAGE=`echo $WEBCONSOLE_DOCKER_IMAGE | cut -d " " -f 1`
+        #echo Generated WEBCONSOLE_DOCKER_IMAGE value:
+        #echo $WEBCONSOLE_DOCKER_IMAGE
         echo ...Docker image built.
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
-        sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
+        #sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/sansay\/peruserweb:0.1/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
         # Start up the Docker containers.
@@ -203,9 +205,9 @@ fi
 
 cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
 
-
-
 exit 0
+
+
 
 # Make sure DOS2Unix is installed.
 if [ ! -f "/usr/bin/dos2unix" ]; then

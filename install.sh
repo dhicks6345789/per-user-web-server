@@ -18,7 +18,7 @@ SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
-WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk/webconsole:0.1-beta.3"
+WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -190,7 +190,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
-        sed -i 's/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g' docker-compose.yml
+        sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
         # Start up the Docker containers.

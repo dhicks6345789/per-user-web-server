@@ -202,4 +202,4 @@ fi
 cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
 
 # Copy over the Webconsole config file.
-cp per-user-web-server/webconsole-config.csv /etc/webconsole/webconsole.csv
+cp per-user-web-server/webconsole-config.csv /etc/webconsole/config.csv

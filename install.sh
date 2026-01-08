@@ -200,3 +200,6 @@ fi
 
 # Copy over the Webconsole Tasks defined in this project to the live Webconsole instance.
 cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
+
+# Copy over the Webconsole config file.
+cp per-user-web-server/webconsole-config.csv /etc/webconsole

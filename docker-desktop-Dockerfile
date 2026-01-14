@@ -16,7 +16,7 @@ WORKDIR /home/desktopuser
 RUN mkdir -p /home/desktopuser/.vnc && echo "vncpassword" | vncpasswd -f > /home/desktopuser/.vnc/passwd && chmod 600 /home/desktopuser/.vnc/passwd
 
 # Copy the startup script
-COPY --chown=desktopuser:desktopuser xstartup /home/desktopuser/.vnc/xstartup
+COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-xstartup /home/desktopuser/.vnc/xstartup
 RUN chmod +x /home/desktopuser/.vnc/xstartup
 
 # Expose VNC port (5901 for display :1)

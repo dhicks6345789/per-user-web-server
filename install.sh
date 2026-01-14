@@ -203,3 +203,10 @@ cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
 
 # Copy over the Webconsole config file.
 cp per-user-web-server/webconsole-config.csv /etc/webconsole/config.csv
+
+
+# Copy over the Guacamole config files.
+mkdir /etc/guacamole 2>&1 > /dev/null
+if [ ! -f "/etc/guacamole/user-mapping" ]; then
+    cp per-user-web-server/user-mapping.xml /etc/webconsole/user-mapping.xml
+fi

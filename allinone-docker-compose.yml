@@ -76,4 +76,4 @@ services:
       - guacd
       #- guacamole-db
     volumes:
-      - ./guacamole:/etc/guacamole:ro
+      - /etc/guacamole:/etc/guacamole:ro

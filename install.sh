@@ -19,6 +19,7 @@ SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
 WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
+DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -185,8 +186,12 @@ if [ $INSTALL_PANGOLIN = true ]; then
         systemctl disable webconsole
 
         echo Building Docker image for Webconsole - this might take a few minutes...
-        cp per-user-web-server/Dockerfile ./Dockerfile
-        docker build --progress=plain --tag=$WEBCONSOLE_DOCKER_IMAGE . 2>&1
+        cp per-user-web-server/webconsole-Dockerfile .
+        docker build -f webconsole-Dockerfile --progress=plain --tag=$WEBCONSOLE_DOCKER_IMAGE . 2>&1
+
+        echo Building the Linux desktop Docker image - this might take a few minutes...
+        cp per-user-web-server/docker-desktop-Dockerfile .
+        docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml

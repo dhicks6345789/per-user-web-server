@@ -75,3 +75,5 @@ services:
     depends_on:
       - guacd
       #- guacamole-db
+    volumes:
+      - ./guacamole:/etc/guacamole:ro

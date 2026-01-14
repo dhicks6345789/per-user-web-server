@@ -1,0 +1,19 @@
+<user-mapping>
+    <!-- Example user-mapping.xml file. Add individual connection details here.
+         See the Guacamole documentation page "Configuring Guacamole" for more details:
+         https://guacamole.apache.org/doc/gug/configuring-guacamole.html -->
+    <!-- <authorize username="f.bloggs" password="0605d4d49dbab0c40556e7da47e97570">
+        <connection name="REMOTEDESKTOP01">
+            <protocol>rdp</protocol>
+            <param name="hostname">192.168.1.1</param>
+            <param name="port">3389</param>
+            <param name="username">f.bloggs</param>
+            <param name="password">SecretPassword01</param>
+            <param name="domain">MYDOMAIN</param>
+            <param name="security">nla</param>
+            <param name="ignore-cert">true</param>
+        </connection>
+    </authorize> -->
+    <!-- <authorize username=...>
+    </authorize> -->
+</user-mapping>

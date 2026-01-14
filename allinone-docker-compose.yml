@@ -82,3 +82,4 @@ services:
   desktop:
     image: {{DOCKERDESKTOP_DOCKER_IMAGE}}
     container_name: desktop
+    restart: unless-stopped

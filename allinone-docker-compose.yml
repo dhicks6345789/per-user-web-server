@@ -77,3 +77,8 @@ services:
       #- guacamole-db
     volumes:
       - /etc/guacamole:/etc/guacamole:ro
+
+  # Docker Desktop - a Linux desktop (Xfce) environment with TigerVNC for remote desktop access.
+  desktop:
+    image: {{DOCKERDESKTOP_DOCKER_IMAGE}}
+    container_name: desktop

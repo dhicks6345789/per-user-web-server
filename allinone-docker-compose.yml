@@ -39,3 +39,39 @@ services:
       - ./config/traefik:/etc/traefik:ro # Volume to store the Traefik configuration
       - ./config/letsencrypt:/letsencrypt # Volume to store the Let's Encrypt certificates
       - ./config/traefik/logs:/var/log/traefik # Volume to store Traefik logs
+  
+  # Guacd - The Apache Guacamole proxy daemon.
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: guacd
+    restart: unless-stopped
+    
+  # Database - To store guacamole users and connections.
+  #guacamole-db:
+    #image: postgres:15-alpine
+    #container_name: guac-db
+    #restart: always
+    #environment:
+      #POSTGRES_DB: guacamole_db
+      #POSTGRES_USER: guacamole_user
+      #POSTGRES_PASSWORD: your_password_here
+    #volumes:
+      #- ./init:/docker-entrypoint-initdb.d
+      #- ./data:/var/lib/postgresql/data
+
+  # Guacamole Client - The Guacamole web interface.
+  guacamole:
+    image: guacamole/guacamole:latest
+    container_name: guacamole
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      GUACD_HOSTNAME: guacd
+      #POSTGRES_DATABASE: guacamole_db
+      #POSTGRES_HOSTNAME: guacamole-db
+      #POSTGRES_USER: guacamole_user
+      #POSTGRES_PASSWORD: your_password_here
+    depends_on:
+      - guacd
+      #- guacamole-db

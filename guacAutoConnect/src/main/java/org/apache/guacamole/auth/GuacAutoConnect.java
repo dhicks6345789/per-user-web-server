@@ -48,7 +48,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       while ((line = reader.readLine()) != null) {
         // Regex split: looks for 2 or more consecutive spaces - this handles spaces within names or dates (e.g., "About an hour ago").
         String[] details = line.split("\\s{2,}");
-        if (details[1].equals("sansay.co.uk-dockerdesktop")) {
+        if (details[1].startsWith("sansay.co.uk-dockerdesktop")) {
           logger.info("Found container: " + String.join(", ", details));
           containerList.add(details);
         }

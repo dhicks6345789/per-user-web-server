@@ -55,7 +55,7 @@ services:
   
   # Guacamole Client - The Guacamole web interface.
   guacamole:
-    image: guacamole/guacamole:latest
+    image: {{GUACAMOLE_DOCKER_IMAGE}}
     container_name: guacamole
     restart: unless-stopped
     ports:
@@ -71,7 +71,6 @@ services:
       - /etc/guacamole:/etc/guacamole
       # Give the "guacamole" container access to the host Docker instance, allowing it to manage / create its "sibling" containers.
       - /usr/bin/docker:/usr/bin/docker
-      - /usr/bin/sudo:/usr/bin/sudo
       - /var/run/docker.sock:/var/run/docker.sock
 
   # Docker Desktop - a Linux desktop (Xfce) environment with TigerVNC for remote desktop access.

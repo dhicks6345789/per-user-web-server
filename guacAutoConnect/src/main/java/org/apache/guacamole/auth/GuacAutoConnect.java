@@ -11,7 +11,7 @@ import org.apache.guacamole.protocol.GuacamoleConfiguration;
  * of Guacamole's extension API. The credentials and connection information for
  * a single user are stored directly in guacamole.properties.
  */
-public class TutorialAuthenticationProvider extends SimpleAuthenticationProvider {
+public class GuacAutoConnect extends SimpleAuthenticationProvider {
   @Override
   public String getIdentifier() {
     return "guac-auto-connect";

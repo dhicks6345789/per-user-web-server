@@ -45,14 +45,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
       
       String line;
-      boolean isHeader = true;
-      
       while ((line = reader.readLine()) != null) {
-        if (isHeader) {
-          isHeader = false; // Skip the column headers.
-          continue;
-        }
-        
         // Regex split: looks for 2 or more consecutive spaces - this handles spaces within names or dates (e.g., "About an hour ago").
         String[] details = line.split("\\s{2,}");
         if (details[1].equals("sansay.co.uk-dockerdesktop")) {

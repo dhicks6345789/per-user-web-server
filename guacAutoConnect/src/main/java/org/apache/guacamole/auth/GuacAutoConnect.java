@@ -30,7 +30,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     GuacamoleConfiguration config = new GuacamoleConfiguration();
 
     // Set protocol and connection parameters.
-    config.setProtocol("VNC");
+    config.setProtocol("vnc");
     config.setParameter("hostname", "desktop");
     config.setParameter("port", "5901");
     config.setParameter("username", "desktopuser");

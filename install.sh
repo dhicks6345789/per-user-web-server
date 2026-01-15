@@ -203,6 +203,9 @@ if [ $INSTALL_PANGOLIN = true ]; then
         cp per-user-web-server/docker-desktop-Dockerfile .
         docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 
+        echo Building the custom Java authentication plugin for Guacamole.
+        cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..
+
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml

@@ -56,7 +56,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         // Regex split: looks for 2 or more consecutive spaces
         // This handles spaces within names or dates (e.g., "About an hour ago")
         String[] details = line.split("\\s{2,}");
-        logger.info(details);
+        logger.info(String.join(", ", details));
         containerList.add(details);
       }
       

@@ -165,9 +165,14 @@ cp per-user-web-server/webconsole-config.csv /etc/webconsole/config.csv
 cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
 
 echo Building the custom Java authentication plugin for Guacamole...
+rm per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar
 cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..
 mkdir /etc/guacamole > /dev/null 2>&1
 mkdir /etc/guacamole/extensions > /dev/null 2>&1
+if [ ! -f "per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar" ]; then
+    echo "Problem building custom Java authentication plugin for Guacamole - stopping."
+    exit 1
+fi
 cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /etc/guacamole/extensions
 
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.

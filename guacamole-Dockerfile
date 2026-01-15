@@ -1,0 +1,10 @@
+FROM guacamole/guacamole:latest
+
+# Switch to root to install software
+USER root
+
+RUN apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
+
+# Switch back to the guacamole user if you want to maintain security 
+# or stay as root if your specific use case requires it.
+USER guacamole

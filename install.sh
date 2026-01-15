@@ -160,6 +160,16 @@ git pull
 bash build.sh
 cd ..
 
+echo Copying over Webconsole config and Tasks...
+cp per-user-web-server/webconsole-config.csv /etc/webconsole/config.csv
+cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
+
+echo Building the custom Java authentication plugin for Guacamole...
+cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..
+mkdir /etc/guacamole > /dev/null 2>&1
+mkdir /etc/guacamole/extensions > /dev/null 2>&1
+cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /etc/guacamole/extensions
+
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
@@ -214,15 +224,3 @@ if [ $INSTALL_PANGOLIN = true ]; then
         docker compose up -d
     fi
 fi
-
-# Copy over the Webconsole Tasks defined in this project to the live Webconsole instance.
-cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
-
-# Copy over the Webconsole config file.
-cp per-user-web-server/webconsole-config.csv /etc/webconsole/config.csv
-
-echo Building the custom Java authentication plugin for Guacamole.
-cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..
-mkdir /etc/guacamole > /dev/null 2>&1
-mkdir /etc/guacamole/extensions > /dev/null 2>&1
-cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /etc/guacamole/extensions

@@ -47,17 +47,17 @@ services:
     restart: unless-stopped
     
   # Guacamole Database - To store guacamole users and connections.
-  guacamole-db:
-    image: postgres:15-alpine
-    container_name: guac-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: guacamole_db
-      POSTGRES_USER: guacamole_user
-      POSTGRES_PASSWORD: {{DATABASE_PASSWORD}}
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-      - ./data:/var/lib/postgresql/data
+  #guacamole-db:
+    #image: postgres:15-alpine
+    #container_name: guac-db
+    #restart: unless-stopped
+    #environment:
+      #POSTGRES_DB: guacamole_db
+      #POSTGRES_USER: guacamole_user
+      #POSTGRES_PASSWORD: {{DATABASE_PASSWORD}}
+    #volumes:
+      #- ./init:/docker-entrypoint-initdb.d
+      #- ./data:/var/lib/postgresql/data
   
   # Guacamole Client - The Guacamole web interface.
   guacamole:

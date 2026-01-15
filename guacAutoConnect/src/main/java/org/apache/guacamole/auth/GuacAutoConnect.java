@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GuacAutoConnect extends SimpleAuthenticationProvider {
   // Initialize the logger for this class.
-  private static final Logger logger = LoggerFactory.getLogger(MyCustomAuthPlugin.class);
+  private static final Logger logger = LoggerFactory.getLogger(GuacAutoConnect.class);
   
   @Override public String getIdentifier() {
     return "guac-auto-connect";

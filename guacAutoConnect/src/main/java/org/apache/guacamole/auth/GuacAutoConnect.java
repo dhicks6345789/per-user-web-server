@@ -25,7 +25,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
   
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     // Output a log message.
-    logger.info(guac-auto-connect: User " + credentials.getUsername() +" logged in.");
+    logger.info("guac-auto-connect: User " + credentials.getUsername() +" logged in.");
     
     // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
     Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();

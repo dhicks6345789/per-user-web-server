@@ -1,5 +1,6 @@
 name: pangolin
 services:
+  # Webconsole - a handy way to run console applications directly in the browser. See: https://github.com/dhicks6345789/web-console
   webconsole:
     image: {{WEBCONSOLE_DOCKER_IMAGE}}
     container_name: webconsole
@@ -7,12 +8,15 @@ services:
     volumes:
       - /etc/webconsole:/etc/webconsole
 
+  # A Cloudflare Zero-Trust tunnel. Requires an access token obtained from the Cloudflare console.
+  # Can provide both tunneling and authentication, used just as an option for tunneling here, with Pangolin used for authentication (and as an alternative for tunneling, if wanted).
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-tunnel
     restart: unless-stopped
     command: tunnel --no-autoupdate run --token {{CLOUDFLARED_TOKEN}}
 
+  # Fossorial's Pangolin - can provide tunneling and authentication, basically a self-hostable version of Cloudflare Tunnels. See: https://pangolin.net
   pangolin:
     image: fosrl/pangolin:latest
     container_name: pangolin
@@ -24,7 +28,8 @@ services:
       interval: "10s"
       timeout: "10s"
       retries: 15
-
+  
+  # Part of Fossorial's containerised Pangolin setup. A reverse proxy.
   traefik:
     image: traefik:latest
     container_name: traefik
@@ -41,23 +46,12 @@ services:
       - ./config/traefik/logs:/var/log/traefik # Volume to store Traefik logs
   
   # Guacd - The Apache Guacamole (web-based remote desktop) proxy daemon.
+  # Note the lack of a database container instance, generally included in the standard containerised Guacamole setup.
+  # This is because we are using our own custom authentication plugin to provide connection details for users logging in via Pangolin.
   guacd:
     image: guacamole/guacd:latest
     container_name: guacd
     restart: unless-stopped
-    
-  # Guacamole Database - To store guacamole users and connections.
-  #guacamole-db:
-    #image: postgres:15-alpine
-    #container_name: guac-db
-    #restart: unless-stopped
-    #environment:
-      #POSTGRES_DB: guacamole_db
-      #POSTGRES_USER: guacamole_user
-      #POSTGRES_PASSWORD: {{DATABASE_PASSWORD}}
-    #volumes:
-      #- ./init:/docker-entrypoint-initdb.d
-      #- ./data:/var/lib/postgresql/data
   
   # Guacamole Client - The Guacamole web interface.
   guacamole:
@@ -70,16 +64,11 @@ services:
       GUACD_HOSTNAME: guacd
       HTTP_AUTH_ENABLED: "true"
       HTTP_AUTH_HEADER: Remote-User
-      #POSTGRESQL_AUTO_CREATE_ACCOUNTS: "true"
-      #POSTGRES_DATABASE: guacamole_db
-      #POSTGRES_HOSTNAME: guacamole-db
-      #POSTGRES_USER: guacamole_user
-      #POSTGRES_PASSWORD: {{DATABASE_PASSWORD}}
     depends_on:
       - guacd
-      #- guacamole-db
     volumes:
       - /etc/guacamole:/etc/guacamole
+      - /var/run/docker.sock:/var/run/docker.sock # Give the "guacamole" container access to the host Docker instance, allowing it to manage / create its "sibling" containers.
 
   # Docker Desktop - a Linux desktop (Xfce) environment with TigerVNC for remote desktop access.
   desktop:

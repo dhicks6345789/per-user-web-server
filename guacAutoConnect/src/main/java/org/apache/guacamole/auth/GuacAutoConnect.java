@@ -20,7 +20,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
   @Override
   public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     // Do nothing ... yet
-    System.out.println("guac-auto-connect: A User logged in.");
+    System.out.println("guac-auto-connect: User " + credentials.getUsername() +" logged in.");
     return null;
   }
 }

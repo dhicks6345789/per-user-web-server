@@ -78,6 +78,8 @@ services:
     depends_on:
       - guacd
       - guacamole-db
+    volumes:
+      - /etc/guacamole:/etc/guacamole
 
   # Docker Desktop - a Linux desktop (Xfce) environment with TigerVNC for remote desktop access.
   desktop:

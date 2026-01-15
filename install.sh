@@ -44,6 +44,11 @@ while test $# -gt 0; do
             CLOUDFLARED_TOKEN=$1
             shift
             ;;
+        -database_password)
+            shift
+            DATABASE_PASSWORD=$1
+            shift
+            ;;
         -pangolin)
             shift
             INSTALL_PANGOLIN=true
@@ -197,6 +202,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{DATABASE_PASSWORD}}/$DATABASE_PASSWORD/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
         # Start up the Docker containers.

@@ -200,6 +200,9 @@ if [ $INSTALL_PANGOLIN = true ]; then
         
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
         echo Installing cloudflared and Webconsole inside Docker.
+
+        # Stop any running Docker containers.
+        docker compose down
     
         # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
         systemctl stop webconsole

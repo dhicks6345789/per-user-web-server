@@ -38,7 +38,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     List<String[]> containerList = new ArrayList<>();
     
     // Call the Docker command to list all running docker desktop instances, see if any match the current user.
-    ProcessBuilder processBuilder = new ProcessBuilder("docker", "ps", "-a");
+    ProcessBuilder processBuilder = new ProcessBuilder("sudo", "docker", "ps", "-a");
     
     try {
       Process process = processBuilder.start();

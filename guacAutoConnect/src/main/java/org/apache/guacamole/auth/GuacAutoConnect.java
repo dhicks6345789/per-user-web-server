@@ -60,7 +60,8 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         logger.info("Error: Docker command exited with code " + exitCode);
       }
       if (desktopPort.equals("")) {
-        for (int newPort = 5901; desktopPorts.contains(String.valueOf(newPort)) && newPort <= 5920; newPort = newPort + 1) {
+        int newPort;
+        for (newPort = 5901; desktopPorts.contains(String.valueOf(newPort)) && newPort <= 5920; newPort = newPort + 1) {
         }
         desktopPort = String.valueOf(newPort);
         logger.info("Starting new desktop instance for user " + username + " on port " + desktopPort);

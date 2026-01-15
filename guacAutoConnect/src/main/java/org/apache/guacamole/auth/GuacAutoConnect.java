@@ -6,27 +6,29 @@ import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.auth.simple.SimpleAuthenticationProvider;
 import org.apache.guacamole.net.auth.Credentials;
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Authentication provider implementation intended to demonstrate basic use
- * of Guacamole's extension API. The credentials and connection information for
- * a single user are stored directly in guacamole.properties.
+ * A custom authentication provider that automatically connects the given user to a remote desktop instance hosted inside a Docker container.
+ * If a suitible instance matching the username doesn't already exist, one will be created.
+ * This extension assumes something else is handling the actual authentication, and that by the time this code gets called the user is assumed to be valid and authorised.
+ * Designed for use with Pangolin handling authentication and a VNC-enabled Desktop image available in Docker.
  */
 public class GuacAutoConnect extends SimpleAuthenticationProvider {
-  @Override
-  public String getIdentifier() {
+  // Initialize the logger for this class.
+  private static final Logger logger = LoggerFactory.getLogger(MyCustomAuthPlugin.class);
+  
+  @Override public String getIdentifier() {
     return "guac-auto-connect";
   }
   
-  @Override
-  public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
-    // Do nothing ... yet
-    System.out.println("guac-auto-connect: User " + credentials.getUsername() +" logged in.");
+  @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
+    // Output a log message.
+    logger.info(guac-auto-connect: User " + credentials.getUsername() +" logged in.");
     
-    // Successful login. Return configurations.
+    // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
     Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
-    
-    // Create new configuration.
     GuacamoleConfiguration config = new GuacamoleConfiguration();
 
     // Set protocol and connection parameters.
@@ -35,7 +37,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     config.setParameter("port", "5901");
     config.setParameter("username", "desktopuser");
     config.setParameter("password", "vncpassword");
-    configs.put("Desktop Connection", config);
+    configs.put(credentials.getUsername() + ": Developer Desktop", config);
     return configs;
   }
 }

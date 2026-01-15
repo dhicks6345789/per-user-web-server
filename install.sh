@@ -18,6 +18,7 @@ SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
+GUACAMOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
 WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 
@@ -208,6 +209,10 @@ if [ $INSTALL_PANGOLIN = true ]; then
         systemctl stop webconsole
         systemctl disable webconsole
 
+        echo Building Docker image for custom Guacamole image - this might take a few minutes...
+        cp per-user-web-server/guacamole-Dockerfile .
+        docker build -f guacamole-Dockerfile --progress=plain --tag=$GUACAMOLE_DOCKER_IMAGE . 2>&1
+
         echo Building Docker image for Webconsole - this might take a few minutes...
         cp per-user-web-server/webconsole-Dockerfile .
         docker build -f webconsole-Dockerfile --progress=plain --tag=$WEBCONSOLE_DOCKER_IMAGE . 2>&1
@@ -218,6 +223,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
+        sed -i "s/{{GUACAMOLE_DOCKER_IMAGE}}/$GUACAMOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml

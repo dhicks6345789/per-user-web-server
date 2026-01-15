@@ -70,14 +70,14 @@ services:
       GUACD_HOSTNAME: guacd
       HTTP_AUTH_ENABLED: "true"
       HTTP_AUTH_HEADER: Remote-User
-      POSTGRESQL_AUTO_CREATE_ACCOUNTS: "true"
-      POSTGRES_DATABASE: guacamole_db
-      POSTGRES_HOSTNAME: guacamole-db
-      POSTGRES_USER: guacamole_user
-      POSTGRES_PASSWORD: {{DATABASE_PASSWORD}}
+      #POSTGRESQL_AUTO_CREATE_ACCOUNTS: "true"
+      #POSTGRES_DATABASE: guacamole_db
+      #POSTGRES_HOSTNAME: guacamole-db
+      #POSTGRES_USER: guacamole_user
+      #POSTGRES_PASSWORD: {{DATABASE_PASSWORD}}
     depends_on:
       - guacd
-      - guacamole-db
+      #- guacamole-db
     volumes:
       - /etc/guacamole:/etc/guacamole
 

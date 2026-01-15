@@ -18,15 +18,63 @@ import org.slf4j.LoggerFactory;
 public class GuacAutoConnect extends SimpleAuthenticationProvider {
   // Initialize the logger for this class.
   private static final Logger logger = LoggerFactory.getLogger(GuacAutoConnect.class);
-  
+
+  // Tell Guacamole what the name of this custom extension is.
   @Override public String getIdentifier() {
     return "guac-auto-connect";
   }
-  
+
+  // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     // Output a log message.
     String username = credentials.getUsername().split("@")[0];
     logger.info("User " + username + " logged in.");
+
+
+
+
+
+
+    
+    // We want to get a list of running containers using our "dockerdesktop" image so we can see if there's one already running we can connect the user to or if we need to start a new one
+    List<String[]> containerList = new ArrayList<>();
+    
+    // To do: go to the Docker CLI, list all running docker desktop instances, see if any match the current user.
+    // sudo docker ps -a | grep dockerdesktop
+    // Command to run
+    ProcessBuilder processBuilder = new ProcessBuilder("docker", "ps", "-a");
+    
+    try {
+      Process process = processBuilder.start();
+      BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      
+      String line;
+      boolean isHeader = true;
+      
+      while ((line = reader.readLine()) != null) {
+        if (isHeader) {
+          isHeader = false; // Skip the column headers
+          continue;
+        }
+        
+        // Regex split: looks for 2 or more consecutive spaces
+        // This handles spaces within names or dates (e.g., "About an hour ago")
+        String[] details = line.split("\\s{2,}");
+        containerList.add(details);
+      }
+      
+      int exitCode = process.waitFor();
+      if (exitCode != 0) {
+        System.err.println("Error: Docker command exited with code " + exitCode);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+
+
+
+
     
     // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
     Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();

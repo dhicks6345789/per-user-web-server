@@ -222,7 +222,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
         docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
-        cp per-user-web-server/allinone-docker-compose.yml ./docker-compose.yml
+        cp per-user-web-server/docker-compose.yml ./docker-compose.yml
         sed -i "s/{{GUACAMOLE_DOCKER_IMAGE}}/$GUACAMOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml

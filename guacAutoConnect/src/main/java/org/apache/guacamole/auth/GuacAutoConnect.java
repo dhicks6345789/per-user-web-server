@@ -21,6 +21,20 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
   public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     // Do nothing ... yet
     System.out.println("guac-auto-connect: User " + credentials.getUsername() +" logged in.");
-    return null;
+    
+    // Successful login. Return configurations.
+    Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
+
+    // Create new configuration
+    GuacamoleConfiguration config = new GuacamoleConfiguration();
+
+    // Set protocol and connection parameters.
+    config.setProtocol("VNC");
+    config.setParameter("hostname", "desktop");
+    config.setParameter("port", "5901");
+    config.setParameter("username", "desktopuser");
+    config.setParameter("password", "vncpassword");
+    configs.put("Desktop Connection", config);
+    return configs;
   }
 }

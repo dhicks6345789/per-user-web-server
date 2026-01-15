@@ -18,7 +18,7 @@ SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
-GUACAMOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
+GUACAMOLE_DOCKER_IMAGE="sansay.co.uk-guacamole:0.1-beta.3"
 WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 

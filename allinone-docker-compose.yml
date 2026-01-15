@@ -77,7 +77,7 @@ services:
       POSTGRES_PASSWORD: {{DATABASE_PASSWORD}}
     depends_on:
       - guacd
-      - guac-db
+      - guacamole-db
 
   # Docker Desktop - a Linux desktop (Xfce) environment with TigerVNC for remote desktop access.
   desktop:

@@ -1,0 +1,8 @@
+{
+  "guacamoleVersion": "1.6.0",
+  "name": "Guacamole Auto-Connect Extension",
+  "namespace": "guac-auto-connect",
+  "authProviders": [
+    "org.apache.guacamole.auth.GuacAutoConnect"
+  ]
+}

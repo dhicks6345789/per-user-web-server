@@ -1,6 +1,7 @@
 package org.apache.guacamole.auth;
 
-import java.util.Map;
+//import java.util.Map;
+import java.util.HashMap;
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.auth.simple.SimpleAuthenticationProvider;
 import org.apache.guacamole.net.auth.Credentials;

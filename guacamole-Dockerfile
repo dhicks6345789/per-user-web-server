@@ -1,10 +1,13 @@
 FROM guacamole/guacamole:latest
 
-# Switch to root to install software
+# Switch to root to install software.
 USER root
 
+# Install sudo.
 RUN apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
 
-# Switch back to the guacamole user if you want to maintain security 
-# or stay as root if your specific use case requires it.
+# Add the guacamole user to sudoers and allow passwordless access.
+RUN usermod -aG sudo guacamole && echo "guacamole ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Switch back to the default user.
 USER guacamole

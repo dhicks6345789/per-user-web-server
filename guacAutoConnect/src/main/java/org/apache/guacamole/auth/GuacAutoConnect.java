@@ -24,8 +24,8 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     
     // Successful login. Return configurations.
     Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
-
-    // Create new configuration
+    
+    // Create new configuration.
     GuacamoleConfiguration config = new GuacamoleConfiguration();
 
     // Set protocol and connection parameters.

@@ -42,33 +42,40 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
       
       String line;
+      int exitCode;
       String desktopPort = "";
       List<String> desktopPorts = new ArrayList<>();
       while ((line = reader.readLine()) != null) {
         // Regex split: looks for 2 or more consecutive spaces - this handles spaces within names or dates (e.g., "About an hour ago").
         String[] details = line.split("\\s{2,}");
         if (details[1].startsWith("sansay.co.uk-dockerdesktop")) {
-          logger.info("Found container: " + String.join(", ", details));
           desktopPorts.add(details[5].split("/")[0]);
           if (details[6].startsWith("desktop-" + username)) {
             desktopPort = details[5].split("/")[0];
           }
         }
       }
-      int exitCode = process.waitFor();
-      if (exitCode != 0) {
-        logger.info("Error: Docker command exited with code " + exitCode);
-      }
+      exitCode = process.waitFor();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    if (exitCode == 0) {
       if (desktopPort.equals("")) {
         int newPort;
         for (newPort = 5901; desktopPorts.contains(String.valueOf(newPort)) && newPort <= 5920; newPort = newPort + 1) {
         }
         desktopPort = String.valueOf(newPort);
-        logger.info("Starting new desktop instance for user " + username + " on port " + desktopPort);
       }
       logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } else {
+      logger.info("Error: Docker command exited with code " + exitCode);
+    }
+
+    if (desktopPort.equals("")) {
+      logger.info("Problem starting new desktop instance for user " + username);
+    } else {
+      logger.info("Starting new desktop instance for user " + username + " on port " + desktopPort);
     }
     
     // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.

@@ -30,6 +30,11 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
 
   // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
+    String processLine;
+    int processExitCode;
+    String desktopPort = "";
+    List<String> desktopPorts = new ArrayList<>();
+    
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
     String username = credentials.getUsername().split("@")[0];
     logger.info("User " + username + " logged in.");
@@ -40,14 +45,9 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     try {
       Process process = processBuilder.start();
       BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-      
-      String line;
-      int exitCode;
-      String desktopPort = "";
-      List<String> desktopPorts = new ArrayList<>();
-      while ((line = reader.readLine()) != null) {
+      while ((processLine = reader.readLine()) != null) {
         // Regex split: looks for 2 or more consecutive spaces - this handles spaces within names or dates (e.g., "About an hour ago").
-        String[] details = line.split("\\s{2,}");
+        String[] details = processLine.split("\\s{2,}");
         if (details[1].startsWith("sansay.co.uk-dockerdesktop")) {
           desktopPorts.add(details[5].split("/")[0]);
           if (details[6].startsWith("desktop-" + username)) {
@@ -55,12 +55,12 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
           }
         }
       }
-      exitCode = process.waitFor();
+      processExitCode = process.waitFor();
     } catch (Exception e) {
       e.printStackTrace();
     }
     
-    if (exitCode == 0) {
+    if (processExitCode == 0) {
       if (desktopPort.equals("")) {
         int newPort;
         for (newPort = 5901; desktopPorts.contains(String.valueOf(newPort)) && newPort <= 5920; newPort = newPort + 1) {
@@ -69,7 +69,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       }
       logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
     } else {
-      logger.info("Error: Docker command exited with code " + exitCode);
+      logger.info("Error: Docker command exited with code " + processExitCode);
     }
 
     if (desktopPort.equals("")) {

@@ -31,7 +31,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
   // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     String processLine;
-    int processExitCode;
+    int processExitCode = 1;
     String desktopPort = "";
     List<String> desktopPorts = new ArrayList<>();
     

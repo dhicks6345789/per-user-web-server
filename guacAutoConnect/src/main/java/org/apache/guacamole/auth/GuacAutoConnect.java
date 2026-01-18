@@ -35,13 +35,14 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     String desktopPort = "";
     List<String> desktopPorts = new ArrayList<>();
     int vncDisplay = 0;
+    ProcessBuilder processBuilder;
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
     String username = credentials.getUsername().split("@")[0];
     logger.info("User " + username + " logged in.");
     
     // Call the Docker command to list all running docker desktop instances, see if any match the current user.
-    ProcessBuilder processBuilder = new ProcessBuilder("sudo", "docker", "ps", "-a");
+    processBuilder = new ProcessBuilder("sudo", "docker", "ps", "-a");
     
     try {
       Process process = processBuilder.start();
@@ -73,7 +74,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         vncDisplay = vncDisplay - 5900;
         // If we've run out of available ports, don't start a new instance.
         if (vncDisplay <= 20) {
-          ProcessBuilder processBuilder = new ProcessBuilder("docker", "run", "--name", "desktop-"-username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay), "&");
+          processBuilder = new ProcessBuilder("docker", "run", "--name", "desktop-"-username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay), "&");
           try {
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

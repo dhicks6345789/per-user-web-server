@@ -13,14 +13,18 @@ USER desktopuser
 WORKDIR /home/desktopuser
 
 # Set up VNC password
-RUN mkdir -p /home/desktopuser/.vnc && echo "vncpassword" | vncpasswd -f > /home/desktopuser/.vnc/passwd && chmod 600 /home/desktopuser/.vnc/passwd
+#RUN mkdir -p /home/desktopuser/.vnc && echo "vncpassword" | vncpasswd -f > /home/desktopuser/.vnc/passwd && chmod 600 /home/desktopuser/.vnc/passwd
 
-# Copy the startup script
+# Copy the VNC / X Desktop startup script.
 COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-xstartup /home/desktopuser/.vnc/xstartup
 RUN chmod +x /home/desktopuser/.vnc/xstartup
 
+# Copy our custom startup script.
+COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-startup.sh /home/desktopuser/startup.sh
+RUN chmod +x /home/desktopuser/startup.sh
+
 # Expose VNC port (5901 for display :1)
-EXPOSE 5901
+#EXPOSE 5901
 
 # Start TigerVNC
-CMD ["vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":1"]
+#CMD ["vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":1"]

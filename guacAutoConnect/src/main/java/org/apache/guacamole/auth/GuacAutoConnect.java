@@ -32,6 +32,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     String processLine;
     int dockerPsProcessExitCode = 1;
+    int dockerRunProcessExitCode = 1;
     String desktopPort = "";
     List<String> desktopPorts = new ArrayList<>();
     int vncDisplay = 0;

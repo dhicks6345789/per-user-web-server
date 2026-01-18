@@ -76,12 +76,8 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         // If we've run out of available ports, don't start a new instance.
         if (vncDisplay <= 20) {
           logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
-          
-          // logger.info(String.join(" ", new String[] {"sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--publish", "", "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay)}));
-          // processBuilder = new ProcessBuilder("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay));
-          
-          logger.info(String.join(" ", new String[] {"sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--publish", desktopPort + ":" + desktopPort, "--network", "main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay)}));
-          processBuilder = new ProcessBuilder("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--publish", desktopPort + ":" + desktopPort, "--network", "main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
+          logger.info(String.join(" ", new String[] {"sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay)}));
+          processBuilder = new ProcessBuilder("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
           
           try {
             Process process = processBuilder.start();

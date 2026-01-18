@@ -75,6 +75,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         vncDisplay = vncDisplay - 5900;
         // If we've run out of available ports, don't start a new instance.
         if (vncDisplay <= 20) {
+          logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
           processBuilder = new ProcessBuilder("docker", "run", "--name", "desktop-" + username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay), "&");
           try {
             Process process = processBuilder.start();
@@ -104,8 +105,8 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     
       // Set protocol and connection parameters.
       config.setProtocol("vnc");
-      config.setParameter("hostname", "desktop");
-      config.setParameter("port", "5901");
+      config.setParameter("hostname", "desktop-" + username);
+      config.setParameter("port", desktopPort);
       config.setParameter("username", "desktopuser");
       config.setParameter("password", "vncpassword");
       configs.put("Developer Desktop: " + username, config);

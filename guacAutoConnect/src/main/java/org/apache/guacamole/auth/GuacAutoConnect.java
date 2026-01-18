@@ -34,7 +34,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     int dockerPsProcessExitCode = 1;
     String desktopPort = "";
     List<String> desktopPorts = new ArrayList<>();
-    int vncDisplay = 0
+    int vncDisplay = 0;
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
     String username = credentials.getUsername().split("@")[0];

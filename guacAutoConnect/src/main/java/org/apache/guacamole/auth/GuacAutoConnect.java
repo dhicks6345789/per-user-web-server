@@ -31,9 +31,10 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
   // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     String processLine;
-    int processExitCode = 1;
+    int dockerPsProcessExitCode = 1;
     String desktopPort = "";
     List<String> desktopPorts = new ArrayList<>();
+    int vncDisplay = 0
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
     String username = credentials.getUsername().split("@")[0];
@@ -45,50 +46,66 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     try {
       Process process = processBuilder.start();
       BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      // Parse each line of the "docker ps -a" command to find all containers using our current "desktop" image, and record the port numbers used by each image.
       while ((processLine = reader.readLine()) != null) {
         // Regex split: looks for 2 or more consecutive spaces - this handles spaces within names or dates (e.g., "About an hour ago").
         String[] details = processLine.split("\\s{2,}");
         if (details[1].startsWith("sansay.co.uk-dockerdesktop")) {
           desktopPorts.add(details[5].split("/")[0]);
+          // If we find a "desktop" image belonging to the current user, set that as the port number to connect to.
           if (details[6].startsWith("desktop-" + username)) {
             desktopPort = details[5].split("/")[0];
+            vncPort = Integer.parseInt(desktopPort) - 5900;
           }
         }
       }
-      processExitCode = process.waitFor();
+      dockerPsProcessExitCode = process.waitFor();
     } catch (Exception e) {
       e.printStackTrace();
     }
     
-    if (processExitCode == 0) {
+    if (dockerPsProcessExitCode == 0) {
       if (desktopPort.equals("")) {
-        int newPort;
-        for (newPort = 5901; desktopPorts.contains(String.valueOf(newPort)) && newPort <= 5920; newPort = newPort + 1) {
+        // If we don't already have a running "desktop" container associated with the current user, start one. First, we need to pick an available port number.
+        for (vncPort = 5901; desktopPorts.contains(String.valueOf(vncPort)) && vncPort <= 5920; vncPort = vncPort + 1) {
         }
-        desktopPort = String.valueOf(newPort);
+        desktopPort = String.valueOf(vncPort);
+        vncPort = vncPort - 5900;
+        // If we've run out of available ports, don't start a new instance.
+        if (vncPort <= 20) {
+          ProcessBuilder processBuilder = new ProcessBuilder("docker", "run", "--name", "desktop-"-username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncPort), "&");
+          try {
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            dockRunProcessExitCode = process.waitFor();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        } else {
+          logger.info("Desktop instances limit reached, unable to start new desktop instance for user " + username);
+        }
       }
-      logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
     } else {
-      logger.info("Error: Docker command exited with code " + processExitCode);
+      logger.info("Error: Docker ps command exited with code " + dockerPsProcessExitCode);
     }
 
     if (desktopPort.equals("")) {
-      logger.info("Problem starting new desktop instance for user " + username);
+      logger.info("Problem finding / starting desktop instance for user " + username);
     } else {
-      logger.info("Starting new desktop instance for user " + username + " on port " + desktopPort);
-    }
+      logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
+      
+      // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
+      Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
+      GuacamoleConfiguration config = new GuacamoleConfiguration();
     
-    // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
-    Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
-    GuacamoleConfiguration config = new GuacamoleConfiguration();
-
-    // Set protocol and connection parameters.
-    config.setProtocol("vnc");
-    config.setParameter("hostname", "desktop");
-    config.setParameter("port", "5901");
-    config.setParameter("username", "desktopuser");
-    config.setParameter("password", "vncpassword");
-    configs.put("Developer Desktop: " + username, config);
+      // Set protocol and connection parameters.
+      config.setProtocol("vnc");
+      config.setParameter("hostname", "desktop");
+      config.setParameter("port", "5901");
+      config.setParameter("username", "desktopuser");
+      config.setParameter("password", "vncpassword");
+      configs.put("Developer Desktop: " + username, config);
+    }
     return configs;
   }
 }

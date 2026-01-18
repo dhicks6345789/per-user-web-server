@@ -81,6 +81,9 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             dockerRunProcessExitCode = process.waitFor();
+            while ((processLine = reader.readLine()) != null) {
+              logger.info(processLine);
+            }
           } catch (Exception e) {
             e.printStackTrace();
           }

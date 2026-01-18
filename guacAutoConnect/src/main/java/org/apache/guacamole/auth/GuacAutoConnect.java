@@ -30,7 +30,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
 
   // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
-    String processLine;run -p 8080:80
+    String processLine;
     int dockerPsProcessExitCode = 1;
     int dockerRunProcessExitCode = 1;
     String desktopPort = "";

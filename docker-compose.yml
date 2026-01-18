@@ -5,6 +5,8 @@ services:
     image: {{WEBCONSOLE_DOCKER_IMAGE}}
     container_name: webconsole
     command: /usr/local/bin/webconsole --debug --localOnly false
+    networks:
+      - main
     volumes:
       - /etc/webconsole:/etc/webconsole
 
@@ -15,12 +17,16 @@ services:
     container_name: cloudflared-tunnel
     restart: unless-stopped
     command: tunnel --no-autoupdate run --token {{CLOUDFLARED_TOKEN}}
+    networks:
+      - main
 
   # Fossorial's Pangolin - can provide tunneling and authentication, basically a self-hostable version of Cloudflare Tunnels. See: https://pangolin.net
   pangolin:
     image: fosrl/pangolin:latest
     container_name: pangolin
     restart: unless-stopped
+    networks:
+      - main
     volumes:
       - ./config:/app/config
     healthcheck:
@@ -40,6 +46,8 @@ services:
         condition: service_healthy
     command:
       - --configFile=/etc/traefik/traefik_config.yml
+    networks:
+      - main
     volumes:
       - ./config/traefik:/etc/traefik:ro # Volume to store the Traefik configuration
       - ./config/letsencrypt:/letsencrypt # Volume to store the Let's Encrypt certificates
@@ -52,6 +60,8 @@ services:
     image: guacamole/guacd:latest
     container_name: guacd
     restart: unless-stopped
+    networks:
+      - main
   
   # Guacamole Client - The Guacamole web interface.
   guacamole:
@@ -66,6 +76,8 @@ services:
       HTTP_AUTH_HEADER: Remote-User
     depends_on:
       - guacd
+    networks:
+      - main
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
@@ -78,3 +90,7 @@ services:
     #image: {{DOCKERDESKTOP_DOCKER_IMAGE}}
     #container_name: desktop
     #restart: unless-stopped
+# We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
+networks:
+  main:
+    driver: bridge

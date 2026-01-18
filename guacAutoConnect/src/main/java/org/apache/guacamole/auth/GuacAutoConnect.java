@@ -90,7 +90,12 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
             e.printStackTrace();
           }
           // To do: maybe actually run docker ps -a more rather than just do a simple pause.
-          Thread.sleep(2000);
+          try {
+            Thread.sleep(2000);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // Gemini: Handle the exception (e.g., logging).
+          }
         } else {
           logger.info("Desktop instances limit reached, unable to start new desktop instance for user " + username);
         }

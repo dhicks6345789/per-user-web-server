@@ -79,7 +79,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
           try {
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            dockRunProcessExitCode = process.waitFor();
+            dockerRunProcessExitCode = process.waitFor();
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -91,13 +91,15 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       logger.info("Error: Docker ps command exited with code " + dockerPsProcessExitCode);
     }
 
+    // Create a new map of Guacamole configurations to return. If we couldn't find / create a desktop instance to connect to, this will stay empty and result in an error for the user.
+    Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
+    
     if (desktopPort.equals("")) {
       logger.info("Problem finding / starting desktop instance for user " + username);
     } else {
       logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
       
       // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
-      Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
       GuacamoleConfiguration config = new GuacamoleConfiguration();
     
       // Set protocol and connection parameters.

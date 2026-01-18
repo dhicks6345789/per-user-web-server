@@ -77,7 +77,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         if (vncDisplay <= 20) {
           logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
           logger.info("docker", "run", "--detach", "--name", "desktop-" + username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay));
-          processBuilder = new ProcessBuilder("docker", "run", "--detach", "--name", "desktop-" + username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay));
+          processBuilder = new ProcessBuilder(String.join(", ", {"docker", "run", "--detach", "--name", "desktop-" + username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay)}));
           try {
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

@@ -55,7 +55,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
           // If we find a "desktop" image belonging to the current user, set that as the port number to connect to.
           if (details[6].startsWith("desktop-" + username)) {
             desktopPort = details[5].split("/")[0];
-            vncPort = Integer.parseInt(desktopPort) - 5900;
+            vncDisplay = Integer.parseInt(desktopPort) - 5900;
           }
         }
       }
@@ -67,13 +67,13 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     if (dockerPsProcessExitCode == 0) {
       if (desktopPort.equals("")) {
         // If we don't already have a running "desktop" container associated with the current user, start one. First, we need to pick an available port number.
-        for (vncPort = 5901; desktopPorts.contains(String.valueOf(vncPort)) && vncPort <= 5920; vncPort = vncPort + 1) {
+        for (int vncPort = 5901; desktopPorts.contains(String.valueOf(vncPort)) && vncPort <= 5920; vncPort = vncPort + 1) {
         }
         desktopPort = String.valueOf(vncPort);
-        vncPort = vncPort - 5900;
+        vncDisplay = vncPort - 5900;
         // If we've run out of available ports, don't start a new instance.
-        if (vncPort <= 20) {
-          ProcessBuilder processBuilder = new ProcessBuilder("docker", "run", "--name", "desktop-"-username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncPort), "&");
+        if (vncDisplay <= 20) {
+          ProcessBuilder processBuilder = new ProcessBuilder("docker", "run", "--name", "desktop-"-username, "sansay.co.uk-dockerdesktop:0.1-beta.3", "vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":" + String.valueOf(vncDisplay), "&");
           try {
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

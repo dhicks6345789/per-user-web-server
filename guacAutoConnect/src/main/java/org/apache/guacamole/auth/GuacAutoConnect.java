@@ -4,9 +4,12 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
+import java.lang.InterruptedException;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -127,7 +130,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         config.setParameter("password", "vncpassword");
         configs.put("Developer Desktop: " + username, config);
       }
-    } catch (java.io.IOException e) {
+    } catch (java.io.IOException | java.lang.InterruptedException e) {
       System.err.println("An error occurred while calling the Session Manager service: " + e.getMessage());
       e.printStackTrace();
     }

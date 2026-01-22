@@ -91,15 +91,12 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     
     Map<String, String> sessionParameters = new HashMap<>();
     sessionParameters.put("username", username);
-    
     // 2. Convert Map to form-url-encoded string
     String form = sessionParameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
     logger.info("form: " + form);
-    
-
     HttpClient client = HttpClient.newHttpClient();
     //HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString(form)).build();
-    HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST("{\"username\": \"" + username + "\"}").build();
+    HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("{\"username\": \"" + username + "\"}")).build();
     
     try {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

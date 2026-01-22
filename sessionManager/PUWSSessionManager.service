@@ -1,0 +1,16 @@
+[Unit]
+Description=PUWSSessionManager
+Wants=network-online.target
+After=network-online.target
+ 
+[Service]
+Type=simple
+
+ExecStart=/usr/local/bin/sessionManager
+
+ExecStop=kill $MAINPID
+Restart=always
+RestartSec=4
+ 
+[Install]
+WantedBy=default.target

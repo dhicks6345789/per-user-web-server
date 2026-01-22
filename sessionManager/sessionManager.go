@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 	"net/http"
 	"context"
@@ -45,7 +46,7 @@ func main() {
 		// Go through the list of containers looking for any where the image used matches our "dockerdesktop" image.
 		for _, item := range containers.Items {
 			if strings.HasPrefix(item.Image, "sansay.co.uk-dockerdesktop-") {
-				append(VNCPorts, item.Ports[0].PrivatePort)
+				VNCPorts = append(VNCPorts, item.Ports[0].PrivatePort)
 				if strings.TrimPrefix(item.Image, "sansay.co.uk-dockerdesktop-") == username {
 					VNCPort = item.Ports[0].PrivatePort
 					fmt.Printf("Found on port: %d", VNCPort)
@@ -67,7 +68,7 @@ func main() {
 			// Start the container
 			// ContainerStartOptions is usually empty unless you are using Checkpoints
 			ctx := context.Background()
-			containerStartErr = cli.ContainerStart(ctx, containerID, container.StartOptions{})
+			containerStartErr := cli.ContainerStart(ctx, containerID, container.StartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr, http.StatusInternalServerError)
 				return

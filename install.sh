@@ -171,8 +171,10 @@ cp per-user-web-server/webconsole-config.csv /etc/webconsole/config.csv
 cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
 
 echo Building the Go Session Manager server.
+cd sessionManager
 go build sessionManager.go
-if [ ! -f "sessionManager" ]; then
+cd ..
+if [ ! -f "sessionManager/sessionManager" ]; then
     echo "Problem building the Go Session Manager server - stopping."
     exit 1
 fi

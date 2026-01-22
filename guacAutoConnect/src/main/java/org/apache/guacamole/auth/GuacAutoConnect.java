@@ -106,11 +106,11 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
 
           // Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
           String[] rcloneMountResult = runCommand("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&");
-          logger.info(rcloneMountResult);
+          logger.info(String.join("\n", rcloneMountResult));
           
           logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
           String[] dockerRunResult = runCommand("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
-          logger.info(dockerRunResult);
+          logger.info(String.join("\n", dockerRunResult));
           
           // Wait for the desktop instance to start up before we do anything more.
           // To do: maybe actually run docker ps -a more rather than just do a simple pause.

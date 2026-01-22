@@ -29,15 +29,15 @@ func main() {
 
 		fmt.Println("Looking for session for user: ", username)
 
-		//containers, err := cli.ContainerList(context.Background(), client.ContainerListOptions{})
-		//if err != nil {
-			//http.Error(w, err.Error(), http.StatusInternalServerError)
-			//return
-		//}
+		containers, err := cli.ContainerList(context.Background(), client.ContainerListOptions{})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println(containers[0])
 		
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "{\"errorCode\":\"\", \"portNumber\":\"\", \"password\":\"\"}")
-    }
 	})
 
 	fmt.Println("Server starting on :8091...")

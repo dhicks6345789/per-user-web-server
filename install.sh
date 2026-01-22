@@ -180,9 +180,6 @@ if [ ! -f "per-user-web-server/sessionManager/sessionManager" ]; then
     exit 1
 fi
 
-
-exit 0
-
 echo Building the custom Java authentication plugin for Guacamole...
 rm per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar
 cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..

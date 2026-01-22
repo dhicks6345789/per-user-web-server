@@ -22,7 +22,7 @@ func main() {
 
 	// 1. Endpoint to List Containers
 	http.HandleFunc("/containers", func(w http.ResponseWriter, r *http.Request) {
-		containers, err := cli.ContainerList(context.Background(), container.ListOptions{})
+		containers, err := cli.ContainerList(context.Background(), client.ContainerListOptions{})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

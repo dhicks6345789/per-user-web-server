@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
 )
 
@@ -34,7 +35,10 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Println(containers[0])
+		fmt.Printf("%-20s %-20s %-20s\n", "CONTAINER ID", "IMAGE", "STATUS")
+		for _, ctr := range containers.Items {
+			fmt.Printf("%-20s %-20s %-20s\n", ctr.ID[:12], ctr.Image, ctr.Status)
+		}
 		
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "{\"errorCode\":\"\", \"portNumber\":\"\", \"password\":\"\"}")

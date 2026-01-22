@@ -180,6 +180,7 @@ if [ ! -f "per-user-web-server/sessionManager/sessionManager" ]; then
     exit 1
 fi
 
+
 exit 0
 
 echo Building the custom Java authentication plugin for Guacamole...

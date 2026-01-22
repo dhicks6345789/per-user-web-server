@@ -21,7 +21,7 @@ func main() {
 
 	// Endpoint connectOrStartSession - returns a port number and password to connect with VNC.
 	// Usage: POST /connectOrStartSession?username=USERNAME
-	// Returns: JSON { errorCode, portNumber, password }
+	// Returns: JSON { portNumber, password }
 	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new desktop session (container).
 	http.HandleFunc("/connectOrStartSession", func(w http.ResponseWriter, r *http.Request) {
 		username := strings.TrimSpace(r.URL.Query().Get("username"))
@@ -39,14 +39,16 @@ func main() {
 			return
 		}
 
+		var VNCPorts []uint16
 		var VNCPort uint16 = 0
+		var possibleVNCPort uint16 = 0
 		// Go through the list of containers looking for any where the image used matches our "dockerdesktop" image.
 		for _, item := range containers.Items {
 			if strings.HasPrefix(item.Image, "sansay.co.uk-dockerdesktop-") {
+				append(VNCPorts, item.Ports[0].PrivatePort)
 				if strings.TrimPrefix(item.Image, "sansay.co.uk-dockerdesktop-") == username {
-					fmt.Printf("Found - port: ")
-					fmt.Printf("%d", item.Ports[0].PrivatePort)
 					VNCPort = item.Ports[0].PrivatePort
+					fmt.Printf("Found on port: %d", VNCPort)
 				}
 			}
 		}
@@ -54,10 +56,27 @@ func main() {
 		// If no existing session found, start one.
 		if VNCPort == 0 {
 			fmt.Println("Starting session for user: ", username)
+			// First, find an available port number.
+			for possibleVNCPort = 5901; slices.Contains(VNCPorts, possibleVNCPort) && possibleVNCPort <= 5920; possibleVNCPort = possibleVNCPort + 1 {
+			}
+			// If no free port found, return an error.
+			if possibleVNCPort == 0 {
+				http.Error(w, "No free sessions.", http.StatusInternalServerError)
+				return
+			}
+			// Start the container
+			// ContainerStartOptions is usually empty unless you are using Checkpoints
+			ctx := context.Background()
+			containerStartErr = cli.ContainerStart(ctx, containerID, container.StartOptions{})
+			if containerStartErr != nil {
+				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr, http.StatusInternalServerError)
+				return
+			}
+			// "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
 		}
 		
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, "{\"errorCode\":\"\", \"portNumber\":\"%d\", \"password\":\"\"}", VNCPort)
+		fmt.Fprintf(w, "{\"portNumber\":\"%d\", \"password\":\"\"}", VNCPort)
 	})
 
 	fmt.Println("Server starting on :8091...")

@@ -69,7 +69,7 @@ func main() {
 			// ContainerStartOptions is usually empty unless you are using Checkpoints
 			ctx := context.Background()
 			// containerStartResult, = 
-			_, containerStartErr := cli.ContainerStart(ctx, "desktop-" + username, Client.ContainerStartOptions{})
+			_, containerStartErr := cli.ContainerStart(ctx, "desktop-" + username, client.ContainerStartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return

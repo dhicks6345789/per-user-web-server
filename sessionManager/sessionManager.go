@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"net/http"
 	"context"
 
@@ -23,7 +24,7 @@ func main() {
 	// Returns: JSON { errorCode, portNumber, password }
 	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new desktop session (container).
 	http.HandleFunc("/connectOrStartSession", func(w http.ResponseWriter, r *http.Request) {
-		username := Strings.TrimSpace(r.URL.Query().Get("username"))
+		username := strings.TrimSpace(r.URL.Query().Get("username"))
 		if username == "" {
 			http.Error(w, "Missing 'username' parameter", http.StatusBadRequest)
 			return

@@ -6,10 +6,17 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.auth.simple.SimpleAuthenticationProvider;
 import org.apache.guacamole.net.auth.Credentials;
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,66 +72,40 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
 
   // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
-    // A list of VNC port numbers already in use for desktop session connections, found by parsing the output of a "docker ps -a" command.
-    List<String> desktopPorts = new ArrayList<>();
-    String desktopPort = "";
-    int vncDisplay = 0;
+    // Figure out the username of the user who has just logged in.
+    String username = credentials.getUsername().split("@")[0];
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
-    String username = credentials.getUsername().split("@")[0];
     logger.info("User " + username + " logged in.");
+
+    // Request the Session Manager running on the host to give us the connection details for the user's desktop instance. A new instance for the user is created if one isn't already running.
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8091/connectOrStartSession")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString("{\"username\":\"" + username + "\"}")).build();
+    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    logger.info("Status Code: " + response.statusCode());
+    logger.info("Response: " + response.body());
+
+    String desktopPort = "5901";
     
-    // Call Docker to list all running docker desktop instances, see if any match the current user.
-    String[] dockerPsResult = runCommand("sudo", "docker", "ps", "-a");
-    if (dockerPsResult[0].startsWith("ERROR:")) {
-      logger.info(dockerPsResult[0]);
-    } else {
-      // Parse each line of the "docker ps -a" command to find all containers using our current "desktop" image, and record the port numbers used by each image.
-      for (String processLine : dockerPsResult) {
-        // Regex split: looks for 2 or more consecutive spaces - this handles spaces within names or dates (e.g., "About an hour ago").
-        String[] details = processLine.split("\\s{2,}");
-        if (details[1].startsWith("sansay.co.uk-dockerdesktop")) {
-          desktopPorts.add(details[5].split("/")[0]);
-          // If we find a "desktop" image belonging to the current user, extract the VNC port number it is running on and set that as the display number to connect to.
-          if (details[6].startsWith("desktop-" + username)) {
-            desktopPort = details[5].split("/")[0];
-            vncDisplay = Integer.parseInt(desktopPort) - 5900;
-          }
-        }
-      }
-
-      // If we don't already have a running "desktop" container associated with the current user, start one.
-      if (desktopPort.equals("")) {
-        // First, we need to pick an available port number.
-        for (vncDisplay = 5901; desktopPorts.contains(String.valueOf(vncDisplay)) && vncDisplay <= 5920; vncDisplay = vncDisplay + 1) {
-        }
-        desktopPort = String.valueOf(vncDisplay);
-        vncDisplay = vncDisplay - 5900;
-        // If we've run out of available ports, don't start a new instance.
-        if (vncDisplay <= 20) {
-          // To do: unmount or re-use any existing user mount, make sure we don't double-up.
-
-          // Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
-          String[] rcloneMountResult = runCommand("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&");
-          logger.info(String.join("\n", rcloneMountResult));
-          
-          logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
-          String[] dockerRunResult = runCommand("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
-          logger.info(String.join("\n", dockerRunResult));
-          
-          // Wait for the desktop instance to start up before we do anything more.
-          // To do: maybe actually run docker ps -a more rather than just do a simple pause.
-          try {
-            Thread.sleep(2000);
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            // Gemini: Handle the exception (e.g., logging).
-          }
-        } else {
-          logger.info("Desktop instances limit reached, unable to start new desktop instance for user " + username);
-        }
-      }
+    /*
+    // To do: unmount or re-use any existing user mount, make sure we don't double-up.
+    // Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
+    String[] rcloneMountResult = runCommand("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&");
+    logger.info(String.join("\n", rcloneMountResult));
+    
+    logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
+    String[] dockerRunResult = runCommand("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
+    logger.info(String.join("\n", dockerRunResult));
+    
+    // Wait for the desktop instance to start up before we do anything more.
+    // To do: maybe actually run docker ps -a more rather than just do a simple pause.
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      // Gemini: Handle the exception (e.g., logging).
     }
+    */
     
     // Create a new map of Guacamole configurations to return. If we couldn't find / create a desktop instance to connect to, this will stay empty and result in an error for the user.
     Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();

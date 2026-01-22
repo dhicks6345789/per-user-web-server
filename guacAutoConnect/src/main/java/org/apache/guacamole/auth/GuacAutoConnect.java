@@ -76,7 +76,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     
     // Call Docker to list all running docker desktop instances, see if any match the current user.
     String[] dockerPsResult = runCommand("sudo", "docker", "ps", "-a");
-    if (dockerPsResult[0].startsWith("ERROR:") {
+    if (dockerPsResult[0].startsWith("ERROR:")) {
       logger.info(dockerPsResult[0]);
     } else {
       // Parse each line of the "docker ps -a" command to find all containers using our current "desktop" image, and record the port numbers used by each image.

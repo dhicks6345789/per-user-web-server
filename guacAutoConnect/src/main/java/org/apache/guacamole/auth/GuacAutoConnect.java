@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -83,7 +84,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8091/connectOrStartSession")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString("{\"username\":\"" + username + "\"}")).build();
     try {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    } catch (IOException e) {
+    } catch (java.io.IOException e) {
       System.err.println("An error occurred while calling the Session Manager service: " + e.getMessage());
       e.printStackTrace();
     }

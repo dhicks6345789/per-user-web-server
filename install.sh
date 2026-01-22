@@ -172,7 +172,7 @@ cp -r per-user-web-server/tasks/* /etc/webconsole/tasks
 
 echo Building the Go Session Manager server.
 cd per-user-web-server/sessionManager
-go build sessionManager.go
+bash build.sh
 cd ..
 cd ..
 if [ ! -f "per-user-web-server/sessionManager/sessionManager" ]; then

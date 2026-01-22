@@ -38,12 +38,12 @@ func main() {
 			return
 		}
 
-		VNCPort := 0
+		uint16 VNCPort := 0
 		for _, item := range containers.Items {
 			if strings.HasPrefix(item.Image, "sansay.co.uk-dockerdesktop-") {
 				if strings.TrimPrefix(item.Image, "sansay.co.uk-dockerdesktop-") == username {
 					fmt.Printf("Found - port: ")
-					fmt.Printf(item.Ports[0].PrivatePort)
+					fmt.Printf("%d", item.Ports[0].PrivatePort)
 					VNCPort = item.Ports[0].PrivatePort
 				}
 			}

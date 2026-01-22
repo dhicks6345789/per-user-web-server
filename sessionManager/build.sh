@@ -16,7 +16,7 @@ rm sessionManager
 go build sessionManager.go
 
 # Exit if we didn't manage to build the executable.
-[ ! -f sessionManager ] && { echo "Error: sessionManager not compile."; exit 1; }
+[ ! -f sessionManager ] && { echo "Error: sessionManager not compiled."; exit 1; }
 
 cp sessionManager /usr/local/bin
 

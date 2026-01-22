@@ -80,7 +80,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       logger.info(dockerPsResult[0]);
     } else {
       // Parse each line of the "docker ps -a" command to find all containers using our current "desktop" image, and record the port numbers used by each image.
-      for (String processLine : commandResult) {
+      for (String processLine : dockerPsResult) {
         // Regex split: looks for 2 or more consecutive spaces - this handles spaces within names or dates (e.g., "About an hour ago").
         String[] details = processLine.split("\\s{2,}");
         if (details[1].startsWith("sansay.co.uk-dockerdesktop")) {

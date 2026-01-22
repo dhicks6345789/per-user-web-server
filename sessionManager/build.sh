@@ -5,8 +5,13 @@ echo Building Session Manager...
 # Stop any existing running service.
 systemctl stop PUWSSessionManager
 
-# go get github.com/nfnt/resize
+# Get any required mondules.
+go get github.com/docker/docker/api/types/container
+go get github.com/docker/docker/client
+
+# Clear out any previously-compile binary.
 rm sessionManager
+
 go build sessionManager.go
 #cp sessionManager /usr/local/bin
 

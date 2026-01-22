@@ -45,10 +45,9 @@ func main() {
 		var possibleVNCPort uint16 = 0
 		// Go through the list of containers looking for any where the image used matches our "dockerdesktop" image.
 		for _, item := range containers.Items {
-			//if strings.HasPrefix(item.Image, "sansay.co.uk-dockerdesktop-") {
-			if strings.HasPrefix(item.Name, "desktop-") {
+			if strings.HasPrefix(item.Names[0], "desktop-") {
 				VNCPorts = append(VNCPorts, item.Ports[0].PrivatePort)
-				if strings.TrimPrefix(item.Name, "desktop-") == username {
+				if strings.TrimPrefix(item.Names[0], "desktop-") == username {
 					VNCPort = item.Ports[0].PrivatePort
 					fmt.Printf("Found on port: %d", VNCPort)
 				}

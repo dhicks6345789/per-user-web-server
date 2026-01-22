@@ -24,6 +24,10 @@ import org.apache.guacamole.protocol.GuacamoleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// Temporary?
+import java.util.stream.Collectors;
+import java.net.http.HttpRequest.BodyPublishers;
+
 /**
  * A custom authentication provider that automatically connects the given user to a remote desktop instance hosted inside a Docker container.
  * If a suitible instance matching the username doesn't already exist, one will be created.
@@ -91,7 +95,8 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     // 2. Convert Map to form-url-encoded string
     String form = sessionParameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
     logger.info("form: " + form);
-    
+
+    HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://httpbin.org/post")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString(form)).build();
     
     try {

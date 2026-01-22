@@ -43,7 +43,8 @@ func main() {
 			if strings.HasPrefix(item.Image, "sansay.co.uk-dockerdesktop-") {
 				if strings.TrimPrefix(item.Image, "sansay.co.uk-dockerdesktop-") == username {
 					fmt.Printf("Found - port: ")
-					fmt.Printf(item.Ports[0])
+					fmt.Printf(item.Ports[0].PrivatePort)
+					VNCPort = item.Ports[0].PrivatePort
 				}
 			}
 		}
@@ -54,7 +55,7 @@ func main() {
 		}
 		
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, "{\"errorCode\":\"\", \"portNumber\":\"\", \"password\":\"\"}")
+		fmt.Fprintf(w, "{\"errorCode\":\"\", \"portNumber\":\"%d\", \"password\":\"\"}", VNCPort)
 	})
 
 	fmt.Println("Server starting on :8091...")

@@ -38,7 +38,7 @@ func main() {
 		//}
 		//w.Header().Set("Content-Type", "application/json")
 		//json.NewEncoder(w).Encode(containers)
-	}
+	})
 
 	fmt.Println("Server starting on :8091...")
 	log.Fatal(http.ListenAndServe(":8091", nil))

@@ -37,9 +37,20 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Printf("%-20s %-20s %-20s\n", "CONTAINER ID", "IMAGE", "STATUS")
-		for _, ctr := range containers.Items {
-			fmt.Printf("%-20s %-20s %-20s\n", ctr.ID[:12], ctr.Image, ctr.Status)
+
+		VNCPort := 0
+		for _, item := range containers.Items {
+			if strings.HasPrefix(item.Image, "sansay.co.uk-dockerdesktop-") {
+				if strings.TrimPrefix(item.Image, "sansay.co.uk-dockerdesktop-") == username {
+					fmt.Printf("Found - port: ")
+					fmt.Printf(item.Ports[0])
+				}
+			}
+		}
+
+		// If no existing session found, start one.
+		if VNCPort == 0 {
+			fmt.Println("Starting session for user: ", username)
 		}
 		
 		w.Header().Set("Content-Type", "application/json")

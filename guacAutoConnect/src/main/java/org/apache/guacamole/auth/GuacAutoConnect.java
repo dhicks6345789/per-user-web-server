@@ -84,10 +84,16 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
     logger.info("User " + username + " logged in.");
-
-    // Request the Session Manager running on the host to give us the connection details for the user's desktop instance. A new instance for the user is created if one isn't already running.
-    HttpClient client = HttpClient.newHttpClient();
-    HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString("{\"username\":\"" + username + "\"}")).build();
+    
+    Map<String, String> sessionParameters = new HashMap<>();
+    sessionParameters.put("username", username);
+    
+    // 2. Convert Map to form-url-encoded string
+    String form = parameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
+    logger.info("form: " + form);
+    
+    HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://httpbin.org/post")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString(form)).build();
+    
     try {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
       logger.info("Status Code: " + response.statusCode());

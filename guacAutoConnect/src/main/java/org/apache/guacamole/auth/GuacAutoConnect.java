@@ -73,6 +73,9 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
 
   // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
+    // Create a new map of Guacamole configurations to return. If we can't find / create a desktop instance to connect to, this will stay empty and result in an error for the user.
+    Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
+    
     // Figure out the username of the user who has just logged in.
     String username = credentials.getUsername().split("@")[0];
     
@@ -84,53 +87,49 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8091/connectOrStartSession")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString("{\"username\":\"" + username + "\"}")).build();
     try {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      logger.info("Status Code: " + response.statusCode());
+      logger.info("Response: " + response.body());
+      String desktopPort = "5901";
+    
+      /*
+      // To do: unmount or re-use any existing user mount, make sure we don't double-up.
+      // Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
+      String[] rcloneMountResult = runCommand("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&");
+      logger.info(String.join("\n", rcloneMountResult));
+    
+      logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
+      String[] dockerRunResult = runCommand("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
+      logger.info(String.join("\n", dockerRunResult));
+    
+      // Wait for the desktop instance to start up before we do anything more.
+      // To do: maybe actually run docker ps -a more rather than just do a simple pause.
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        // Gemini: Handle the exception (e.g., logging).
+      }
+      */
+      
+      if (desktopPort.equals("")) {
+        logger.info("Problem finding / starting desktop instance for user " + username);
+      } else {
+        logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
+      
+        // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
+        GuacamoleConfiguration config = new GuacamoleConfiguration();
+    
+        // Set protocol and connection parameters.
+        config.setProtocol("vnc");
+        config.setParameter("hostname", "desktop-" + username);
+        config.setParameter("port", desktopPort);
+        config.setParameter("username", "desktopuser");
+        config.setParameter("password", "vncpassword");
+        configs.put("Developer Desktop: " + username, config);
+      }
     } catch (java.io.IOException e) {
       System.err.println("An error occurred while calling the Session Manager service: " + e.getMessage());
       e.printStackTrace();
-    }
-    logger.info("Status Code: " + response.statusCode());
-    logger.info("Response: " + response.body());
-
-    String desktopPort = "5901";
-    
-    /*
-    // To do: unmount or re-use any existing user mount, make sure we don't double-up.
-    // Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
-    String[] rcloneMountResult = runCommand("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&");
-    logger.info(String.join("\n", rcloneMountResult));
-    
-    logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
-    String[] dockerRunResult = runCommand("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
-    logger.info(String.join("\n", dockerRunResult));
-    
-    // Wait for the desktop instance to start up before we do anything more.
-    // To do: maybe actually run docker ps -a more rather than just do a simple pause.
-    try {
-      Thread.sleep(2000);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      // Gemini: Handle the exception (e.g., logging).
-    }
-    */
-    
-    // Create a new map of Guacamole configurations to return. If we couldn't find / create a desktop instance to connect to, this will stay empty and result in an error for the user.
-    Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
-    
-    if (desktopPort.equals("")) {
-      logger.info("Problem finding / starting desktop instance for user " + username);
-    } else {
-      logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
-      
-      // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
-      GuacamoleConfiguration config = new GuacamoleConfiguration();
-    
-      // Set protocol and connection parameters.
-      config.setProtocol("vnc");
-      config.setParameter("hostname", "desktop-" + username);
-      config.setParameter("port", desktopPort);
-      config.setParameter("username", "desktopuser");
-      config.setParameter("password", "vncpassword");
-      configs.put("Developer Desktop: " + username, config);
     }
     return configs;
   }

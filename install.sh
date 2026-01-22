@@ -114,6 +114,11 @@ if [ ! -f "/usr/bin/maven" ]; then
     apt-get install -y maven
 fi
 
+# Make sure rclone (for accessing / mounting cloud storage services such as Google Drive) is installed.
+if [ ! -f "/usr/bin/rclone" ]; then
+    apt-get install -y rclone
+fi
+
 # 18/12/2025: The Pangolin installer seems to make use of the "add-apt-repository" command. This isn't available in Debian 13 (Trixie) as the "software-properties-common" package has been removed from the distribution.
 # What seems to work is installing "software-properties-common" from a .deb file (making sure its dependencies are installed first).
 if [ $debianversion = "trixie" ]; then

@@ -114,6 +114,11 @@ if [ ! -f "/usr/bin/maven" ]; then
     apt-get install -y maven
 fi
 
+# Make sure FUSE (for mounting file systems) is installed.
+if [ ! -f "/usr/bin/fusermount" ]; then
+    apt-get install -y fuse
+fi
+
 # Make sure rclone (for accessing / mounting cloud storage services such as Google Drive) is installed.
 if [ ! -f "/usr/bin/rclone" ]; then
     apt-get install -y rclone

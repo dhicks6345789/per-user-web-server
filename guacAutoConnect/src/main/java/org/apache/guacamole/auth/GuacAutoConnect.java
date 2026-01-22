@@ -54,7 +54,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         String[] details = processLine.split("\\s{2,}");
         if (details[1].startsWith("sansay.co.uk-dockerdesktop")) {
           desktopPorts.add(details[5].split("/")[0]);
-          // If we find a "desktop" image belonging to the current user, set that as the port number to connect to.
+          // If we find a "desktop" image belonging to the current user, extract the VNC port number it is running on and set that as the display number to connect to.
           if (details[6].startsWith("desktop-" + username)) {
             desktopPort = details[5].split("/")[0];
             vncDisplay = Integer.parseInt(desktopPort) - 5900;
@@ -89,6 +89,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
           } catch (Exception e) {
             e.printStackTrace();
           }
+          // Wait for the desktop instance to start up before we do anything more.
           // To do: maybe actually run docker ps -a more rather than just do a simple pause.
           try {
             Thread.sleep(2000);

@@ -81,7 +81,12 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     // Request the Session Manager running on the host to give us the connection details for the user's desktop instance. A new instance for the user is created if one isn't already running.
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8091/connectOrStartSession")).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString("{\"username\":\"" + username + "\"}")).build();
-    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    try {
+      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    } catch (IOException e) {
+      System.err.println("An error occurred while calling the Session Manager service: " + e.getMessage());
+      e.printStackTrace();
+    }
     logger.info("Status Code: " + response.statusCode());
     logger.info("Response: " + response.body());
 

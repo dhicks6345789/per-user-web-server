@@ -32,13 +32,15 @@ func main() {
 
 		fmt.Println("Looking for session for user: ", username)
 
+		// Get a list of existing containers from Docker.
 		containers, err := cli.ContainerList(context.Background(), client.ContainerListOptions{})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		uint16 VNCPort := 0
+		var VNCPort uint16 = 0
+		// Go through the list of containers looking for any where the image used matches our "dockerdesktop" image.
 		for _, item := range containers.Items {
 			if strings.HasPrefix(item.Image, "sansay.co.uk-dockerdesktop-") {
 				if strings.TrimPrefix(item.Image, "sansay.co.uk-dockerdesktop-") == username {

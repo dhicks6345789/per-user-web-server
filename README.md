@@ -1,15 +1,15 @@
 # per-user-web-server
-Configures a Debian installation as a web server, with a sub-directory for each of a set of users. Includes authentication via [Pangolin](https://github.com/fosrl/pangolin).
+Configures a Debian installation as a development and hosting environment for a set of users. Integrates authentication handled via [Pangolin](https://github.com/fosrl/pangolin) with web-based remote desktop access via Guacamole to give each user an individual desktop environment.
 
-Intended by use for situations where you want to let each of a set of users host their own web site, or basic "intranet", but still private within your organisation. Ideal for schools and similar institutions.
+Intended for situations where you want to let each of a set of users develope and host their own web site and/or applications, but still private within your organisation. Ideal for schools and similar institutions.
 
-**Note: as of 7th August 2025, still very much a work-in-progress, not actually working yet. The documentation below is curently more a to-do list than actual features.**
+**Note: as of 22nd January 2026, still a work-in-progress, not actually working yet. The documentation below is curently more a to-do list than actual features.**
 
 ## What Does This Project Do?
-This project provides setup scripts that are intended for people who want a (hopefully) simple mechanism to set up a web server for hosting user websites, complete with user authentication with default access to only your users.
+This project provides setup scripts that are intended for people who want a mechanism to set up a web server for hosting user websites, complete with user authentication with default access to only your users.
 
 ### Prerequisites
-If you're using this project it's assumed you are probably a system administrator of some sort (maybe working for a school or other learning establishment, or maybe a small-scale hosting provider) wanting to set up a web server for your users. This project is not something you'll want to run on your desktop machine, you'll be wanting at least a basic, publicly-accessible server, either hosted on your own hardware or by a cloud hosting provider of some sort. As of writing (July 2025), a suitible hosted virtual machine from a public provider is available for under $5 a month, possibly even for free.
+If you're using this project it's assumed you are probably a system administrator of some sort (maybe working for a school or other learning establishment, or maybe a small-scale hosting provider) wanting to set up a web server for your users. This project is not something you'll want to run on your desktop machine, you'll be wanting at least a basic, publicly-accessible server, either hosted on your own hardware or by a cloud hosting provider of some sort. As of writing (January 2026), a suitible hosted virtual machine from a public provider is available for under $5 a month, possibly even for free.
 
 #### Linux Distribution
 This project has been tested on a Debian 13 "Trixie" server (August 2025) running on (virtual) AMD64 hardware. Other versions of Debian (the previous version 12, "Bookworm", in particular) will probably work okay, as would similar versions of Ubuntu. Other Linux distributions shouldn't be that difficult to adjust for if needed, as should the ARM version of Debian (for the Raspberry Pi and similar hardware - both WebConsole and Pangolin have binaries available for ARM hardware). Adjusting this project directly for a Windows (or MacOS) install might not be possible as Pangolin seems to be a Linux-only project, but using a different tunneling / authentication provider such as [Cloudflare Zero-Trust Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) along with the WebConsole server should work.

@@ -65,7 +65,7 @@ services:
   
   # Guacamole Client - The Guacamole web interface.
   guacamole:
-    image: {{GUACAMOLE_DOCKER_IMAGE}}
+    image: guacamole/guacamole:latest
     container_name: guacamole
     restart: unless-stopped
     ports:

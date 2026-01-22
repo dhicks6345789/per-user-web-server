@@ -21,6 +21,7 @@ func main() {
 
 	// 1. Endpoint to List Containers
 	http.HandleFunc("/containers", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Called container.")
 		containers, err := cli.ContainerList(context.Background(), client.ContainerListOptions{})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -55,6 +56,6 @@ func main() {
 		fmt.Fprintf(w, "Container %s stopped successfully", containerID)
 	})
 
-	fmt.Println("Server starting on :8080...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Println("Server starting on :8091...")
+	log.Fatal(http.ListenAndServe(":8091", nil))
 }

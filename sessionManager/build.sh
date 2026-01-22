@@ -6,8 +6,8 @@ echo Building Session Manager...
 systemctl stop PUWSSessionManager
 
 # Get any required mondules.
-go get github.com/docker/docker/api/types/container
-go get github.com/docker/docker/client
+go get github.com/moby/moby/api/types/container
+go get github.com/moby/moby/client
 
 # Clear out any previously-compile binary.
 rm sessionManager

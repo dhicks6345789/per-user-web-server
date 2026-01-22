@@ -209,7 +209,6 @@ fi
 
 # Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
 if [ $INSTALL_PANGOLIN = true ]; then
-    clear;
     echo Handing over to Pangolin installation script.
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
         echo --- Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select \"no\" when asked if you want to install Gerbil, Pangolin\'s tunneling component. ---

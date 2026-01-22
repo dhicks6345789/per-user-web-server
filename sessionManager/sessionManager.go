@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/client"
 )
 

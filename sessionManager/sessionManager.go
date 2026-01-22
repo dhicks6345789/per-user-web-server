@@ -10,6 +10,7 @@ import (
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
+	"github.com/moby/moby/api/types/container"
 )
 
 func main() {
@@ -68,10 +69,13 @@ func main() {
 			// Start the container
 			// ContainerStartOptions is usually empty unless you are using Checkpoints
 			ctx := context.Background()
-			containerStartResult, containerStartErr := cli.ContainerStart(ctx, containerID, container.StartOptions{})
+			containerStartResult, containerStartErr := cli.ContainerStart(ctx, "desktop-" + username, container.StartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr, http.StatusInternalServerError)
 				return
+			}
+			if (containerStartResult == nil) {
+				fmt.Println("Odd error.")
 			}
 			// "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
 		}

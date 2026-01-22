@@ -78,6 +78,8 @@ services:
       - guacd
     networks:
       - main
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole

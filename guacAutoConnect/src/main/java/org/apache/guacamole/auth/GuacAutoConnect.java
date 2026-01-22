@@ -89,7 +89,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     sessionParameters.put("username", username);
     
     // 2. Convert Map to form-url-encoded string
-    String form = parameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
+    String form = sessionParameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
     logger.info("form: " + form);
     
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://httpbin.org/post")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString(form)).build();

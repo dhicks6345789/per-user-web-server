@@ -47,7 +47,7 @@ func main() {
 		}
 
 		// Stop the container with a default timeout
-		_, err := cli.ContainerStop(context.Background(), containerID, container.StopOptions{})
+		_, err := cli.ContainerStop(context.Background(), containerID, client.ContainerStopOptions{})
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Failed to stop: %v", err), http.StatusInternalServerError)
 			return

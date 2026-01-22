@@ -81,9 +81,6 @@ services:
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
-      # Give the "guacamole" container access to the host Docker instance, allowing it to manage / create its "sibling" containers.
-      - /usr/bin/docker:/usr/bin/docker
-      - /var/run/docker.sock:/var/run/docker.sock
 
   # Docker Desktop - a Linux desktop (Xfce) environment with TigerVNC for remote desktop access.
   #desktop:

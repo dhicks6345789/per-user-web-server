@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/client"
 )
 
 func main() {

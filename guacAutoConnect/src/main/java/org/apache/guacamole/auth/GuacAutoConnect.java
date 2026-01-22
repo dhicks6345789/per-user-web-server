@@ -92,33 +92,26 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
           }
         }
       }
-      
+
+      // If we don't already have a running "desktop" container associated with the current user, start one.
       if (desktopPort.equals("")) {
-        // If we don't already have a running "desktop" container associated with the current user, start one. First, we need to pick an available port number.
+        // First, we need to pick an available port number.
         for (vncDisplay = 5901; desktopPorts.contains(String.valueOf(vncDisplay)) && vncDisplay <= 5920; vncDisplay = vncDisplay + 1) {
         }
         desktopPort = String.valueOf(vncDisplay);
         vncDisplay = vncDisplay - 5900;
         // If we've run out of available ports, don't start a new instance.
         if (vncDisplay <= 20) {
-          // To do: unmount or re-use any existing user mount, make suire we don't double-up.
+          // To do: unmount or re-use any existing user mount, make sure we don't double-up.
+
+          // Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
+          String[] rcloneMountResult = runCommand("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&");
+          logger.info(rcloneMountResult);
+          
           logger.info("Starting a new desktop instance for user " + username + " on port " + desktopPort);
           String[] dockerRunResult = runCommand("sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
+          logger.info(dockerRunResult);
           
-          
-          // rclone mount gdrive: /mnt/d.hicks --allow-other --vfs-cache-mode writes --drive-impersonate d.hicks@knightsbridgeschool.com
-          processBuilder = new ProcessBuilder();
-          
-          try {
-            Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            dockerRunProcessExitCode = process.waitFor();
-            while ((processLine = reader.readLine()) != null) {
-              logger.info(processLine);
-            }
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
           // Wait for the desktop instance to start up before we do anything more.
           // To do: maybe actually run docker ps -a more rather than just do a simple pause.
           try {
@@ -131,8 +124,8 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
           logger.info("Desktop instances limit reached, unable to start new desktop instance for user " + username);
         }
       }
+    }
     
-
     // Create a new map of Guacamole configurations to return. If we couldn't find / create a desktop instance to connect to, this will stay empty and result in an error for the user.
     Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
     

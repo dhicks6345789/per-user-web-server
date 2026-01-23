@@ -13,6 +13,7 @@ import (
 	"github.com/moby/moby/client"
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
+	"github.com/docker/go-connections/nat"
 )
 
 func main() {
@@ -87,9 +88,10 @@ func main() {
 			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
 			// "sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay)
 			ctx := context.Background()
+			exposedPort := nat.NewPort("tcp", strconv.Itoa(int(VNCPort)))
 			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 				Config: &container.Config{
-					ExposedPorts: network.PortSet{strconv.Itoa(int(VNCPort)) + "/tcp":{}},
+					ExposedPorts: network.PortSet{exposedPort:{}},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", "vncpassword", strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},

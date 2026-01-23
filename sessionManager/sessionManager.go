@@ -89,7 +89,7 @@ func main() {
 			ctx := context.Background()
 			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 				Config: &container.Config{
-					ExposedPorts: network.PortSet(VNCPort),
+					ExposedPorts: network.PortSet{strconv.Itoa(int(VNCPort)) + "/tcp":{}},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", "vncpassword", strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},

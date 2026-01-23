@@ -78,7 +78,7 @@ func main() {
 					Cmd: []string{"echo", "hello world"},
 					Tty: false,
 				},
-				Image: "sansay.co.uk-desktop",
+				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
 			})
 			if containerCreateErr != nil {
 				http.Error(w, "Error creating container for user " + username + ", " + containerCreateErr.Error(), http.StatusInternalServerError)

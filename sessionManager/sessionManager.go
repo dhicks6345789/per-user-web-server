@@ -71,15 +71,26 @@ func main() {
 				http.Error(w, "No free sessions.", http.StatusInternalServerError)
 				return
 			}
-			// Start the container
-			// ContainerStartOptions is usually empty unless you are using Checkpoints
+			
 			ctx := context.Background()
-			// containerStartResult, = 
-			_, containerStartErr := cli.ContainerStart(ctx, "desktop-" + username, client.ContainerStartOptions{})
+			// Create the container
+			resp, containerCreateErr := cli.ContainerCreate(ctx, &container.Config{
+				Image: "sansay.co.uk.desktop",
+				Cmd:   []string{"echo", "Hello from Moby!"},
+				Tty:   false,
+
+			}, nil, nil, nil, "")
+			if containerCreateErr != nil {
+				panic(containerCreateErr)
+			}
+			
+			// Start the container
+			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
+			
 			// "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
 		}
 		

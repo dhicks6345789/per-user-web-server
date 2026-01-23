@@ -91,7 +91,6 @@ func main() {
 			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 				Config: &container.Config{
 					ExposedPorts: network.PortSet{exposedPort:{}},
-					--network", "pangolin_main"
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", "vncpassword", strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},

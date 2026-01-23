@@ -73,15 +73,16 @@ func main() {
 			}
 			
 			ctx := context.Background()
-			// Create the container
-			resp, containerCreateErr := cli.ContainerCreate(ctx, &container.Config{
-				Image: "sansay.co.uk.desktop",
-				Cmd:   []string{"echo", "Hello from Moby!"},
-				Tty:   false,
-
-			}, nil, nil, nil, "")
+			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
+				Config: &container.Config{
+					Cmd: []string{"echo", "hello world"},
+					Tty: false,
+				},
+				Image: "sansay.co.uk-desktop",
+			})
 			if containerCreateErr != nil {
-				panic(containerCreateErr)
+				http.Error(w, "Error creating container for user " + username + ", " + containerCreateErr.Error(), http.StatusInternalServerError)
+				return
 			}
 			
 			// Start the container

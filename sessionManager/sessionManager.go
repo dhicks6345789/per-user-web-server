@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 	"slices"
 	"strings"
 	"strconv"
@@ -115,15 +116,7 @@ func main() {
 			}
 
 			// Wait for the container to be ready.
-			wait := cli.ContainerWait(ctx, resp.ID, client.ContainerWaitOptions{})
-			select {
-				case containerWaitErr := <-wait.Error:
-				if containerWaitErr != nil {
-					http.Error(w, "Error waiting for container to be ready for user " + username + ", " + containerWaitErr.Error(), http.StatusInternalServerError)
-					return
-				}
-				case <-wait.Result:
-			}
+			time.Sleep(2 * time.Second)
 		}
 		
 		w.Header().Set("Content-Type", "application/json")

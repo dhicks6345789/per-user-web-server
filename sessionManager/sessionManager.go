@@ -5,6 +5,7 @@ import (
 	"log"
 	"slices"
 	"strings"
+	"strconv"
 	"net/http"
 	"context"
 
@@ -72,6 +73,8 @@ func main() {
 				http.Error(w, "No free sessions.", http.StatusInternalServerError)
 				return
 			}
+			VNCPort = possibleVNCPort
+			VNCDisplay := VNCPort - 5900
 			
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
@@ -80,7 +83,8 @@ func main() {
 			ctx := context.Background()
 			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 				Config: &container.Config{
-					Cmd: []string{"echo", "hello world"},
+					Hostname: "desktop-" + username,
+					Cmd: []string{"bash", "/home/desktopuser/startup.sh", "vncpassword", strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",

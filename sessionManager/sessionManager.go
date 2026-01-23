@@ -74,7 +74,7 @@ func main() {
 				return
 			}
 			VNCPort = possibleVNCPort
-			VNCDisplay := VNCPort - 5900
+			VNCDisplay := int(VNCPort) - 5900
 			
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.

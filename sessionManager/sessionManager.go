@@ -91,7 +91,7 @@ func main() {
 			}
 			
 			// Start the container.
-			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
+			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, client.ContainerStartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return

@@ -89,10 +89,10 @@ func main() {
 			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 				Config: &container.Config{
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", "vncpassword", strconv.Itoa(VNCDisplay)},
-					Tty: false
+					Tty: false,
 				},
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
-				Name: "desktop-" + username
+				Name: "desktop-" + username,
 			})
 			if containerCreateErr != nil {
 				http.Error(w, "Error creating container for user " + username + ", " + containerCreateErr.Error(), http.StatusInternalServerError)

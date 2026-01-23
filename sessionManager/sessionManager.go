@@ -87,8 +87,7 @@ func main() {
 			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
 			// "sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay)
 			ctx := context.Background()
-			exposedPort := network.ParsePort(VNCPort)
-			// proto unique.Handle[IPProtocol]
+			exposedPort := network.Port{num: VNCPort, network.normalizePortProto("tcp")}
 			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 				Config: &container.Config{
 					ExposedPorts: network.PortSet{exposedPort:{}},

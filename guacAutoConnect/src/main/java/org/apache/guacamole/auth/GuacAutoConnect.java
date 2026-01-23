@@ -1,5 +1,14 @@
+/**
+ * A custom Guacamole authentication provider that automatically connects the given user to a remote desktop instance hosted inside a Docker container.
+ * If a suitible instance matching the username doesn't already exist, one will be created.
+ * This extension assumes something else is handling the actual authentication, and that by the time this code gets called the user is assumed to be valid and authorised.
+ * Designed for use with Pangolin handling authentication and a VNC-enabled Desktop image available in Docker.
+ * Also, designed to communicate (via a simple HTTP API) with a dedicated Session Manager serivce running on the Docker host. This component itself runs inisde a container,
+ * it can't directly create sibling containers, it has to pass the request up to its host for that.
+ */
 package org.apache.guacamole.auth;
 
+// Standard libraries.
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -17,22 +26,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 
+// We're implementing Guacamole's SimpleAuthenticationProvider interface, we need to import some of Guacamole's libraries.
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.auth.simple.SimpleAuthenticationProvider;
 import org.apache.guacamole.net.auth.Credentials;
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
 
+// For parsing JSON strings to objects.
+import org.json.JSONObject;
+
+// For handling logging.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A custom Guacamole authentication provider that automatically connects the given user to a remote desktop instance hosted inside a Docker container.
- * If a suitible instance matching the username doesn't already exist, one will be created.
- * This extension assumes something else is handling the actual authentication, and that by the time this code gets called the user is assumed to be valid and authorised.
- * Designed for use with Pangolin handling authentication and a VNC-enabled Desktop image available in Docker.
- * Also, designed to communicate (via a simple HTTP API) with a dedicated Session Manager serivce running on the Docker host. This component itself runs inisde a container,
- * it can't directly create sibling containers, it has to pass the request up to its host for that.
- */
+// The main class, which Guacamole sees as an Authentication Provider extension.
 public class GuacAutoConnect extends SimpleAuthenticationProvider {
   // Initialize the logger for this class.
   private static final Logger logger = LoggerFactory.getLogger(GuacAutoConnect.class);
@@ -58,7 +65,9 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     try {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
       logger.info("Response: " + response.body());
-      String desktopPort = "5901";
+      JSONObject obj = new JSONObject(response.body());
+      String desktopPort = obj.getString("portNumber");
+      String VNCPassword = obj.getString("password");
       
       if (desktopPort.equals("")) {
         logger.info("Problem finding / starting desktop instance for user " + username);
@@ -72,8 +81,8 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         config.setProtocol("vnc");
         config.setParameter("hostname", "desktop-" + username);
         config.setParameter("port", desktopPort);
-        config.setParameter("username", "desktopuser");
-        config.setParameter("password", "vncpassword");
+        config.setParameter("username", username);
+        config.setParameter("password", VNCPassword);
         configs.put("Developer Desktop: " + username, config);
       }
     } catch (java.io.IOException | java.lang.InterruptedException e) {

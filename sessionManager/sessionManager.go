@@ -96,8 +96,7 @@ func main() {
 				},
 				NetworkingConfig : &network.NetworkingConfig{
 					EndpointsConfig: map[string]*network.EndpointSettings{
-						//networkName: &network.EndpointSettings{},
-						NetworkID: "pangolin_main",
+						"pangolin_main": &network.EndpointSettings{},
 					},
 				},
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",

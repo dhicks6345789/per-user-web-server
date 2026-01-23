@@ -33,5 +33,11 @@
       <version>1.6.0</version>
       <scope>provided</scope>
     </dependency>
+    <!-- JSON Parsing library. -->
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20231013</version>
+    </dependency>
   </dependencies>
 </project>

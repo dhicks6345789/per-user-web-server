@@ -10,6 +10,7 @@ import (
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
+	"github.com/moby/moby/api/types/container"
 )
 
 func main() {
@@ -72,6 +73,10 @@ func main() {
 				return
 			}
 			
+			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
+			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
+			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
+			// "sudo", "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay)
 			ctx := context.Background()
 			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
 				Config: &container.Config{
@@ -85,14 +90,23 @@ func main() {
 				return
 			}
 			
-			// Start the container
+			// Start the container.
 			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
-			
-			// "docker", "run", "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay));
+
+			// Wait for the container to be ready.
+			wait := cli.ContainerWait(ctx, resp.ID, client.ContainerWaitOptions{})
+			select {
+				case containerWaitErr := <-wait.Error:
+				if containerWaitErr != nil {
+					http.Error(w, "Error waiting for container to be ready for user " + username + ", " + containerWaitErr.Error(), http.StatusInternalServerError)
+					return
+				}
+				case <-wait.Result:
+			}
 		}
 		
 		w.Header().Set("Content-Type", "application/json")

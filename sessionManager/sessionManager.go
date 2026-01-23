@@ -64,6 +64,11 @@ func main() {
 
 		// If no existing session found, start one.
 		if VNCPort == 0 {
+			// Start a Docker container - see for example code:
+			// https://docs.docker.com/reference/api/engine/sdk/examples/
+			// And for create options:
+			// https://github.com/moby/moby/blob/master/api/types/container/config.go
+			
 			fmt.Println("Starting session for user: ", username)
 			// First, find an available port number.
 			for possibleVNCPort = 5901; slices.Contains(VNCPorts, possibleVNCPort) && possibleVNCPort <= 5920; possibleVNCPort = possibleVNCPort + 1 {

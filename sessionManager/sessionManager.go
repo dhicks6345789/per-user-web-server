@@ -25,7 +25,13 @@ func main() {
 	// Returns: JSON { portNumber, password }
 	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new desktop session (container).
 	http.HandleFunc("/connectOrStartSession", func(w http.ResponseWriter, r *http.Request) {
-		username := strings.TrimSpace(r.URL.Query().Get("username"))
+		// Parse the HTTP GET/POST request form data.
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "Error parsing form", http.StatusBadRequest)
+			return
+		}
+		// Get any passed variables using FormValue or PostForm.
+		username := strings.TrimSpace(r.FormValue("username"))
 		if username == "" {
 			http.Error(w, "Missing 'username' parameter", http.StatusBadRequest)
 			return

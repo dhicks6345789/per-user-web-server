@@ -12,7 +12,7 @@ import (
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
-	"github.com/moby/moby/pkg/stdcopy"
+	//"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
 )

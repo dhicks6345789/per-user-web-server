@@ -12,6 +12,7 @@ import (
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
+	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
 )
@@ -107,6 +108,29 @@ func main() {
 				http.Error(w, "Error creating container for user " + username + ", " + containerCreateErr.Error(), http.StatusInternalServerError)
 				return
 			}
+			
+			options := container.LogsOptions{
+				ShowStdout: true,
+				ShowStderr: true,
+				Follow:     true, // Set to true to stream logs in real-time
+				Timestamps: true,
+				Tail:       "all",
+			}
+			
+			// Get the reader.
+			reader, err := cli.ContainerLogs(ctx, containerID, options)
+			if err != nil {
+				http.Error(w, "Error getting reader rom container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer reader.Close()
+			
+			// Demultiplex the stream.
+			// stdcopy.StdCopy separates the multiplexed stream back into Stdout and Stderr
+			//_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
+			//if err != nil && err != io.EOF {
+				//panic(err)
+			//}
 			
 			// Start the container.
 			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, client.ContainerStartOptions{})

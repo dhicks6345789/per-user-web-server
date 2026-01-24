@@ -118,7 +118,7 @@ func main() {
 			}
 			
 			// Get the reader.
-			reader, err := cli.ContainerLogs(ctx, containerID, options)
+			reader, err := cli.ContainerLogs(ctx, resp.ID, options)
 			if err != nil {
 				http.Error(w, "Error getting reader rom container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
 				return

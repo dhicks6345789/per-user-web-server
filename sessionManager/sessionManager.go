@@ -141,7 +141,7 @@ func main() {
 			}
 			
 			// Wait for the container to be ready.
-			time.Sleep(20 * time.Second)
+			time.Sleep(8 * time.Second)
 
 			// Read the logs.
 			bodyBytes, err := io.ReadAll(reader)

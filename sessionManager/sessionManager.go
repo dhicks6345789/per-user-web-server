@@ -109,7 +109,7 @@ func main() {
 				return
 			}
 			
-			options := container.LogsOptions{
+			options := ContainerLogsOptions{
 				ShowStdout: true,
 				ShowStderr: true,
 				Follow:     true, // Set to true to stream logs in real-time

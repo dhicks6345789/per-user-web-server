@@ -120,7 +120,7 @@ func main() {
 			// Get the reader.
 			reader, err := cli.ContainerLogs(ctx, resp.ID, options)
 			if err != nil {
-				http.Error(w, "Error getting reader rom container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
+				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
 				return
 			}
 			defer reader.Close()
@@ -138,6 +138,14 @@ func main() {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			bodyBytes, err := io.ReadAll(rc)
+			if err != nil {
+				http.Error(w, "Error reading logs from reader for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			// Convert bytes to string.
+			fmt.Println(string(bodyBytes))
 
 			// Wait for the container to be ready.
 			time.Sleep(2 * time.Second)

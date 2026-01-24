@@ -139,7 +139,11 @@ func main() {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
+			
+			// Wait for the container to be ready.
+			time.Sleep(2 * time.Second)
 
+			// Read the logs.
 			bodyBytes, err := io.ReadAll(reader)
 			if err != nil {
 				http.Error(w, "Error reading logs from reader for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
@@ -147,9 +151,6 @@ func main() {
 			}
 			// Convert bytes to string.
 			fmt.Println(string(bodyBytes))
-
-			// Wait for the container to be ready.
-			time.Sleep(2 * time.Second)
 		}
 		
 		w.Header().Set("Content-Type", "application/json")

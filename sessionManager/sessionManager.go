@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"fmt"
 	"log"
 	"time"
@@ -139,7 +140,7 @@ func main() {
 				return
 			}
 
-			bodyBytes, err := io.ReadAll(rc)
+			bodyBytes, err := io.ReadAll(reader)
 			if err != nil {
 				http.Error(w, "Error reading logs from reader for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return

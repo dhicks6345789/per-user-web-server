@@ -144,7 +144,14 @@ func main() {
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
 			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
-
+			rcloneOut, rcloneErr := exec.Command("rclone", "ls", "drive:").Output()
+			//rcloneRunErr := rcloneCmd.Run()
+			if rcloneErr != nil {
+				http.Error(httpResponse, "Running rclone failed: " + rcloneErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			fmt.Println(rcloneOut)
+			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
 			exposedPort, _ := network.ParsePort(strconv.Itoa(int(VNCPort)) + "/TCP")
@@ -203,9 +210,9 @@ func main() {
 				return
 			}
 		}
-		
+
+		// If we've got to this point, we should have a running "desktop" container with a VNC session started up on a known port and with a known password.
 		httpResponse.Header().Set("Content-Type", "application/json")
-		fmt.Printf("{\"portNumber\":\"%d\", \"password\":\"" + VNCPassword + "\"}", VNCPort)
 		fmt.Fprintf(httpResponse, "{\"portNumber\":\"%d\", \"password\":\"" + VNCPassword + "\"}", VNCPort)
 	})
 

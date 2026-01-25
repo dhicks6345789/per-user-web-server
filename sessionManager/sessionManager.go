@@ -45,7 +45,7 @@ func main() {
 		fmt.Fprintf(newSeedFile, "vncpassword")
 		newSeedFile.Close()
 	} else if seedFileErr != nil {
-		fmt.Println("An error occurred while checking the file: " + seedPath + ", " + seedFileError.Error())
+		fmt.Println("An error occurred while checking the file: " + seedPath + ", " + seedFileErr.Error())
 		return
 	}
 	
@@ -178,7 +178,7 @@ func main() {
 			}
 		}
 		
-		w.Header().Set("Content-Type", "application/json")
+		httpResponse.Header().Set("Content-Type", "application/json")
 		fmt.Printf("{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)
 		fmt.Fprintf(httpResponse, "{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)
 	})

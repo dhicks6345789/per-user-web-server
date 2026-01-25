@@ -120,6 +120,7 @@ func main() {
 			http.Error(httpResponse, "Error generating VNC session password for user " + username + ", " + VNCPasswordErr.Error(), http.StatusInternalServerError)
 			return
 		}
+		VNCPassword = strings.Split(VNCPassword, "$")[5]
 
 		// If no existing session found, start one.
 		if VNCPort == 0 {

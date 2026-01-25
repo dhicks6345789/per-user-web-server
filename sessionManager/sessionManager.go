@@ -134,7 +134,7 @@ func main() {
 			}
 			defer reader.Close()
 
-			io.Copy(os.Stdout, reader)
+			//io.Copy(os.Stdout, reader)
 
 			// Wait for the container to be ready.
 			time.Sleep(2 * time.Second)

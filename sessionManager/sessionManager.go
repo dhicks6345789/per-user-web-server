@@ -123,7 +123,7 @@ func main() {
 			}
 			
 			// Get a reader object to read the container logs so we can check to see when the VNC server has started up.
-			logReader, loagReaderErr := cli.ContainerLogs(containerContext, resp.ID, client.ContainerLogsOptions{ShowStdout:true, ShowStderr:true, Follow:true, Timestamps:true, Tail:"all"})
+			logReader, logReaderErr := cli.ContainerLogs(containerContext, resp.ID, client.ContainerLogsOptions{ShowStdout:true, ShowStderr:true, Follow:true, Timestamps:true, Tail:"all"})
 			if logReaderErr != nil {
 				http.Error(w, "Error getting reader from container, " + err.Error(), http.StatusInternalServerError)
 				return

@@ -135,8 +135,8 @@ func main() {
 			logLine := ""
 			
 			// Read the container's log a line at a time, looping until we see the "Starting VNC server" message.
-			// Note that, unless the container terminates early due to some error, logsScanner.Scan() should always return true.
-			for logsSanner.Scan() && !strings.Contains(line, "Starting VNC server") {
+			// Note that, unless the container terminates early due to some error, logScanner.Scan() should always return true.
+			for logSanner.Scan() && !strings.Contains(line, "Starting VNC server") {
 				logLine = logScanner.Text()
 				fmt.Println(logLine)
 				time.Sleep(1 * time.Second)

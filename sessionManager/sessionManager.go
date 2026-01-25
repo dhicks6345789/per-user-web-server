@@ -28,7 +28,7 @@ func main() {
 	// That seed value is a simple string, stored in a text file at /etc/puws/seed.txt. If that path doesn't already exist, we create it now.
 	seedPath := "/etc/puws/seed.txt"
 	seedDir := filepath.Dir(seedPath)
-	seedDirErr := os.MkdirAll(dir, 0755)
+	seedDirErr := os.MkdirAll(seedDir, 0755)
 	if seedDirErr != nil {
 		fmt.Println("Error creating directories: " + seedDirErr.Error())
 		return

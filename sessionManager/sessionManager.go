@@ -13,7 +13,7 @@ import (
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
-	//"github.com/moby/moby/pkg/stdcopy"
+	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
 )
@@ -118,14 +118,6 @@ func main() {
 				Tail:       "all",
 			}
 			
-			// Get the reader.
-			reader, err := cli.ContainerLogs(ctx, resp.ID, options)
-			if err != nil {
-				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
-				return
-			}
-			defer reader.Close()
-			
 			// Demultiplex the stream.
 			// stdcopy.StdCopy separates the multiplexed stream back into Stdout and Stderr
 			//_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
@@ -137,6 +129,22 @@ func main() {
 			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, client.ContainerStartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// Get the reader.
+			reader, err := cli.ContainerLogs(ctx, resp.ID, options)
+			if err != nil {
+				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer reader.Close()
+
+			// Handle the multiplexed stream (demuxing stdout and stderr)
+			// This helper copies the 'out' reader to os.Stdout and os.Stderr
+			_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
+			if err != nil && err != io.EOF {
+				http.Error(w, "Error reading two logs from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
 				return
 			}
 			

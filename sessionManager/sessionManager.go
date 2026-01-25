@@ -61,6 +61,12 @@ func main() {
 		return
 	}
 	
+	randomSeed, randomSeedErr := os.ReadFile(seedPath)
+    if randomSeedErr != nil {
+		fmt.Println("Error reading random seed value from file: " + seedPath + ", " + randomSeedErr.Error())
+        return
+    }
+	
 	// Initialize the Docker client. It automatically looks for the Docker socket (unix:///var/run/docker.sock).
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -127,6 +133,14 @@ func main() {
 			VNCPort = possibleVNCPort
 			VNCDisplay := int(VNCPort) - 5900
 
+			// Generate a unique password for this session, a hash 
+			VNCPassword, VNCPasswordErr := argon2id.CreateHash(string(randomSeed)+username+string(VNCDisplay), argon2id.DefaultParams)
+			
+			if VNCPasswordErr != nil {
+				http.Error(httpResponse, "Error generating VNC session password for user " + username + ", " + VNCPasswordErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
 			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
@@ -138,7 +152,7 @@ func main() {
 				Config: &container.Config{
 					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
-					Cmd: []string{"bash", "/home/desktopuser/startup.sh", "vncpassword", strconv.Itoa(VNCDisplay)},
+					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
 				NetworkingConfig : &network.NetworkingConfig{
@@ -191,8 +205,8 @@ func main() {
 		}
 		
 		httpResponse.Header().Set("Content-Type", "application/json")
-		fmt.Printf("{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)
-		fmt.Fprintf(httpResponse, "{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)
+		fmt.Printf("{\"portNumber\":\"%d\", \"password\":\"" + VNCPassword + "\"}", VNCPort)
+		fmt.Fprintf(httpResponse, "{\"portNumber\":\"%d\", \"password\":\"" + VNCPassword + "\"}", VNCPort)
 	})
 
 	fmt.Println("Server starting on :8091...")

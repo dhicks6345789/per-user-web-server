@@ -147,6 +147,8 @@ func main() {
 			// Convert bytes to string.
 			fmt.Println(string(bodyBytes))
 		}
+
+		fmt.Println("Returning data.")
 		
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)

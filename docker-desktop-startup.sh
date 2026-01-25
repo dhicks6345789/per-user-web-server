@@ -6,3 +6,5 @@ mkdir -p /home/desktopuser/.vnc && echo "vncpassword" | vncpasswd -f > /home/des
 
 # Start TigerVNC.
 vncserver -fg -localhost no -geometry 1280x720 :1
+
+echo "Desktop started."

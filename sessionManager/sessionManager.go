@@ -145,7 +145,7 @@ func main() {
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
 			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
-			rcloneOut, rcloneErr := exec.Command("rclone", "ls", "gdrive:").Output()
+			rcloneOut, rcloneErr := exec.Command("rclone", "ls", "gdrive:", "--drive-impersonate", username + "@knightsbridgeschool.com").Output()
 			//rcloneRunErr := rcloneCmd.Run()
 			if rcloneErr != nil {
 				http.Error(httpResponse, "Running rclone failed: " + rcloneErr.Error(), http.StatusInternalServerError)

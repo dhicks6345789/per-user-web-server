@@ -83,9 +83,9 @@ func main() {
 			}
 			VNCPort = possibleVNCPort
 			VNCDisplay := int(VNCPort) - 5900
-			
-			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
+
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
+			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
 			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
 
 			// Create the container that holds the user's desktop session.
@@ -136,7 +136,7 @@ func main() {
 			
 			// Read the container's log a line at a time, looping until we see the "Starting VNC server" message.
 			// Note that, unless the container terminates early due to some error, logScanner.Scan() should always return true.
-			for logSanner.Scan() && !strings.Contains(line, "Starting VNC server") {
+			for logScanner.Scan() && !strings.Contains(line, "Starting VNC server") {
 				logLine = logScanner.Text()
 				fmt.Println(logLine)
 				time.Sleep(1 * time.Second)

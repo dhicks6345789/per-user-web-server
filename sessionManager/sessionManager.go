@@ -1,9 +1,9 @@
 package main
 
 import (
-	"io"
+	//"io"
 	"bufio"
-	"os"
+	//"os"
 	"fmt"
 	"log"
 	"time"

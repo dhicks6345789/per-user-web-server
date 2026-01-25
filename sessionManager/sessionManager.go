@@ -115,25 +115,23 @@ func main() {
 				return
 			}
 
-			// Start the newly-create container.
+			// Start the newly-create container, report any errors.
 			_, containerStartErr := cli.ContainerStart(containerContext, resp.ID, client.ContainerStartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			
-			options := client.ContainerLogsOptions{
-				ShowStdout: true,
-				ShowStderr: true,
-				Follow:     true, // Set to true to stream logs in real-time.
-				Timestamps: true,
-				Tail:       "all",
-			}
-			
-			
+			//containerLogsOptions := client.ContainerLogsOptions{
+				//ShowStdout: true,
+				//ShowStderr: true,
+				//Follow:     true, // Set to true to stream logs in real-time.
+				//Timestamps: true,
+				//Tail:       "all",
+			//}
 			
 			// Get the reader.
-			reader, err := cli.ContainerLogs(containerContext, resp.ID, options)
+			reader, err := cli.ContainerLogs(containerContext, resp.ID, client.ContainerLogsOptions{ShowStdout: true})
 			if err != nil {
 				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
 				return

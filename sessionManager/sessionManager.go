@@ -166,7 +166,7 @@ func main() {
 			
 			fmt.Println("Got some data.")
 			// Convert bytes to string.
-			fmt.Println(string(bodyBytes))
+			//fmt.Println(string(bodyBytes))
 			fmt.Println("Done gotting some data.")
 		}
 

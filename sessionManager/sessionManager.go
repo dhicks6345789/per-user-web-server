@@ -130,19 +130,17 @@ func main() {
 			}
 			defer logReader.Close()
 			
-			// Create a new buffered scanner object se we can read the container logs a line at a time.
+			// Create a new buffered scanner object se we can read the container logs a line at a time, looping until we see the "Starting VNC server" message.
 			logScanner := bufio.NewScanner(logReader)
 			logLine := ""
-			
-			// Read the container's log a line at a time, looping until we see the "Starting VNC server" message.
 			// Note that, unless the container terminates early due to some error, logScanner.Scan() should always return true.
-			for logScanner.Scan() && !strings.Contains(line, "Starting VNC server") {
+			for logScanner.Scan() && !strings.Contains(logLine, "Starting VNC server") {
 				logLine = logScanner.Text()
 				fmt.Println(logLine)
 				time.Sleep(1 * time.Second)
 			}
 			
-			// Report any errors during the scan process.
+			// Report any errors during the log reading process.
 			if logScannerErr := logScanner.Err(); logScannerErr != nil {
 				http.Error(w, "Error getting reader from container, " + logScannerErr.Error(), http.StatusInternalServerError)
 				return

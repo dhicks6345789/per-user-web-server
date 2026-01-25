@@ -14,7 +14,12 @@ import (
 	"strconv"
 	"net/http"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"path/filepath"
+
+	// The Argon2 hashing library, used to produce passwords for VNC sessions.
+	"github.com/alexedwards/argon2id"
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
@@ -42,7 +47,14 @@ func main() {
 			fmt.Println("Failed to create file: " + seedPath + ", " + seedFileCreateErr.Error())
 			return
 		}
-		fmt.Fprintf(newSeedFile, "vncpassword")
+		// Generate a random 32-character hexadecimal string...
+		seedBytes := make([]byte, 16)
+		if _, seedBytesErr := rand.Read(seedBytes); seedBytesErr != nil {
+			fmt.Println("Failed to generate random seed file: " + seedPath + ", " + seedBytesErr.Error())
+			return
+		}
+		// ...and write it to the seed file.
+		fmt.Fprintf(newSeedFile, hex.EncodeToString(seedBytes))
 		newSeedFile.Close()
 	} else if seedFileErr != nil {
 		fmt.Println("An error occurred while checking the file: " + seedPath + ", " + seedFileErr.Error())

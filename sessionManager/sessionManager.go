@@ -67,13 +67,13 @@ func main() {
 
 		// If no existing session found, start one.
 		if VNCPort == 0 {
-			// Start a Docker container - see for example code:
+			// Start an instance of our "desktop" Docker container - see for example code:
 			// https://docs.docker.com/reference/api/engine/sdk/examples/
 			// And for create options:
 			// https://github.com/moby/moby/blob/master/api/types/container/config.go
+			fmt.Println("Starting desktop session for user: ", username)
 			
-			fmt.Println("Starting session for user: ", username)
-			// First, find an available port number.
+			// First, find an available VNC port number.
 			for possibleVNCPort = 5901; slices.Contains(VNCPorts, possibleVNCPort) && possibleVNCPort <= 5920; possibleVNCPort = possibleVNCPort + 1 {
 			}
 			// If no free port found, return an error.
@@ -87,76 +87,74 @@ func main() {
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
 			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
-			// docker run "--detach", "--name", "desktop-" + username, "--expose", desktopPort, "--network", "pangolin_main", "sansay.co.uk-dockerdesktop:0.1-beta.3", "bash", "/home/desktopuser/startup.sh", "bananas", String.valueOf(vncDisplay)
-			ctx := context.Background()
+
+			// Create the container that holds the user's desktop session.
+			containerContext := context.Background()
 			exposedPort, _ := network.ParsePort(strconv.Itoa(int(VNCPort)) + "/TCP")
-			resp, containerCreateErr := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
+			resp, containerCreateErr := cli.ContainerCreate(containerContext, client.ContainerCreateOptions{
 				Config: &container.Config{
+					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", "vncpassword", strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
 				NetworkingConfig : &network.NetworkingConfig{
+					// Join the container to the main network group so the Guacamole gateway can see the VNC instance.
 					EndpointsConfig: map[string]*network.EndpointSettings{
 						"pangolin_main": &network.EndpointSettings{},
 					},
 				},
+				// We use our own container image.
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
+				// Use a consistant name we can use later for management.
 				Name: "desktop-" + username,
 			})
+			// Check the container create process worked okay.
 			if containerCreateErr != nil {
 				http.Error(w, "Error creating container for user " + username + ", " + containerCreateErr.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// Start the newly-create container.
+			_, containerStartErr := cli.ContainerStart(containerContext, resp.ID, client.ContainerStartOptions{})
+			if containerStartErr != nil {
+				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			
 			options := client.ContainerLogsOptions{
 				ShowStdout: true,
 				ShowStderr: true,
-				Follow:     true, // Set to true to stream logs in real-time
+				Follow:     true, // Set to true to stream logs in real-time.
 				Timestamps: true,
 				Tail:       "all",
 			}
 			
-			// Start the container.
-			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, client.ContainerStartOptions{})
-			if containerStartErr != nil {
-				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
-				return
-			}
+			
 			
 			// Get the reader.
-			reader, err := cli.ContainerLogs(ctx, resp.ID, options)
+			reader, err := cli.ContainerLogs(containerContext, resp.ID, options)
 			if err != nil {
 				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
 				return
 			}
 			defer reader.Close()
-
-			// Wait for the container to be ready.
-			time.Sleep(2 * time.Second)
 			
 			// Create a new scanner
-			scanner := bufio.NewScanner(reader)
-			
-			// Scan() returns true as long as there is another token (line)
+			scanner := bufio.NewScanner(reader)			
 			line := ""
+			// Scan() returns true as long as there is another token (line)
 			for scanner.Scan() && !strings.Contains(line, "Starting VNC server") {
 				line = scanner.Text() // Get the current line as a string.
 				fmt.Println(line)
+				time.Sleep(1 * time.Second)
 			}
 			
 			// Check for errors during the scan process
 			if err := scanner.Err(); err != nil {
 				log.Fatal(err)
 			}
-			
-			fmt.Println("Got some data.")
-			// Convert bytes to string.
-			//fmt.Println(string(bodyBytes))
-			fmt.Println("Done gotting some data.")
 		}
-
-		fmt.Println("Returning data.")
 		
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)

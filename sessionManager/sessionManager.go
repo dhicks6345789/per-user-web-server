@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"time"
+	"bufio"
 	"slices"
 	"strings"
 	"strconv"
@@ -122,39 +122,35 @@ func main() {
 				return
 			}
 			
-			//containerLogsOptions := client.ContainerLogsOptions{
-				//ShowStdout: true,
-				//ShowStderr: true,
-				//Follow:     true, // Set to true to stream logs in real-time.
-				//Timestamps: true,
-				//Tail:       "all",
-			//}
-			
-			// Get the reader.
-			reader, err := cli.ContainerLogs(containerContext, resp.ID, client.ContainerLogsOptions{ShowStdout: true})
-			if err != nil {
-				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
+			// Get a reader object to read the container logs so we can check to see when the VNC server has started up.
+			logReader, loagReaderErr := cli.ContainerLogs(containerContext, resp.ID, client.ContainerLogsOptions{ShowStdout:true, ShowStderr:true, Follow:true, Timestamps:true, Tail:"all"})
+			if logReaderErr != nil {
+				http.Error(w, "Error getting reader from container, " + err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer reader.Close()
+			defer logReader.Close()
 			
-			// Create a new scanner
-			scanner := bufio.NewScanner(reader)			
-			line := ""
-			// Scan() returns true as long as there is another token (line)
-			for scanner.Scan() && !strings.Contains(line, "Starting VNC server") {
-				line = scanner.Text() // Get the current line as a string.
-				fmt.Println(line)
+			// Create a new buffered scanner object se we can read the container logs a line at a time.
+			logScanner := bufio.NewScanner(logReader)
+			logLine := ""
+			
+			// Read the container's log a line at a time, looping until we see the "Starting VNC server" message.
+			// Note that, unless the container terminates early due to some error, logsScanner.Scan() should always return true.
+			for logsSanner.Scan() && !strings.Contains(line, "Starting VNC server") {
+				logLine = logScanner.Text()
+				fmt.Println(logLine)
 				time.Sleep(1 * time.Second)
 			}
 			
-			// Check for errors during the scan process
-			if err := scanner.Err(); err != nil {
-				log.Fatal(err)
+			// Report any errors during the scan process.
+			if logScannerErr := logScanner.Err(); logScannerErr != nil {
+				http.Error(w, "Error getting reader from container, " + logScannerErr.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
 		
 		w.Header().Set("Content-Type", "application/json")
+		fmt.Printf("{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)
 		fmt.Fprintf(w, "{\"portNumber\":\"%d\", \"password\":\"vncpassword\"}", VNCPort)
 	})
 

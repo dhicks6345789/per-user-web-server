@@ -144,8 +144,10 @@ func main() {
 				http.Error(w, "Error reading logs from reader for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
+			fmt.Println("Got some data.")
 			// Convert bytes to string.
 			fmt.Println(string(bodyBytes))
+			fmt.Println("Done gotting some data.")
 		}
 
 		fmt.Println("Returning data.")

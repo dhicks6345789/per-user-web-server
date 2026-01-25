@@ -7,7 +7,6 @@ systemctl stop PUWSSessionManager
 
 # Get any required Go mondules.
 go get github.com/moby/moby/client
-go get github.com/moby/moby/pkg/stdcopy
 go get github.com/moby/moby/api/types/container
 
 # Clear out any previously-compile binary.

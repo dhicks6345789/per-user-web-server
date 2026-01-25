@@ -5,9 +5,10 @@ echo Building Session Manager...
 # Stop any existing running service.
 systemctl stop PUWSSessionManager
 
-# Get any required mondules.
-go get github.com/moby/moby/api/types/container
+# Get any required Go mondules.
 go get github.com/moby/moby/client
+go get github.com/moby/moby/pkg/stdcopy
+go get github.com/moby/moby/api/types/container
 
 # Clear out any previously-compile binary.
 rm sessionManager

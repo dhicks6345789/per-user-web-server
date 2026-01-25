@@ -39,7 +39,7 @@ func main() {
 	if os.IsNotExist(seedFileErr) {
 		newSeedFile, seedFileCreateErr := os.Create(seedPath)
 		if seedFileCreateErr != nil {
-			fmt.Println("Failed to create file: " + seedPath + ", " + seedFileCreateError.Error())
+			fmt.Println("Failed to create file: " + seedPath + ", " + seedFileCreateErr.Error())
 			return
 		}
 		fmt.Fprintf(newSeedFile, "vncpassword")

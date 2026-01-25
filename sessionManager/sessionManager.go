@@ -114,6 +114,13 @@ func main() {
 			}
 		}
 
+		// Generate a unique password for this session, a hash of the random seed and the username.
+		VNCPassword, VNCPasswordErr := argon2id.CreateHash(string(randomSeed)+username, argon2id.DefaultParams)
+		if VNCPasswordErr != nil {
+			http.Error(httpResponse, "Error generating VNC session password for user " + username + ", " + VNCPasswordErr.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		// If no existing session found, start one.
 		if VNCPort == 0 {
 			// Start an instance of our "desktop" Docker container - see for example code:
@@ -132,14 +139,6 @@ func main() {
 			}
 			VNCPort = possibleVNCPort
 			VNCDisplay := int(VNCPort) - 5900
-
-			// Generate a unique password for this session, a hash 
-			VNCPassword, VNCPasswordErr := argon2id.CreateHash(string(randomSeed)+username+string(VNCDisplay), argon2id.DefaultParams)
-			
-			if VNCPasswordErr != nil {
-				http.Error(httpResponse, "Error generating VNC session password for user " + username + ", " + VNCPasswordErr.Error(), http.StatusInternalServerError)
-				return
-			}
 			
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.

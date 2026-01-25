@@ -1,9 +1,7 @@
 package main
 
 import (
-	//"io"
 	"bufio"
-	//"os"
 	"fmt"
 	"log"
 	"time"
@@ -134,8 +132,6 @@ func main() {
 			}
 			defer reader.Close()
 
-			//io.Copy(os.Stdout, reader)
-
 			// Wait for the container to be ready.
 			time.Sleep(2 * time.Second)
 			
@@ -143,9 +139,9 @@ func main() {
 			scanner := bufio.NewScanner(reader)
 			
 			// Scan() returns true as long as there is another token (line)
-			for scanner.Scan() {
-				line := scanner.Text() // Get the current line as a string
-				fmt.Println("Line!:")
+			line := ""
+			for scanner.Scan() && !strings.Contains(line, "Starting VNC server") {
+				line = scanner.Text() // Get the current line as a string.
 				fmt.Println(line)
 			}
 			
@@ -153,16 +149,6 @@ func main() {
 			if err := scanner.Err(); err != nil {
 				log.Fatal(err)
 			}
-
-
-			
-
-			// Read the logs.
-			//bodyBytes, err := io.ReadAll(reader)
-			//if err != nil {
-				//http.Error(w, "Error reading logs from reader for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
-				//return
-			//}
 			
 			fmt.Println("Got some data.")
 			// Convert bytes to string.

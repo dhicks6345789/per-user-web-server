@@ -131,7 +131,7 @@ func main() {
 				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
 				return
 			}
-			// defer reader.Close()
+			defer reader.Close()
 
 			io.Copy(os.Stdout, reader)
 
@@ -146,8 +146,6 @@ func main() {
 			}
 			// Convert bytes to string.
 			fmt.Println(string(bodyBytes))
-
-			reader.Close()
 		}
 		
 		w.Header().Set("Content-Type", "application/json")

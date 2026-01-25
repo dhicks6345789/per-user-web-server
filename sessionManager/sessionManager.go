@@ -117,38 +117,25 @@ func main() {
 				Tail:       "all",
 			}
 			
-			// Demultiplex the stream.
-			// stdcopy.StdCopy separates the multiplexed stream back into Stdout and Stderr
-			//_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
-			//if err != nil && err != io.EOF {
-				//panic(err)
-			//}
-			
 			// Start the container.
 			_, containerStartErr := cli.ContainerStart(ctx, resp.ID, client.ContainerStartOptions{})
 			if containerStartErr != nil {
 				http.Error(w, "Error starting container for user " + username + ", " + containerStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
-
+			
 			// Get the reader.
 			reader, err := cli.ContainerLogs(ctx, resp.ID, options)
 			if err != nil {
 				http.Error(w, "Error getting reader from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
 				return
 			}
-			defer reader.Close()
+			#defer reader.Close()
 
-			// Handle the multiplexed stream (demuxing stdout and stderr)
-			// This helper copies the 'out' reader to os.Stdout and os.Stderr
-			_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
-			if err != nil && err != io.EOF {
-				http.Error(w, "Error reading two logs from container for user " + username + ", " + err.Error(), http.StatusInternalServerError)
-				return
-			}
-			
+			io.Copy(os.Stdout, reader)
+
 			// Wait for the container to be ready.
-			time.Sleep(8 * time.Second)
+			time.Sleep(2 * time.Second)
 
 			// Read the logs.
 			bodyBytes, err := io.ReadAll(reader)
@@ -158,6 +145,8 @@ func main() {
 			}
 			// Convert bytes to string.
 			fmt.Println(string(bodyBytes))
+
+			reader.Close()
 		}
 		
 		w.Header().Set("Content-Type", "application/json")

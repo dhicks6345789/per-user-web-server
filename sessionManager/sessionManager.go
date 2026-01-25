@@ -4,6 +4,7 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"log"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"strconv"
 	"net/http"
 	"context"
+	"path/filepath"
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"

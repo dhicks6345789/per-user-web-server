@@ -26,7 +26,7 @@ import (
 	"github.com/moby/moby/client"
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
-	//"github.com/moby/moby/api/types/mount"
+	"github.com/moby/moby/api/types/mount"
 )
 
 func main() {

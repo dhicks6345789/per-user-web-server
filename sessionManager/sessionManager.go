@@ -150,10 +150,7 @@ func main() {
 				Config: &container.Config{
 					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
-					// Define the mount points we will be using inside the container.
-					//Volumes: map[string]struct{}{
-						//"/home/desktopuser/Documents": {},
-					//},
+					// Pass in the VNC password and display number to the custom startup script that runs inside the container.
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},

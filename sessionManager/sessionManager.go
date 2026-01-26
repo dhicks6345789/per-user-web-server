@@ -159,6 +159,14 @@ func main() {
 				Config: &container.Config{
 					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
+					Volumes: []mount.Mount{
+						{
+							Type: mount.TypeBind,
+							Source: "/mnt/" + username, // The host mount point.
+							Target: "/home/desktopuser/Documents", // The container mount point.
+							ReadOnly: false,
+						},
+					},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
@@ -166,14 +174,6 @@ func main() {
 					// Join the container to the main network group so the Guacamole gateway can see the VNC instance.
 					EndpointsConfig: map[string]*network.EndpointSettings{
 						"pangolin_main": &network.EndpointSettings{},
-					},
-				},
-				Mounts: []mount.Mount{
-					{
-						Type: mount.TypeBind,
-						Source: "/mnt/" + username, // The host mount point.
-						Target: "/home/desktopuser/Documents", // The container mount point.
-						ReadOnly: false,
 					},
 				},
 				// We use our own container image.

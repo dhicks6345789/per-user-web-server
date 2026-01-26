@@ -21,7 +21,7 @@ import (
 
 	// The Argon2 hashing library, used to produce passwords for VNC sessions.
 	//"github.com/alexedwards/argon2id"
-	golang.org/x/crypto/argon2
+	"golang.org/x/crypto/argon2"
 
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"

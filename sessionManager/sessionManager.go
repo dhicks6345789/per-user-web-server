@@ -159,11 +159,9 @@ func main() {
 				Config: &container.Config{
 					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
+					// 1. Define the VOLUME inside the container
 					Volumes: map[string]struct{}{
-						"Type": {mount.TypeBind},
-						"Source": {"/mnt/" + username},
-						"Target": {"/home/desktopuser/Documents"},
-						"ReadOnly": {false},
+						"/mnt/" + username: {},
 					},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
@@ -178,6 +176,12 @@ func main() {
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
 				// Use a consistant name we can use later for management.
 				Name: "desktop-" + username,
+				//Volumes: map[string]struct{}{
+						//"Type": {mount.TypeBind},
+						//"Source": {"/mnt/" + username},
+						//"Target": {"/home/desktopuser/Documents"},
+						//"ReadOnly": {false},
+					//},
 			})
 			// Check the container create process worked okay.
 			if containerCreateErr != nil {

@@ -159,7 +159,7 @@ func main() {
 				Config: &container.Config{
 					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
-					Volumes: []mount.Mount{
+					Volumes: []string{
 						{
 							Type: mount.TypeBind,
 							Source: "/mnt/" + username, // The host mount point.

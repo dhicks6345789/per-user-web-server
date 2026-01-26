@@ -5,7 +5,7 @@ package main
 
 import (
 	"os"
-	"os/exec"
+	//"os/exec"
 	"fmt"
 	"log"
 	"time"

@@ -118,7 +118,7 @@ func main() {
 
 		// Generate a unique password for this session, a hash of the random seed and the username.
 		// Generate the Argon2-hashed password. Parameters are: time (in iterations), memory (in bytes), threads, key length.
-		VNCPassword := string(argon2.IDKey([]byte(username), randomSeed, uint32(1), uint32(64*1024), uint8(4), uint32(32)))
+		VNCPassword := hex.EncodeToString(argon2.IDKey([]byte(username), randomSeed, 1, 64*1024, 4, 32))
 		fmt.Println(VNCPassword)
 
 		// If no existing session found, start one.

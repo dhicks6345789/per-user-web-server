@@ -160,9 +160,9 @@ func main() {
 					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
 					// 1. Define the VOLUME inside the container
-					Volumes: map[string]struct{}{
-						"/home/desktopuser/Documents": {},
-					},
+					//Volumes: map[string]struct{}{
+						//"/home/desktopuser/Documents": {},
+					//},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
@@ -175,29 +175,17 @@ func main() {
 				HostConfig: &container.HostConfig{
 					Mounts: []mount.Mount{
 						mount.Mount{
-							Type:     mount.TypeBind, // Use TypeVolume for Docker-managed volumes.
-							Source:   "/mnt/" + username, // Absolute path on the host machine.
-							Target:   "/home/desktopuser/Documents", // Path inside the container.
+							Type: mount.TypeBind, // Use TypeVolume for Docker-managed volumes.
+							Source: "/mnt/" + username, // Absolute path on the host machine.
+							Target: "/home/desktopuser/Documents", // Path inside the container.
 							ReadOnly: false,
 						},
 					},
 				},
-				//HostConfig: &container.HostConfig{
-					// 2. Bind the host path to that container path.
-					//Binds: []string{
-						//"/mnt/d.hicks:/home/desktopuser/Documents",
-					//},
-				//},
 				// We use our own container image.
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
 				// Use a consistant name we can use later for management.
 				Name: "desktop-" + username,
-				//Volumes: map[string]struct{}{
-						//"Type": {mount.TypeBind},
-						//"Source": {"/mnt/" + username},
-						//"Target": {"/home/desktopuser/Documents"},
-						//"ReadOnly": {false},
-					//},
 			})
 			// Check the container create process worked okay.
 			if containerCreateErr != nil {

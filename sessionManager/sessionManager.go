@@ -165,7 +165,7 @@ func main() {
 					Mounts: []mount.Mount{
 						mount.Mount{
 							Type: mount.TypeVolume,
-							Source: "/mnt/" + username,
+							//Source: "/mnt/" + username,
 							Target: "/home/desktopuser/Documents",
 							VolumeOptions: &mount.VolumeOptions{
 								DriverConfig: &mount.Driver{

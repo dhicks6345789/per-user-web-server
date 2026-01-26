@@ -145,12 +145,12 @@ func main() {
 			
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
-			rcloneCmd := exec.Command("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com")
-			rcloneErr := rcloneCmd.Start()
-			if rcloneErr != nil {
-				http.Error(httpResponse, "Running rclone failed: " + rcloneErr.Error(), http.StatusInternalServerError)
-				return
-			}
+			//rcloneCmd := exec.Command("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com")
+			//rcloneErr := rcloneCmd.Start()
+			//if rcloneErr != nil {
+				//http.Error(httpResponse, "Running rclone failed: " + rcloneErr.Error(), http.StatusInternalServerError)
+				//return
+			//}
 			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
@@ -173,7 +173,7 @@ func main() {
 					},
 				},
 				HostConfig: &container.HostConfig{
-					Mounts: []mount.Mount{
+					/*Mounts: []mount.Mount{
 						mount.Mount{
 							Type: mount.TypeBind, // Use TypeVolume for Docker-managed volumes.
 							Source: "/mnt/" + username, // Absolute path on the host machine.
@@ -183,6 +183,24 @@ func main() {
 								// rslave or rshared allows the container to see 
 								// the mount even if rclone is started AFTER the container.
 								Propagation: mount.PropagationRSlave,
+							},
+						},
+					},*/
+					Mounts: []mount.Mount{
+						mount.Mount{
+							Type: mount.TypeVolume,
+							Source: "/mnt/" + username,
+							Target: "/home/desktopuser/Documents",
+							VolumeOptions: &mount.VolumeOptions{
+								DriverConfig: &mount.Driver{
+									Name: "rclone",
+									Options: map[string]string{
+										"remote": "gdrive:",
+										"allow_other": "true",
+										"vfs-cache-mode": "full",
+										"drive-impersonate": username + "@knightsbridgeschool.com",
+									},
+								},
 							},
 						},
 					},

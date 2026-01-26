@@ -8,7 +8,7 @@ systemctl stop PUWSSessionManager
 # Get any required Go mondules.
 go get github.com/moby/moby/client
 go get github.com/moby/moby/api/types/container
-go get go get golang.org/x/crypto/argon2
+go get golang.org/x/crypto/argon2
 
 # Clear out any previously-compile binary.
 rm sessionManager

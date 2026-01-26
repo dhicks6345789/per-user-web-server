@@ -1,11 +1,11 @@
 /*
-	The session manager for the per-user-web-server (PUWS) project. Sits on the main host server and communicates with / manages Docker containers, in particular the desktop instances of users who are connecting via Guacamole.
+	The session manager for the per-user-web-server (PUWS) project. Sits on the main host server and communicates with / manages Docker containers,
+	in particular the desktop instances of users who are connecting via Guacamole.
 */
 package main
 
 import (
 	"os"
-	//"os/exec"
 	"fmt"
 	"log"
 	"time"
@@ -143,15 +143,6 @@ func main() {
 			VNCPort = possibleVNCPort
 			VNCDisplay := int(VNCPort) - 5900
 			
-			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
-			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
-			//rcloneCmd := exec.Command("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com")
-			//rcloneErr := rcloneCmd.Start()
-			//if rcloneErr != nil {
-				//http.Error(httpResponse, "Running rclone failed: " + rcloneErr.Error(), http.StatusInternalServerError)
-				//return
-			//}
-			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
 			exposedPort, _ := network.ParsePort(strconv.Itoa(int(VNCPort)) + "/TCP")
@@ -160,9 +151,9 @@ func main() {
 					// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
 					ExposedPorts: network.PortSet{exposedPort:{}},
 					// Define the mount points we will be using inside the container.
-					Volumes: map[string]struct{}{
-						"/home/desktopuser/Documents": {},
-					},
+					//Volumes: map[string]struct{}{
+						//"/home/desktopuser/Documents": {},
+					//},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
@@ -173,19 +164,7 @@ func main() {
 					},
 				},
 				HostConfig: &container.HostConfig{
-					/*Mounts: []mount.Mount{
-						mount.Mount{
-							Type: mount.TypeBind, // Use TypeVolume for Docker-managed volumes.
-							Source: "/mnt/" + username, // Absolute path on the host machine.
-							Target: "/home/desktopuser/Documents", // Path inside the container.
-							ReadOnly: false,
-							BindOptions: &mount.BindOptions{
-								// rslave or rshared allows the container to see 
-								// the mount even if rclone is started AFTER the container.
-								Propagation: mount.PropagationRSlave,
-							},
-						},
-					},*/
+					// We use the rclone Docker plugin to mount the user's Google Drive home folder as their "Documents" folder in their new desktop container.
 					Mounts: []mount.Mount{
 						mount.Mount{
 							Type: mount.TypeVolume,

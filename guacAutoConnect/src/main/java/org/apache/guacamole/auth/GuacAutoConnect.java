@@ -3,7 +3,7 @@
  * If a suitible instance matching the username doesn't already exist, one will be created.
  * This extension assumes something else is handling the actual authentication, and that by the time this code gets called the user is assumed to be valid and authorised.
  * Designed for use with Pangolin handling authentication and a VNC-enabled Desktop image available in Docker.
- * Also, designed to communicate (via a simple HTTP API) with a dedicated Session Manager serivce running on the Docker host. This component itself runs inisde a container,
+ * Also, designed to communicate (via a simple HTTP API) with a dedicated Session Manager serivce running on the Docker host. This component itself runs inside a container,
  * it can't directly create sibling containers, it has to pass the request up to its host for that.
  */
 package org.apache.guacamole.auth;
@@ -52,20 +52,24 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
   // This function gets called when a user succesfully logs in.
   @Override public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(Credentials credentials) throws GuacamoleException {
     // Create a new map of Guacamole configurations to return. If we can't find / create a desktop instance to connect to, this will stay empty and result in an error for the user.
-    Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
+    Map<String, GuacamoleConfiguration> guacConfigs = new HashMap<String, GuacamoleConfiguration>();
     
     // Figure out the username of the user who has just logged in.
     String username = credentials.getUsername().split("@")[0];
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
-    logger.info("User " + username + " logged in.");
-    HttpClient client = HttpClient.newHttpClient();
-    HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username)).build();
-    
+    logger.info("User " + username + " connected to Guacamole - contacing Session Manager for session details.");
+
+    // Call the Session Manager service (a basic, self-contained HTTP server written in Go) to tell it the user wants to connect to a VNC desktop instance.
+    // We pass in the username, if there's a free slot available we should get back a VNC port number and password.
+    HttpClient sessionManagerClient = HttpClient.newHttpClient();
+    HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username)).build();
     try {
-      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-      logger.info("Response: " + response.body());
-      JSONObject obj = new JSONObject(response.body());
+      HttpResponse<String> sessionManagerResponse = sessionManagerClient.send(sessionManagerRequest, HttpResponse.BodyHandlers.ofString());
+      logger.info("Session Manager responded: " + sessionManagerResponseesponse.body());
+      
+      // Parse the JSON data returned from the Session Manager. To do: probably best to check for error messages first.
+      JSONObject obj = new JSONObject(sessionManagerResponse.body());
       String desktopPort = obj.getString("portNumber");
       String VNCPassword = obj.getString("password");
       
@@ -75,20 +79,20 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
       
         // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
-        GuacamoleConfiguration config = new GuacamoleConfiguration();
+        GuacamoleConfiguration guacConfig = new GuacamoleConfiguration();
     
         // Set protocol and connection parameters.
-        config.setProtocol("vnc");
-        config.setParameter("hostname", "desktop-" + username);
-        config.setParameter("port", desktopPort);
-        config.setParameter("username", username);
-        config.setParameter("password", VNCPassword);
-        configs.put("Developer Desktop: " + username, config);
+        guacConfig.setProtocol("vnc");
+        guacConfig.setParameter("hostname", "desktop-" + username);
+        guacConfig.setParameter("port", desktopPort);
+        guacConfig.setParameter("username", username);
+        guacConfig.setParameter("password", VNCPassword);
+        guacConfigs.put("Developer Desktop: " + username, config);
       }
     } catch (java.io.IOException | java.lang.InterruptedException e) {
       System.err.println("An error occurred while calling the Session Manager service: " + e.getMessage());
       e.printStackTrace();
     }
-    return configs;
+    return guacConfigs;
   }
 }

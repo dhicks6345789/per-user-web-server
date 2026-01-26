@@ -161,17 +161,23 @@ func main() {
 					ExposedPorts: network.PortSet{exposedPort:{}},
 					// 1. Define the VOLUME inside the container
 					Volumes: map[string]struct{}{
-						"/mnt/" + username: {},
+						/home/desktopuser/Documents: {},
 					},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
-				NetworkingConfig : &network.NetworkingConfig{
+				NetworkingConfig: &network.NetworkingConfig{
 					// Join the container to the main network group so the Guacamole gateway can see the VNC instance.
 					EndpointsConfig: map[string]*network.EndpointSettings{
 						"pangolin_main": &network.EndpointSettings{},
 					},
 				},
+				HostConfig: &container.HostConfig{
+					// 2. Bind the host path to that container path.
+					Binds: []string{
+						"/mnt/" + username:/home/desktopuser/Documents",
+					},
+				}
 				// We use our own container image.
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
 				// Use a consistant name we can use later for management.

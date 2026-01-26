@@ -87,7 +87,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         guacConfig.setParameter("port", desktopPort);
         guacConfig.setParameter("username", username);
         guacConfig.setParameter("password", VNCPassword);
-        guacConfigs.put("Developer Desktop: " + username, config);
+        guacConfigs.put("Developer Desktop: " + username, guacConfig);
       }
     } catch (java.io.IOException | java.lang.InterruptedException e) {
       System.err.println("An error occurred while calling the Session Manager service: " + e.getMessage());

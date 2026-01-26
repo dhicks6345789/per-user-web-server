@@ -66,7 +66,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username)).build();
     try {
       HttpResponse<String> sessionManagerResponse = sessionManagerClient.send(sessionManagerRequest, HttpResponse.BodyHandlers.ofString());
-      logger.info("Session Manager responded: " + sessionManagerResponseesponse.body());
+      logger.info("Session Manager responded: " + sessionManagerResponse.body());
       
       // Parse the JSON data returned from the Session Manager. To do: probably best to check for error messages first.
       JSONObject obj = new JSONObject(sessionManagerResponse.body());

@@ -179,6 +179,11 @@ func main() {
 							Source: "/mnt/" + username, // Absolute path on the host machine.
 							Target: "/home/desktopuser/Documents", // Path inside the container.
 							ReadOnly: false,
+							BindOptions: &mount.BindOptions{
+								// rslave or rshared allows the container to see 
+								// the mount even if rclone is started AFTER the container.
+								Propagation: mount.PropagationRSlave,
+							},
 						},
 					},
 				},

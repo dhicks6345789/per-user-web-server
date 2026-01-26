@@ -171,8 +171,8 @@ func main() {
 				Mounts: []mount.Mount{
 					{
 						Type:   mount.TypeBind,
-						Source: "mnt/" + username", // Absolute path on host.
-						Target: "/home/Documents", // Path inside container
+						Source: "/mnt/" + username", // Absolute path on host.
+						Target: "/home/desktopuser/Documents", // Path inside container.
 						ReadOnly: false,
 					},
 				},

@@ -175,9 +175,9 @@ func main() {
 				HostConfig: &container.HostConfig{
 					Mounts: []mount.Mount{
 						mount.Mount{
-							Type:     mount.TypeBind,      // Use TypeVolume for Docker-managed volumes
-							Source:   "mnt/" + username,    // Absolute path on the host machine
-							Target:   "/home/desktopuser/Documents", // Path inside the container
+							Type:     mount.TypeBind, // Use TypeVolume for Docker-managed volumes.
+							Source:   "/mnt/" + username, // Absolute path on the host machine.
+							Target:   "/home/desktopuser/Documents", // Path inside the container.
 							ReadOnly: false,
 						},
 					},

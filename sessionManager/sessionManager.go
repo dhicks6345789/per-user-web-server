@@ -175,7 +175,7 @@ func main() {
 				HostConfig: &container.HostConfig{
 					// 2. Bind the host path to that container path.
 					Binds: []string{
-						"/mnt/" + username:"/home/desktopuser/Documents",
+						"/mnt/d.hicks":"/home/desktopuser/Documents",
 					},
 				},
 				// We use our own container image.

@@ -144,7 +144,6 @@ func main() {
 			
 			// Mount the user's Google Drive home to /mnt in the container host, ready to be passed to the user's desktop container.
 			// To do: unmount or re-use any existing user mount, make sure we don't double-up.
-			// "rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com", "&"
 			rcloneCmd := exec.Command("rclone", "mount", "gdrive:", "/mnt/" + username, "--allow-other", "--vfs-cache-mode", "writes", "--drive-impersonate", username + "@knightsbridgeschool.com")
 			rcloneErr := rcloneCmd.Start()
 			if rcloneErr != nil {
@@ -166,6 +165,14 @@ func main() {
 					// Join the container to the main network group so the Guacamole gateway can see the VNC instance.
 					EndpointsConfig: map[string]*network.EndpointSettings{
 						"pangolin_main": &network.EndpointSettings{},
+					},
+				},
+				Mounts: []mount.Mount{
+					{
+						Type:   mount.TypeBind,
+						Source: "mnt/" + username", // Absolute path on host.
+						Target: "/home/Documents", // Path inside container
+						ReadOnly: false,
 					},
 				},
 				// We use our own container image.

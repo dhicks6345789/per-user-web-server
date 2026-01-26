@@ -161,7 +161,7 @@ func main() {
 					ExposedPorts: network.PortSet{exposedPort:{}},
 					// 1. Define the VOLUME inside the container
 					Volumes: map[string]struct{}{
-						/home/desktopuser/Documents: {},
+						"/home/desktopuser/Documents": {},
 					},
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,

@@ -177,7 +177,7 @@ func main() {
 					Binds: []string{
 						"/mnt/" + username:"/home/desktopuser/Documents",
 					},
-				}
+				},
 				// We use our own container image.
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
 				// Use a consistant name we can use later for management.

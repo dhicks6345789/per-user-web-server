@@ -31,7 +31,7 @@ import (
 
 func main() {
 	// We want each desktop instance to have a separate, un-guessable VNC password. However, we also want that password to be consistant so we can easily reconnect a user to their session.
-	// Rather than hold session password in memory, we use a hash function to generate a password for each session from the username, port number and a secret seed value.
+	// Rather than hold session passwords in memory, we use a hash function to generate a password for each session from the username and a secret seed value.
 	// That seed value is a simple string, stored in a text file at /etc/puws/seed.txt. If that path doesn't already exist, we create it now.
 	seedPath := "/etc/puws/seed.txt"
 	seedDir := filepath.Dir(seedPath)
@@ -62,7 +62,8 @@ func main() {
 		fmt.Println("An error occurred while checking the file: " + seedPath + ", " + seedFileErr.Error())
 		return
 	}
-	
+
+	// Get the random seed value.
 	randomSeed, randomSeedErr := os.ReadFile(seedPath)
     if randomSeedErr != nil {
 		fmt.Println("Error reading random seed value from file: " + seedPath + ", " + randomSeedErr.Error())
@@ -119,7 +120,6 @@ func main() {
 		// Generate a unique password for this session, a hash of the random seed and the username.
 		// Generate the Argon2-hashed password. Parameters are: time (in iterations), memory (in bytes), threads, key length.
 		VNCPassword := hex.EncodeToString(argon2.IDKey([]byte(username), randomSeed, 1, 64*1024, 4, 32))
-		fmt.Println(VNCPassword)
 
 		// If no existing session found, start one.
 		if VNCPort == 0 {
@@ -222,7 +222,7 @@ func main() {
 
 		// If we've got to this point, we should have a running "desktop" container with a VNC session started up on a known port and with a known password.
 		httpResponse.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(httpResponse, "{\"portNumber\":\"%d\", \"password\":\"" + VNCPassword + "\"}", VNCPort)
+		fmt.Fprintf(httpResponse, "{\"portNumber\":\"" + strconv.Itoa(int(VNCPort)) + "\", \"password\":\"" + VNCPassword + "\"}")
 	})
 
 	fmt.Println("Server starting on :8091...")

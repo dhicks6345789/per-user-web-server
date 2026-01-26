@@ -173,11 +173,21 @@ func main() {
 					},
 				},
 				HostConfig: &container.HostConfig{
-					// 2. Bind the host path to that container path.
-					Binds: []string{
-						"/mnt/d.hicks:/home/desktopuser/Documents",
+					Mounts: []mount.Mount{
+						mount.Mount{
+							Type:     mount.TypeBind,      // Use TypeVolume for Docker-managed volumes
+							Source:   "mnt/" + username,    // Absolute path on the host machine
+							Target:   "/home/desktopuser/Documents", // Path inside the container
+							ReadOnly: false,
+						},
 					},
 				},
+				//HostConfig: &container.HostConfig{
+					// 2. Bind the host path to that container path.
+					//Binds: []string{
+						//"/mnt/d.hicks:/home/desktopuser/Documents",
+					//},
+				//},
 				// We use our own container image.
 				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
 				// Use a consistant name we can use later for management.

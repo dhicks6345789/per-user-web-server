@@ -123,6 +123,11 @@ if [ ! -f "/usr/bin/rclone" ]; then
     apt-get install -y rclone
 fi
 
+# We also install the rclone plugin for Docker, so we can use rclone to mount file systems directly inside containers.
+sudo mkdir -p /var/lib/docker-plugins/rclone/config
+sudo mkdir -p /var/lib/docker-plugins/rclone/cache
+docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
+
 # 18/12/2025: The Pangolin installer seems to make use of the "add-apt-repository" command. This isn't available in Debian 13 (Trixie) as the "software-properties-common" package has been removed from the distribution.
 # What seems to work is installing "software-properties-common" from a .deb file (making sure its dependencies are installed first).
 if [ $debianversion = "trixie" ]; then

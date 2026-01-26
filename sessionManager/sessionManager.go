@@ -77,6 +77,8 @@ func main() {
 	}
 	defer cli.Close()
 
+	// To do: somewhere, add a periodic function that can do things like close sessions that have been disconnected from for a set time.
+	
 	// Endpoint connectOrStartSession - returns a port number and password to connect with VNC.
 	// Usage: POST /connectOrStartSession?username=USERNAME
 	// Returns: JSON { portNumber, password }

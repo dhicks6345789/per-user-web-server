@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 
 	// The Argon2 hashing library, used to produce passwords for VNC sessions.
-	//"github.com/alexedwards/argon2id"
 	"golang.org/x/crypto/argon2"
 
 	// The Docker management library - originally docker/docker, but now called "moby".
@@ -128,13 +127,6 @@ func main() {
 		// Generate the Argon2-hashed password.
 		VNCPassword := argon2.IDKey([]byte(password), randomSeed, time, memory, threads, keyLen)
 		fmt.Println(VNCPassword)
-		
-		//VNCPassword, VNCPasswordErr := argon2id.CreateHash(string(randomSeed)+username, argon2id.DefaultParams)
-		//if VNCPasswordErr != nil {
-			//http.Error(httpResponse, "Error generating VNC session password for user " + username + ", " + VNCPasswordErr.Error(), http.StatusInternalServerError)
-			//return
-		//}
-		//VNCPassword = strings.Split(VNCPassword, "$")[5]
 
 		// If no existing session found, start one.
 		if VNCPort == 0 {

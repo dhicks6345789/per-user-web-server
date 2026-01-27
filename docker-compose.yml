@@ -83,12 +83,13 @@ services:
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
-
-  # Docker Desktop - a Linux desktop (Xfce) environment with TigerVNC for remote desktop access.
-  #desktop:
-    #image: {{DOCKERDESKTOP_DOCKER_IMAGE}}
-    #container_name: desktop
-    #restart: unless-stopped
+  # httpd - the Apache web server.
+  httpd:
+    image: httpd:latest
+    container_name: guacamole
+    restart: unless-stopped
+    ports:
+      - 8081:80
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:
   main:

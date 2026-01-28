@@ -146,7 +146,7 @@ func main() {
 			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their desktop image they have the appropriate ownership and permissions.
 			userIDCmdOut, userIDErr := exec.Command("id", "-u", username).Output()
 			if userIDErr != nil {
-				fmt.Println("Output: " + userIDCmdOut)
+				fmt.Println("Output: " + string(userIDCmdOut))
 				http.Error(httpResponse, "Cannot get id of user on host for user: " + username, http.StatusInternalServerError)
 				return
 			}

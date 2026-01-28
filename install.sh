@@ -224,14 +224,14 @@ fi
 if [ $INSTALL_PANGOLIN = true ]; then
     echo Handing over to Pangolin installation script.
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-        echo --- Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select \"no\" when asked if you want to install Gerbil, Pangolin\'s tunneling component. ---
+        echo "--- Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select \"no\" when asked if you want to install Gerbil, Pangolin\'s tunneling component. ---"
     fi
     
     wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
     ./installer
         
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-        echo Installing cloudflared and Webconsole inside Docker.
+        echo "Installing cloudflared and Webconsole inside Docker."
 
         # Stop any running Docker containers.
         docker compose down
@@ -240,15 +240,15 @@ if [ $INSTALL_PANGOLIN = true ]; then
         systemctl stop webconsole
         systemctl disable webconsole
 
-        echo Building our custom Docker image for the Apache web server (httpd - this might take a few minutes...
+        echo "Building our custom Docker image for the Apache web server (httpd) - this might take a few minutes..."
         cp per-user-web-server/httpd-Dockerfile .
         docker build -f httpd-Dockerfile --progress=plain --tag=$HTTPD_DOCKER_IMAGE . 2>&1
 
-        echo Building Docker image for Webconsole - this might take a few minutes...
+        echo "Building Docker image for Webconsole - this might take a few minutes..."
         cp per-user-web-server/webconsole-Dockerfile .
         docker build -f webconsole-Dockerfile --progress=plain --tag=$WEBCONSOLE_DOCKER_IMAGE . 2>&1
 
-        echo Building the Linux desktop Docker image - this might take a few minutes...
+        echo "Building the Linux desktop Docker image - this might take a few minutes..."
         cp per-user-web-server/docker-desktop-Dockerfile .
         docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 

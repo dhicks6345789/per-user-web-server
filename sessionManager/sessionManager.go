@@ -203,6 +203,7 @@ func main() {
 					ExposedPorts: network.PortSet{exposedPort:{}},
 					// Pass in the VNC password and display number to the custom startup script that runs inside the container.
 					Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
+					User: userUIDStr + ":" + userGUIDStr,
 					Tty: false,
 				},
 				NetworkingConfig: &network.NetworkingConfig{

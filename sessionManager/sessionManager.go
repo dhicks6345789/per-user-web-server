@@ -236,7 +236,7 @@ func main() {
 							Type: mount.TypeBind,
 							Source: "/var/www/" + username,
 							//Target: "/home/" + username + "/www",
-							Target: "/mnt/www"
+							Target: "/mnt/www",
 							ReadOnly: false,
 						},
 					},

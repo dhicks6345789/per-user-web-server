@@ -7,9 +7,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils sudo curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup
-COPY per-user-web-server/docker-desktop-startup.sh /root/docker-desktop-startup.sh
-
-
+COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-root-startup.sh
+COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
 
 ## Create a non-root user
 #RUN useradd -m -s /bin/bash desktopuser && echo "desktopuser:vncpassword" | chpasswd && adduser desktopuser sudo

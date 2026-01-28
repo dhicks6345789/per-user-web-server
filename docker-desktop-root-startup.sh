@@ -10,12 +10,8 @@ useradd -m --uid "$2" --gid "$3" -s /bin/bash "$1"
 echo "$1:$2" | chpasswd
 echo "Created user $1 with IDs $2:$3."
 
-sudo -u $1 bash <<EOF
-  # Set up VNC password.
-  mkdir -p /home/$1/.vnc && echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd && chmod 600 /home/$1/.vnc/passwd
-  
-  echo "Starting VNC server, password $4 on display number $5."
+cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
+chown $1 /home/$1/startup.sh
+chmod u+x /home/$1/startup.sh
 
-  # Start TigerVNC.
-  vncserver -fg -localhost no -geometry 1280x720 :$5  
-EOF
+su - $1 -c "bash /home/$1/startup.sh"

@@ -218,7 +218,7 @@ func main() {
 					Mounts: []mount.Mount{
 						mount.Mount{
 							Type: mount.TypeVolume,
-							Target: "/home/desktopuser/Documents",
+							Target: "/home/" + username + "/Documents",
 							VolumeOptions: &mount.VolumeOptions{
 								DriverConfig: &mount.Driver{
 									Name: "rclone",
@@ -234,7 +234,7 @@ func main() {
 						mount.Mount{
 							Type: mount.TypeBind,
 							Source: "/var/www/" + username,
-							Target: "/home/desktopuser/www",
+							Target: "/home/" + username + "/www",
 							ReadOnly: false,
 						},
 					},

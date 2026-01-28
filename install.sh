@@ -197,6 +197,11 @@ if [ ! -f "per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6
 fi
 cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /etc/guacamole/extensions
 
+echo Make sure the "www" folder for user website folders exists.
+if [ ! -d "/var/www" ]; then
+    mkdir -p /var/www
+fi
+
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then

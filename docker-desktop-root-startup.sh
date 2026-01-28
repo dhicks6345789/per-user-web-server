@@ -16,6 +16,7 @@ cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
 chown $1 /home/$1/startup.sh
 chmod u+x /home/$1/startup.sh
 
+mkdir -p /home/$1/.vnc
 cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
 chown $1 /home/$1/.vnc/xstartup
 chmod u+x /home/$1/.vnc/xstartup

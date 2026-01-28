@@ -141,6 +141,13 @@ func main() {
 			}
 			VNCPort = possibleVNCPort
 			VNCDisplay := int(VNCPort) - 5900
+
+			// We're about to create a container that mounts the user's /var/www/username folder. First, make sure that folder exists.
+			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0755)
+			if userWWWDirErr != nil {
+				http.Error(httpResponse, "Error creating directory: " + userWWWDirErr.Error(), http.StatusInternalServerError)
+				return
+			}
 			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
@@ -176,6 +183,12 @@ func main() {
 									},
 								},
 							},
+						},
+						mount.Mount{
+							Type: mount.TypeVolume,
+							Source: "/var/www/" + username,
+							Target: "/home/desktopuser/www",
+							ReadOnly: false,
 						},
 					},
 				},

@@ -204,7 +204,7 @@ func main() {
 					// Pass in the VNC password and display number to the custom startup script that runs inside the container.
 					// Cmd: []string{"bash", "/home/desktopuser/startup.sh", VNCPassword, strconv.Itoa(VNCDisplay)},
 					//User: userUIDStr + ":" + userGIDStr,
-					Cmd: []string{"bash", "/root/docker-desktop-root-startup.sh", username, VNCPassword, userUIDStr, userGIDStr, strconv.Itoa(VNCDisplay)},
+					Cmd: []string{"bash", "/root/docker-desktop-root-startup.sh", username, userUIDStr, userGIDStr, VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
 				NetworkingConfig: &network.NetworkingConfig{

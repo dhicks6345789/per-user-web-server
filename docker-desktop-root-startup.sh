@@ -16,4 +16,8 @@ cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
 chown $1 /home/$1/startup.sh
 chmod u+x /home/$1/startup.sh
 
+cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
+chown $1 /home/$1/.vnc/xstartup
+chmod u+x /home/$1/.vnc/xstartup
+
 su - $1 -c "bash /home/$1/startup.sh $1 $2 $3 $4 $5"

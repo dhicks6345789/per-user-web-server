@@ -7,6 +7,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"os/user"
 	"fmt"
 	"log"
 	"time"
@@ -150,14 +151,46 @@ func main() {
 			VNCDisplay := int(VNCPort) - 5900
 
 			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their desktop image they have the appropriate ownership and permissions.
-			userIDCmdOut := runShellCommand("id", "-u", username)
-			fmt.Println("Output: " + userIDCmdOut)
+			userUIDStr := ""
+			userGIDStr := ""
+			userTryCount := 0
+			userCreateOutput := ""
+			for userUIDStr == "" && userTryCount < 2 {
+				desktopUser, desktopUserError := user.Lookup(username)
+				if desktopUserError == nil {
+					userUIDStr = desktopUser.Uid
+					userGIDStr = desktopUser.Gid
+				} else {
+					// The user wasn't found - the user doesn't exist, therefore create it.
+					userCreateOutput = runShellCommand("useradd", "-m", "-s", "/bin/bash", username)
+				}
+				userTryCount = userTryCount + 1
+			}
+			if userTryCount == 2 {
+				http.Error(httpResponse, "Error creating user on host for user " + username + ": " + userCreateOutput, http.StatusInternalServerError)
+				return
+			}
+			userUID, userUIDErr := strconv.Atoi(userUIDStr)
+			if userUIDErr != nil {
+				http.Error(httpResponse, "Error getting user UID: " + userUIDErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			userGID, userGIDErr := strconv.Atoi(userGIDStr)
+			if userGIDErr != nil {
+				http.Error(httpResponse, "Error getting user GID: " + userGIDErr.Error(), http.StatusInternalServerError)
+				return
+			}
 			
 			// We're about to create a container that mounts the user's /var/www/username folder.
 			// First, make sure that folder exists, and that it is owned by the appropriate user.
 			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0755)
 			if userWWWDirErr != nil {
 				http.Error(httpResponse, "Error creating directory: " + userWWWDirErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			userChownErr := os.Chown("/var/www/" + username, userUID, userGID)
+			if userChownErr != nil {
+				http.Error(httpResponse, "Error assigning directory /var/www/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			

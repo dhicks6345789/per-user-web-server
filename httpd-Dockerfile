@@ -1,0 +1,10 @@
+FROM httpd:latest
+
+# Create a directory for our custom configs
+RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
+
+# Append a single 'Include' line to the end of the main config
+RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/httpd.conf
+
+# Copy our configs into that directory
+COPY ./users-www.conf /usr/local/apache2/conf/sites-enabled/

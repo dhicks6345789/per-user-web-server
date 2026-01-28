@@ -83,10 +83,11 @@ services:
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
+  
   # httpd - the Apache web server.
   httpd:
     image: httpd:latest
-    container_name: guacamole
+    container_name: httpd
     restart: unless-stopped
     ports:
       - 8081:80

@@ -91,6 +91,8 @@ services:
     restart: unless-stopped
     networks:
       - main
+    volumes:
+      - /var/www:/usr/local/apache2/htdocs/www
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:
   main:

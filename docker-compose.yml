@@ -86,13 +86,13 @@ services:
   
   # httpd - the Apache web server.
   httpd:
-    image: httpd:latest
+    image: {{HTTPD_DOCKER_IMAGE}}
     container_name: httpd
     restart: unless-stopped
     networks:
       - main
     volumes:
-      - /var/www:/usr/local/apache2/htdocs/www
+      - /var/www:/usr/local/apache2/htdocs
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:
   main:

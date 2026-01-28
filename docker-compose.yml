@@ -89,8 +89,8 @@ services:
     image: httpd:latest
     container_name: httpd
     restart: unless-stopped
-    ports:
-      - 8081:80
+     networks:
+      - main
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:
   main:

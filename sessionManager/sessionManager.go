@@ -142,7 +142,16 @@ func main() {
 			VNCPort = possibleVNCPort
 			VNCDisplay := int(VNCPort) - 5900
 
-			// We're about to create a container that mounts the user's /var/www/username folder. First, make sure that folder exists.
+			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their desktop image they have the appropriate ownership and permissions.
+			userIDCmdOut, userIDErr := exec.Command("id", "-u", username).Output()
+			if userIDErr != nil {
+				http.Error(httpResponse, "Cannot get id of user on host for user: " + username, http.StatusInternalServerError)
+				return
+			}
+			debug(userIDCmdOut)
+			
+			// We're about to create a container that mounts the user's /var/www/username folder.
+			// First, make sure that folder exists, and that it is owned by the appropriate user.
 			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0755)
 			if userWWWDirErr != nil {
 				http.Error(httpResponse, "Error creating directory: " + userWWWDirErr.Error(), http.StatusInternalServerError)

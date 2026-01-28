@@ -149,7 +149,7 @@ func main() {
 				http.Error(httpResponse, "Cannot get id of user on host for user: " + username, http.StatusInternalServerError)
 				return
 			}
-			debug(userIDCmdOut)
+			fmt.Println(userIDCmdOut)
 			
 			// We're about to create a container that mounts the user's /var/www/username folder.
 			// First, make sure that folder exists, and that it is owned by the appropriate user.

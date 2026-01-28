@@ -30,6 +30,12 @@ import (
 	"github.com/moby/moby/api/types/mount"
 )
 
+func runShellCommand(command string, args ...string) string {
+	shellCmd := exec.Command(command, args...)
+	cmdOutput, _ := shellCmd.CombinedOutput()
+	return strings.TrimSpace(string(cmdOutput))
+}
+
 func main() {
 	// We want each desktop instance to have a separate, un-guessable VNC password. However, we also want that password to be consistant so we can easily reconnect a user to their session.
 	// Rather than hold session passwords in memory, we use a hash function to generate a password for each session from the username and a secret seed value.
@@ -144,13 +150,8 @@ func main() {
 			VNCDisplay := int(VNCPort) - 5900
 
 			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their desktop image they have the appropriate ownership and permissions.
-			userIDCmdOut, userIDErr := exec.Command("id", "-u", username).Output()
-			if userIDErr != nil {
-				fmt.Println("Output: " + string(userIDCmdOut))
-				http.Error(httpResponse, "Cannot get id of user on host for user: " + username, http.StatusInternalServerError)
-				return
-			}
-			fmt.Println(userIDCmdOut)
+			userIDCmdOut := runShellCommand("id", "-u", username)
+			fmt.Println("Output: " + userIDCmdOut)
 			
 			// We're about to create a container that mounts the user's /var/www/username folder.
 			// First, make sure that folder exists, and that it is owned by the appropriate user.

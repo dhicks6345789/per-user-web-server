@@ -19,6 +19,7 @@ SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
 WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
+HTTPD_DOCKER_IMAGE="sansay.co.uk-httpd:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 
 # Read user-defined command-line flags.
@@ -239,6 +240,10 @@ if [ $INSTALL_PANGOLIN = true ]; then
         systemctl stop webconsole
         systemctl disable webconsole
 
+        echo Building our custom Docker image for the Apache web server (httpd - this might take a few minutes...
+        cp per-user-web-server/httpd-Dockerfile .
+        docker build -f httpd-Dockerfile --progress=plain --tag=$HTTPD_DOCKER_IMAGE . 2>&1
+
         echo Building Docker image for Webconsole - this might take a few minutes...
         cp per-user-web-server/webconsole-Dockerfile .
         docker build -f webconsole-Dockerfile --progress=plain --tag=$WEBCONSOLE_DOCKER_IMAGE . 2>&1
@@ -249,6 +254,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/docker-compose.yml ./docker-compose.yml
+        sed -i "s/{{HTTPD_DOCKER_IMAGE}}/$HTTPD_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml

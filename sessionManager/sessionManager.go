@@ -163,8 +163,8 @@ func main() {
 				} else {
 					// The user wasn't found - the user doesn't exist, therefore create it.
 					userCreateOutput = runShellCommand("useradd", "-m", "-s", "/bin/bash", username)
+					userTryCount = userTryCount + 1
 				}
-				userTryCount = userTryCount + 1
 			}
 			if userTryCount == 2 {
 				http.Error(httpResponse, "Error creating user on host for user " + username + ": " + userCreateOutput, http.StatusInternalServerError)

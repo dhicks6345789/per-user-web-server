@@ -6,25 +6,21 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Xfce, TigerVNC, and basic tools
 RUN apt-get update && apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils sudo curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN useradd -m -s /bin/bash desktopuser && echo "desktopuser:vncpassword" | chpasswd && adduser desktopuser sudo
+COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup
+COPY per-user-web-server/docker-desktop-startup.sh /root/docker-desktop-startup.sh
 
-USER desktopuser
-WORKDIR /home/desktopuser
 
-# Set up VNC password
-#RUN mkdir -p /home/desktopuser/.vnc && echo "vncpassword" | vncpasswd -f > /home/desktopuser/.vnc/passwd && chmod 600 /home/desktopuser/.vnc/passwd
 
-# Copy the VNC / X Desktop startup script.
-COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-xstartup /home/desktopuser/.vnc/xstartup
-RUN chmod +x /home/desktopuser/.vnc/xstartup
-
-# Copy our custom startup script.
-COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-startup.sh /home/desktopuser/startup.sh
-RUN chmod +x /home/desktopuser/startup.sh
-
-# Expose VNC port (5901 for display :1)
-#EXPOSE 5901
-
-# Start TigerVNC
-#CMD ["vncserver", "-fg", "-localhost", "no", "-geometry", "1280x720", ":1"]
+## Create a non-root user
+#RUN useradd -m -s /bin/bash desktopuser && echo "desktopuser:vncpassword" | chpasswd && adduser desktopuser sudo
+#
+#USER desktopuser
+#WORKDIR /home/desktopuser
+#
+## Copy the VNC / X Desktop startup script.
+#COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-xstartup /home/desktopuser/.vnc/xstartup
+#RUN chmod +x /home/desktopuser/.vnc/xstartup
+#
+## Copy our custom startup script.
+#COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-startup.sh /home/desktopuser/startup.sh
+#RUN chmod +x /home/desktopuser/startup.sh

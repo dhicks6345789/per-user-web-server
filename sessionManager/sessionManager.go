@@ -185,7 +185,7 @@ func main() {
 							},
 						},
 						mount.Mount{
-							Type: mount.TypeVolume,
+							Type: mount.TypeBind,
 							Source: "/var/www/" + username,
 							Target: "/home/desktopuser/www",
 							ReadOnly: false,

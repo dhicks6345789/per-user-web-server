@@ -130,6 +130,9 @@ if [ ! -f "/usr/bin/rclone" ]; then
 fi
 
 cp rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
+pwd
+ls ../pangolin.json
+ls ..
 if [ ! -f "../pangolin.json" ]; then
     echo "Missing pangolin.json - authentication credentials for rclone to connect to Google Drive. Stopping."
     exit 1

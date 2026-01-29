@@ -12,6 +12,7 @@ groupadd -g $3 $1
 useradd -m --uid "$2" --gid "$3" -s /bin/bash "$1"
 # Set the user's password.
 echo "$1:$4" | chpasswd
+echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/users
 echo "Created user $1 with IDs $2:$3."
 
 # Now we have a user, map the mount points passed in from the container host to the locations we want them for the user. The Documents folder, linked to the user's Google Drive home folder...

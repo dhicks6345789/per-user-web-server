@@ -6,7 +6,11 @@
 # $4=password
 # $5=vncdisplay
 
-# First, create the user's group.
+# We haven't created the user yet, but their home folder already exists as we've mounted their "Documents" and "www" folders there at container creation time.
+# Set ownership of their home folder by numeric IDs, we'll crate the actual user in the next step.
+chown $2:$3 /home/$1
+
+# Create the user's group.
 groupadd -g $3 $1
 # Create the user with a home directory and bash shell.
 useradd -m --uid "$2" --gid "$3" -s /bin/bash "$1"

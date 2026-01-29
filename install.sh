@@ -125,9 +125,12 @@ if [ ! -f "/usr/bin/rclone" ]; then
     # We also install the rclone plugin for Docker, so we can use rclone to mount file systems directly inside containers.
     sudo mkdir -p /var/lib/docker-plugins/rclone/config
     sudo mkdir -p /var/lib/docker-plugins/rclone/cache
-    # To do:
-    # cp rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
-    # copy in user JSON credentials to /var/lib/docker-plugins/rclone/config/pangolin.json
+    cp rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
+    if [ ! -f "../pangolin.json" ]; then
+        echo "Missing pangolin.json - authentication credentials for rclone to connect to Google Drive. Stopping."
+        exit 1
+    fi
+    cp ../pangolin.json /var/lib/docker-plugins/rclone/config/pangolin.json
     docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
 fi
 

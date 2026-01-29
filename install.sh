@@ -125,13 +125,14 @@ if [ ! -f "/usr/bin/rclone" ]; then
     # We also install the rclone plugin for Docker, so we can use rclone to mount file systems directly inside containers.
     sudo mkdir -p /var/lib/docker-plugins/rclone/config
     sudo mkdir -p /var/lib/docker-plugins/rclone/cache
-    cp rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
-    if [ ! -f "../pangolin.json" ]; then
-        echo "Missing pangolin.json - authentication credentials for rclone to connect to Google Drive. Stopping."
-        exit 1
-    fi
     cp ../pangolin.json /var/lib/docker-plugins/rclone/config/pangolin.json
     docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
+fi
+
+cp rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
+if [ ! -f "../pangolin.json" ]; then
+    echo "Missing pangolin.json - authentication credentials for rclone to connect to Google Drive. Stopping."
+    exit 1
 fi
 
 # 18/12/2025: The Pangolin installer seems to make use of the "add-apt-repository" command. This isn't available in Debian 13 (Trixie) as the "software-properties-common" package has been removed from the distribution.

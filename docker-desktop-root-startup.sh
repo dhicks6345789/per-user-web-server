@@ -15,17 +15,17 @@ echo "$1:$4" | chpasswd
 echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/users
 echo "Created user $1 with IDs $2:$3."
 
-# Now we have a user, map the mount points passed in from the container host to the locations we want them for the user. The Documents folder, linked to the user's Google Drive home folder...
-#mkdir -p /home/$1/Documents
-#rm -rf /home/$1/Documents
-ln -s /mnt/Documents /home/$1/Documents
-chown -R $1:$1 /home/$1/Documents
+## Now we have a user, map the mount points passed in from the container host to the locations we want them for the user. The Documents folder, linked to the user's Google Drive home folder...
+##mkdir -p /home/$1/Documents
+##rm -rf /home/$1/Documents
+#ln -s /mnt/Documents /home/$1/Documents
+#chown -R $1:$1 /home/$1/Documents
 
-# ...and the www folder, linked to the host's www folder and, therefore, served by the Apache web server container.
-#mkdir -p /home/$1/www
-#rm -rf /home/$1/www
-ln -s /mnt/www /home/$1/www
-chown -R $1:$1 /home/$1/www
+## ...and the www folder, linked to the host's www folder and, therefore, served by the Apache web server container.
+##mkdir -p /home/$1/www
+##rm -rf /home/$1/www
+#ln -s /mnt/www /home/$1/www
+#chown -R $1:$1 /home/$1/www
 
 # Set up the user startup script, which is where the VNC startup happens.
 cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh

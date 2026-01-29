@@ -1,5 +1,4 @@
-# This script runs as root when the user's desktop image starts up.
-
+# This script runs as root when the user's desktop image starts up. Parameters passed in from the Docker creation process:
 # $1=username
 # $2=User UID
 # $3=User GID
@@ -16,20 +15,9 @@ groupadd -g $3 $1
 useradd -m --uid "$2" --gid "$3" -s /bin/bash "$1"
 # Set the user's password.
 echo "$1:$4" | chpasswd
+# Add the user to the sudoers list, letting them use "sudo" without a password.
 echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/users
 echo "Created user $1 with IDs $2:$3."
-
-## Now we have a user, map the mount points passed in from the container host to the locations we want them for the user. The Documents folder, linked to the user's Google Drive home folder...
-##mkdir -p /home/$1/Documents
-##rm -rf /home/$1/Documents
-#ln -s /mnt/Documents /home/$1/Documents
-#chown -R $1:$1 /home/$1/Documents
-
-## ...and the www folder, linked to the host's www folder and, therefore, served by the Apache web server container.
-##mkdir -p /home/$1/www
-##rm -rf /home/$1/www
-#ln -s /mnt/www /home/$1/www
-#chown -R $1:$1 /home/$1/www
 
 # Set up the user startup script, which is where the VNC startup happens.
 cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh

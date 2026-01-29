@@ -125,7 +125,6 @@ if [ ! -f "/usr/bin/rclone" ]; then
     # We also install the rclone plugin for Docker, so we can use rclone to mount file systems directly inside containers.
     sudo mkdir -p /var/lib/docker-plugins/rclone/config
     sudo mkdir -p /var/lib/docker-plugins/rclone/cache
-    docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
 fi
 
 cp per-user-web-server/rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
@@ -233,6 +232,9 @@ if [ $INSTALL_PANGOLIN = true ]; then
     
     wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
     ./installer
+
+    # Install the rclone Docker plugin.
+    docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
         
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
         echo "Installing cloudflared and Webconsole inside Docker."

@@ -6,20 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Xfce, TigerVNC, and basic tools
 RUN apt-get update && apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils sudo curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to
+# match up UIDs with the host, which we don't know until container creation time.
 COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup
 COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-root-startup.sh
 COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
-
-## Create a non-root user
-#RUN useradd -m -s /bin/bash desktopuser && echo "desktopuser:vncpassword" | chpasswd && adduser desktopuser sudo
-#
-#USER desktopuser
-#WORKDIR /home/desktopuser
-#
-## Copy the VNC / X Desktop startup script.
-#COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-xstartup /home/desktopuser/.vnc/xstartup
-#RUN chmod +x /home/desktopuser/.vnc/xstartup
-#
-## Copy our custom startup script.
-#COPY --chown=desktopuser:desktopuser per-user-web-server/docker-desktop-startup.sh /home/desktopuser/startup.sh
-#RUN chmod +x /home/desktopuser/startup.sh

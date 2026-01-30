@@ -1,5 +1,8 @@
 FROM httpd:latest
 
+# Update the package list and install Python 3.
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip && rm -rf /var/lib/apt/lists/*
+
 # Create a directory for our custom Apache config files.
 RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
 
@@ -8,6 +11,9 @@ RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/
 
 # Uncomment the LoadModule line for rewrite_module ("mod_rewrite") so we can use that module in our own configs.
 RUN sed -i 's/#LoadModule rewrite_module modules\/mod_rewrite.so/LoadModule rewrite_module modules\/mod_rewrite.so/' /usr/local/apache2/conf/httpd.conf
+# Same thing to enable the cgi module.
+LoadModule cgi_module modules/mod_cgi.so
+RUN sed -i 's/#LoadModule cgi_module modules\/mod_cgi.so/LoadModule cgi_module modules\/mod_cgi.so/' /usr/local/apache2/conf/httpd.conf
 # Optional: If you need to allow .htaccess files to actually use the engine.
 RUN sed -i '/<Directory "\/usr\/local\/apache2\/htdocs">/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /usr/local/apache2/conf/httpd.conf
 

@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 python3
 # Install suEXEC, which allows us to limit how users can run CGI scripts.
 RUN apt-get update && apt-get install -y apache2-suexec-custom
 # Enable the suEXEC module.
-sed -i 's/#LoadModule suexec_module/LoadModule suexec_module/' /usr/local/apache2/conf/httpd.conf
+#sed -i 's/#LoadModule suexec_module/LoadModule suexec_module/' /usr/local/apache2/conf/httpd.conf
+sed -i 's/#LoadModule suexec_module modules\/mod_suexec.so/LoadModule suexec_module modules\/mod_suexec.so/' /usr/local/apache2/conf/httpd.conf
 
 # Append a single 'Include' line to the end of the main config so we can add our own config files without having to modify / replace the main httpd.conf.
 RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/httpd.conf

@@ -3,19 +3,17 @@ FROM httpd:latest
 # Update the package list and install Python 3.
 RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip && rm -rf /var/lib/apt/lists/*
 
-# Create a directory for our custom Apache config files.
-RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
-
 # Append a single 'Include' line to the end of the main config so we can add our own config files without having to modify / replace the main httpd.conf.
 RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/httpd.conf
 
-# Uncomment the LoadModule line for rewrite_module ("mod_rewrite") so we can use that module in our own configs.
-#RUN sed -i 's/#LoadModule rewrite_module modules\/mod_rewrite.so/LoadModule rewrite_module modules\/mod_rewrite.so/' /usr/local/apache2/conf/httpd.conf
-# Optional: If you need to allow .htaccess files to actually use the engine.
-#RUN sed -i '/<Directory "\/usr\/local\/apache2\/htdocs">/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /usr/local/apache2/conf/httpd.conf
-
 # Uncomment the LoadModule line for cgid_module ("mod_cgi") so we can use that module in our own configs.
 RUN sed -i 's/#LoadModule cgid_module/LoadModule cgid_module/' /usr/local/apache2/conf/httpd.conf
+
+# Enable mod_userdir
+RUN sed -i 's/#LoadModule userdir_module/LoadModule userdir_module/' /usr/local/apache2/conf/httpd.conf
+
+# Create a directory for our custom Apache config files.
+RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
 
 # Copy our configs into that directory.
 COPY per-user-web-server/users-www.conf /usr/local/apache2/conf/sites-enabled/

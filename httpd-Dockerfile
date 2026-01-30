@@ -10,12 +10,12 @@ RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
 RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/httpd.conf
 
 # Uncomment the LoadModule line for rewrite_module ("mod_rewrite") so we can use that module in our own configs.
-RUN sed -i 's/#LoadModule rewrite_module modules\/mod_rewrite.so/LoadModule rewrite_module modules\/mod_rewrite.so/' /usr/local/apache2/conf/httpd.conf
-# Same thing to enable the cgi module.
-LoadModule cgi_module modules/mod_cgi.so
-RUN sed -i 's/#LoadModule cgi_module modules\/mod_cgi.so/LoadModule cgi_module modules\/mod_cgi.so/' /usr/local/apache2/conf/httpd.conf
+#RUN sed -i 's/#LoadModule rewrite_module modules\/mod_rewrite.so/LoadModule rewrite_module modules\/mod_rewrite.so/' /usr/local/apache2/conf/httpd.conf
 # Optional: If you need to allow .htaccess files to actually use the engine.
-RUN sed -i '/<Directory "\/usr\/local\/apache2\/htdocs">/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /usr/local/apache2/conf/httpd.conf
+#RUN sed -i '/<Directory "\/usr\/local\/apache2\/htdocs">/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /usr/local/apache2/conf/httpd.conf
+
+# Same thing to enable the cgi module.
+RUN sed -i 's/#LoadModule cgi_module modules\/mod_cgi.so/LoadModule cgi_module modules\/mod_cgi.so/' /usr/local/apache2/conf/httpd.conf
 
 # Copy our configs into that directory.
 COPY per-user-web-server/users-www.conf /usr/local/apache2/conf/sites-enabled/

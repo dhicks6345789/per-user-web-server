@@ -206,6 +206,10 @@ if [ ! -d "/var/www" ]; then
     mkdir -p /var/www
 fi
 
+echo Copy over the Python CGI script that gives users the interface to the "www" folder.
+cp per-user-web-server/www/index.py /var/www/index.py
+chmod +x /var/www/index.py
+
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then

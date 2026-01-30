@@ -75,6 +75,7 @@ services:
       GUACD_HOSTNAME: guacd
       HTTP_AUTH_ENABLED: "true"
       HTTP_AUTH_HEADER: Remote-User
+      WEBAPP_CONTEXT: desktop
     depends_on:
       - guacd
     networks:

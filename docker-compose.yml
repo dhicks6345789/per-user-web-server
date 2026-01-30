@@ -23,7 +23,6 @@ services:
   # Fossorial's Pangolin - can provide tunneling and authentication, basically a self-hostable version of Cloudflare Tunnels. See: https://pangolin.net
   pangolin:
     image: fosrl/pangolin:latest
-    #image: fosrl/pangolin:1.15.1
     container_name: pangolin
     restart: unless-stopped
     networks:

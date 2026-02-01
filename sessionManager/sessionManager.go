@@ -242,6 +242,18 @@ func main() {
 							Target: "/home/" + username + "/www",
 							ReadOnly: false,
 						},
+						mount.Mount{
+							Type: mount.TypeBind,
+							Source: "/var/log/apache2/access.log,
+							Target: "/var/log/apache2/access.log",
+							ReadOnly: true,
+						},
+						mount.Mount{
+							Type: mount.TypeBind,
+							Source: "/var/log/apache2/error_log,
+							Target: "/var/log/apache2/error_log",
+							ReadOnly: true,
+						},
 					},
 				},
 				// We use our own container image.

@@ -182,8 +182,9 @@ func main() {
 			}
 			
 			// We're about to create a container that mounts the user's /var/www/username folder.
-			// First, make sure that folder exists, and that it is owned by the appropriate user.
-			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0755)
+			// First, make sure that folder exists, and that it is owned by the matching user and has
+			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folder via CGI scripts.
+			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0711)
 			if userWWWDirErr != nil {
 				http.Error(httpResponse, "Error creating directory: " + userWWWDirErr.Error(), http.StatusInternalServerError)
 				return

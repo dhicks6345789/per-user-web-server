@@ -201,6 +201,10 @@ if [ ! -f "per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6
 fi
 cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /etc/guacamole/extensions
 
+echo Make sure the Apache log files exist.
+touch /var/log/apache/access.log
+touch /var/log/apache/error_log
+
 echo Make sure the "www" folder for user website folders exists.
 if [ ! -d "/var/www" ]; then
     mkdir -p /var/www

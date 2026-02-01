@@ -93,7 +93,12 @@ services:
     networks:
       - main
     volumes:
+      #- /root/config/passwd:/etc/passwd
+      #- /root/config/shadow:/etc/shadow
+      #- /root/config/group:/etc/group
+      - /etc/passwd:/etc/passwd:ro
       - /var/www:/usr/local/apache2/htdocs
+      
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:
   main:

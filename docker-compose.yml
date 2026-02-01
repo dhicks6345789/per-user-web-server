@@ -92,11 +92,11 @@ services:
     restart: unless-stopped
     networks:
       - main
-    logging:
-      driver: "local"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    #logging:
+      #driver: "local"
+      #options:
+        #max-size: "10m"
+        #max-file: "3"
     volumes:
       #- /root/config/passwd:/etc/passwd
       #- /root/config/shadow:/etc/shadow

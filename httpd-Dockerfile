@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y apache2-suexec-custom
 # Enable the suEXEC module.
 RUN sed -i 's/#LoadModule suexec_module modules\/mod_suexec.so/LoadModule suexec_module modules\/mod_suexec.so/' /usr/local/apache2/conf/httpd.conf
 
-# Override the standard setup for error logging - we want to log to both STDERR and a file.
-RUN sed -i 's/ErrorLog \/proc\/self\/fd\/2/ErrorLog \"|\/usr\/bin\/tee -a \/usr\/local\/apache2\/logs\/error_log > \/proc\/self\/fd\/2"/' /usr/local/apache2/conf/httpd.conf
+# Update httpd.conf to use 'tee' for ErrorLog. This writes to the file AND redirects to stderr (fd/2)
+RUN sed -i 's|^ErrorLog .*|ErrorLog "|/usr/bin/tee -a /usr/local/apache2/logs/error_log > /proc/self/fd/2"|' /usr/local/apache2/conf/httpd.conf
+# Update httpd.conf to add a second CustomLog for the physical file. The original image already has one pointing to stdout (fd/1)
+RUN echo 'CustomLog "/usr/local/apache2/logs/access_log" combined' >> /usr/local/apache2/conf/httpd.conf
 
 # Append a single 'Include' line to the end of the main config so we can add our own config files without having to modify / replace the main httpd.conf.
 RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/httpd.conf

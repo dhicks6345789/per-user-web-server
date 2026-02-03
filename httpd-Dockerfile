@@ -28,6 +28,9 @@ RUN a2enmod suexec cgid userdir
 # Copy our config into the sites-enabled directory.
 COPY per-user-web-server/000-default.conf /etc/apache2/sites-enabled/000-default.conf
 
+# Copy our own config over the default suexec config.
+COPY per-user-web-server/users-suexec-www-data /etc/apache2/suexec/www-data
+
 CMD ["apachectl", "-D", "FOREGROUND"]
 
 

@@ -3,7 +3,6 @@
 import subprocess
 import os
 import sys
-import argparse
 
 def run_as_user(uid, script_path):
     """
@@ -43,9 +42,5 @@ def run_as_user(uid, script_path):
         print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run a script as a specific UID.")
-    parser.add_argument("uid", type=int, help="The target User ID (UID)")
-    parser.add_argument("path", type=str, help="The absolute path to the Python script")
-
-    args = parser.parse_args()
-    run_as_user(args.uid, args.path)
+    # UID and path
+    run_as_user(int(sys.argv[1]), sys.argv[2])

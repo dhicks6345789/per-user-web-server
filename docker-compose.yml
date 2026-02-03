@@ -93,8 +93,9 @@ services:
     networks:
       - main
     volumes:
-      # We share the list of users (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
+      # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
       - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
       # The individual users' web folders.
       #- /var/www:/usr/local/apache2/htdocs
       - /var/www/html:/var/www/html

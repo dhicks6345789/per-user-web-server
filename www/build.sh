@@ -1,6 +1,6 @@
 # Build script for the Per-User-Web-Server Web Server.
 
-echo Building Web Serer...
+echo Building Web Server...
 
 # Get any required Go mondules.
 #go get ...
@@ -12,4 +12,4 @@ rm wwwServer
 go build wwwServer.go
 
 # Exit if we didn't manage to build the executable.
-[ ! -f sessionManager ] && { echo "Error: wwwServer not compiled."; exit 1; }
+[ ! -f wwwServer ] && { echo "Error: wwwServer not compiled."; exit 1; }

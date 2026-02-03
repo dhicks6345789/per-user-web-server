@@ -25,7 +25,7 @@ RUN a2enmod suexec cgid userdir
 # 6. Copy modified UserDir config
 COPY userdir.conf /etc/apache2/mods-available/userdir.conf
 
-CMD ["apachectl", "-D", "FOREGROUND"]
+#CMD ["apachectl", "-D", "FOREGROUND"]
 
 
 

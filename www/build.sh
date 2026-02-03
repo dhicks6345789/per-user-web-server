@@ -2,13 +2,8 @@
 
 echo Building Web Serer...
 
-# Stop any existing running service.
-systemctl stop wwwServer
-
 # Get any required Go mondules.
-#go get github.com/moby/moby/client
-#go get github.com/moby/moby/api/types/container
-#go get golang.org/x/crypto/argon2
+#go get ...
 
 # Clear out any previously-compile binary.
 rm wwwServer

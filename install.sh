@@ -203,17 +203,17 @@ cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /
 
 echo Make sure the Apache log files exist.
 mkdir -p /var/log/apache2
-touch /var/log/apache2/access_log
-touch /var/log/apache2/error_log
+touch /var/log/apache2/access.log
+touch /var/log/apache2/error.log
 
 echo Make sure the "www" folder for user website folders exists.
-if [ ! -d "/var/www" ]; then
-    mkdir -p /var/www
+if [ ! -d "/var/www/html" ]; then
+    mkdir -p /var/www/html
 fi
 
 echo Copy over the Python CGI script that gives users the interface to the "www" folder.
-cp per-user-web-server/www/index.py /var/www/index.py
-chmod +x /var/www/index.py
+cp per-user-web-server/www/index.py /var/www/html/index.py
+chmod +x /var/www/html/index.py
 
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then

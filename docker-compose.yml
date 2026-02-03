@@ -100,9 +100,9 @@ services:
       #- /var/www:/usr/local/apache2/htdocs
       - /var/www/html:/var/www/html
       # We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
-      - /var/log/apache2/access.log:/usr/local/apache2/logs/access.log
-      - /var/log/apache2/error.log:/usr/local/apache2/logs/error.log
-      
+      - /var/log/apache2/access.log:/var/log/apache2/access.log
+      - /var/log/apache2/error.log:/var/log/apache2/error.log
+
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:
   main:

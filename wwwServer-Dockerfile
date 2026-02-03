@@ -1,0 +1,3 @@
+FROM debian:latest
+COPY www/wwwServer /usr/local/bin/wwwServer
+EXPOSE 8080

@@ -41,14 +41,15 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	_, ok := info.Sys().(*syscall.Stat_t)
+	fileInfo, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
 		http.Error(w, "Could not determine file owner", 500)
 		return
 	}
 
 	handler := &cgi.Handler{
-		Path: path,
+		Path: "/usr/local/bin/runCGI.py",
+		Args: []string{string(fileInfo.Uid), path}
 		Root: "/cgi-bin/", // Adjust based on your URL prefix
 		Dir:  filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},

@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"os/user"
 	//"os/exec"
 	"fmt"
 	"log"
@@ -47,19 +48,19 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		http.Error(w, "Could not determine file owner", 500)
 		return
 	}
+	
+	u, err := user.LookupId(fmt.Sprint(fileInfo.Uid))
+	if err != nil {
+		log.Printf("Could not find user for UID %s: %v", uidStr, err)
+		return
+	}
 
 	handler := &cgi.Handler{
 		Path: "/usr/local/bin/runCGI.py",
-		Args: []string{fmt.Sprint(fileInfo.Uid), path},
+		Args: []string{u, path},
 		Root: "/cgi-bin/", // Adjust based on your URL prefix
 		Dir:  filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
-		// Note: Standard cgi.Handler does not support SysProcAttr directly.
-		// To fix the "unknown field" error, we remove the Cmd field.
 	}
-
-	// Because cgi.Handler doesn't expose SysProcAttr, 
-	// standard practice for UID switching involves a wrapper 
-	// or using a modified version of the cgi package.
 	handler.ServeHTTP(w, r)
 }

@@ -28,3 +28,6 @@ RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
 
 # Copy our configs into that directory.
 COPY per-user-web-server/users-www.conf /usr/local/apache2/conf/sites-enabled/
+
+# Copy our own config over the default suexec config.
+COPY per-user-web-server/users-suexec-www-data /etc/apache2/suexec/www-data

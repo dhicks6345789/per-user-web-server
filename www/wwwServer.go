@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"log"
-	"syscall"
 	"net/http"
 	"net/http/cgi"
 	"path/filepath"

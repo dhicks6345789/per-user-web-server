@@ -2,8 +2,6 @@ package main
 
 import (
 	"os"
-	//"os/exec"
-	"fmt"
 	"log"
 	"syscall"
 	"net/http"
@@ -42,11 +40,11 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	#fileInfo, ok := info.Sys().(*syscall.Stat_t)
-	#if !ok {
-		#http.Error(w, "Could not determine file owner", 500)
-		#return
-	#}
+	//fileInfo, ok := info.Sys().(*syscall.Stat_t)
+	//if !ok {
+		//http.Error(w, "Could not determine file owner", 500)
+		//return
+	//}
 
 	handler := &cgi.Handler{
 		Path: "/usr/local/bin/runCGI.py",

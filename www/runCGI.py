@@ -47,7 +47,7 @@ if __name__ == "__main__":
     print("runCGI running.")
     print(sys.argv)
 
-    username = sys.argv[1].split("/")[2]
+    username = sys.argv[1].split("/")[3]
     user_info = pwd.getpwnam(username)
     uid = user_info.pw_uid
 

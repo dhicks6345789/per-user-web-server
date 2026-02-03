@@ -106,7 +106,7 @@ services:
   # Our own custom Go web server.
   wwwserver:
     image: {{WWWSERVER_DOCKER_IMAGE}}
-    command: /usr/local/bin/wwwserver
+    command: /usr/local/bin/wwwServer
     container_name: wwwserver
     restart: unless-stopped
     networks:

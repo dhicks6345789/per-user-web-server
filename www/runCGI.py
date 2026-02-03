@@ -42,6 +42,10 @@ def run_as_user(uid, script_path):
         print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
+    print("Content-Type: text/plain\n")
+    print("runCGI running.")
+    print(sys.argv)
+    
     # UID and path
     print("runCGI: " + sys.argv[1] + ", " + sys.argv[2])
-    run_as_user(int(sys.argv[1]), sys.argv[2])
+    #run_as_user(int(sys.argv[1]), sys.argv[2])

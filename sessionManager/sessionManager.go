@@ -181,17 +181,17 @@ func main() {
 				return
 			}
 			
-			// We're about to create a container that mounts the user's /var/www/username folder.
+			// We're about to create a container that mounts the user's /var/www/html/username folder.
 			// First, make sure that folder exists, and that it is owned by the matching user and has
 			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folder via CGI scripts.
-			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0711)
+			userWWWDirErr := os.MkdirAll("/var/www/html/" + username, 0711)
 			if userWWWDirErr != nil {
 				http.Error(httpResponse, "Error creating directory: " + userWWWDirErr.Error(), http.StatusInternalServerError)
 				return
 			}
-			userChownErr := os.Chown("/var/www/" + username, userUID, userGID)
+			userChownErr := os.Chown("/var/www/html/" + username, userUID, userGID)
 			if userChownErr != nil {
-				http.Error(httpResponse, "Error assigning directory /var/www/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
+				http.Error(httpResponse, "Error assigning directory /var/www/html" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			
@@ -238,7 +238,7 @@ func main() {
 						// host user's UID to the container's startup script.
 						mount.Mount{
 							Type: mount.TypeBind,
-							Source: "/var/www/" + username,
+							Source: "/var/www/html/" + username,
 							Target: "/home/" + username + "/www",
 							ReadOnly: false,
 						},

@@ -86,9 +86,27 @@ services:
       - /etc/guacamole:/etc/guacamole
   
   # httpd - the Apache web server.
-  httpd:
-    image: {{HTTPD_DOCKER_IMAGE}}
-    container_name: httpd
+  #httpd:
+  #  image: {{HTTPD_DOCKER_IMAGE}}
+  #  container_name: httpd
+  #  restart: unless-stopped
+  #  networks:
+  #    - main
+  #  volumes:
+  #    # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
+  #    - /etc/passwd:/etc/passwd:ro
+  #    - /etc/group:/etc/group:ro
+  #    # The individual users' web folders.
+  #    #- /var/www:/usr/local/apache2/htdocs
+  #    - /var/www/html:/var/www/html
+  #    # We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
+  #    - /var/log/apache2/access.log:/var/log/apache2/access.log
+  #    - /var/log/apache2/error.log:/var/log/apache2/error.log
+
+  # Our own custom Go web server.
+  wwwserver:
+    image: {{WWWSERVER_DOCKER_IMAGE}}
+    container_name: wwwserver
     restart: unless-stopped
     networks:
       - main
@@ -97,11 +115,10 @@ services:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
       # The individual users' web folders.
-      #- /var/www:/usr/local/apache2/htdocs
-      - /var/www/html:/var/www/html
-      # We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
-      - /var/log/apache2/access.log:/var/log/apache2/access.log
-      - /var/log/apache2/error.log:/var/log/apache2/error.log
+      - /var/www/html:/var/www
+      ## We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
+      #- /var/log/apache2/access.log:/var/log/apache2/access.log
+      #- /var/log/apache2/error.log:/var/log/apache2/error.log
 
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:

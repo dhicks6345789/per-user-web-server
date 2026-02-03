@@ -3,6 +3,7 @@
 import subprocess
 import os
 import sys
+import pwd
 
 def run_as_user(uid, script_path):
     """
@@ -45,7 +46,12 @@ if __name__ == "__main__":
     print("Content-Type: text/plain\n")
     print("runCGI running.")
     print(sys.argv)
+
+    username = sys.argv[1].split("/")[2]
+    user_info = pwd.getpwnam(username)
+    uid = user_info.pw_uid
+
+    print("Username: " + username)
     
     # UID and path
-    print("runCGI: " + sys.argv[1] + ", " + sys.argv[2])
-    #run_as_user(int(sys.argv[1]), sys.argv[2])
+    run_as_user(uid, sys.argv[1])

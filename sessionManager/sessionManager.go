@@ -244,8 +244,8 @@ func main() {
 						},
 						mount.Mount{
 							Type: mount.TypeBind,
-							Source: "/var/log/apache2/access.log",
-							Target: "/var/log/apache2/access.log",
+							Source: "/var/log/apache2/access_log",
+							Target: "/var/log/apache2/access_log",
 							ReadOnly: true,
 						},
 						mount.Mount{

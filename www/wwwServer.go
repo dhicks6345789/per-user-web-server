@@ -49,7 +49,7 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 
 	handler := &cgi.Handler{
 		Path: "/usr/local/bin/runCGI.py",
-		Args: []string{string(fileInfo.Uid), path},
+		Args: []string{fmt.Sprint(fileInfo.Uid), path},
 		Root: "/cgi-bin/", // Adjust based on your URL prefix
 		Dir:  filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},

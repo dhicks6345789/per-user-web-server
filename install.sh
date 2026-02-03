@@ -118,6 +118,7 @@ fi
 if [ ! -f "/usr/bin/fusermount" ]; then
     apt-get install -y fuse
 fi
+modprobe fuse
 
 # Make sure rclone (for accessing / mounting cloud storage services such as Google Drive) is installed.
 if [ ! -f "/usr/bin/rclone" ]; then

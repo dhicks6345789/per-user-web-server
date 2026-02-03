@@ -15,6 +15,7 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fullPath := filepath.Join(rootPath, filepath.Clean(r.URL.Path))
+		log.Print("Serving: " + fullPath)
 
 		// Check if the file exists
 		info, err := os.Stat(fullPath)

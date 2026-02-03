@@ -1,39 +1,76 @@
-FROM httpd:latest
+FROM debian:latest
 
-# Update the package list and install Python 3.
-RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y apache2 apache2-suexec-custom python3 && apt-get clean
 
-# Install suEXEC, which allows us to limit how users can run CGI scripts.
-RUN apt-get update && apt-get install -y apache2-suexec-custom
-# Enable the suEXEC module.
-RUN sed -i 's/#LoadModule suexec_module modules\/mod_suexec.so/LoadModule suexec_module modules\/mod_suexec.so/' /usr/local/apache2/conf/httpd.conf
+## 1. Create multiple users to test the "UserDir" isolation
+## RUN useradd -m -u 1001 -s /bin/bash john && useradd -m -u 1002 -s /bin/bash alice
 
-# Update httpd.conf to use 'tee' for ErrorLog. This writes to the file AND redirects to stderr (fd/2).
-RUN sed -i 's/ErrorLog \/proc\/self\/fd\/2/ErrorLog \"|\/usr\/bin\/tee -a \/usr\/local\/apache2\/logs\/error_log > \/proc\/self\/fd\/2\"/' /usr/local/apache2/conf/httpd.conf
+# 2. Configure suexec-custom to allow /home
+# Line 1: The DocRoot (/home)
+# Line 2: The subdir (public_html)
+RUN echo "/home\ncgi-bin" > /etc/apache2/suexec/www-data
 
-# Update httpd.conf to add a second CustomLog for the physical file. The original image already has one pointing to stdout (fd/1)
-RUN echo 'CustomLog "/usr/local/apache2/logs/access_log" combined' >> /usr/local/apache2/conf/httpd.conf
+# 3. Enable modules
+RUN a2enmod suexec cgid userdir
 
-# Append a single 'Include' line to the end of the main config so we can add our own config files without having to modify / replace the main httpd.conf.
-RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/httpd.conf
+## 4. CRITICAL: Permissions for UserDir traversal
+## Apache (www-data) must have 'x' on /home/user to reach public_html
+##RUN chmod 711 /home/john /home/alice
 
-# Uncomment the LoadModule line for cgid_module ("mod_cgi") so we can use that module in our own configs.
-RUN sed -i 's/#LoadModule cgid_module/LoadModule cgid_module/' /usr/local/apache2/conf/httpd.conf
+## 5. Set up john's public_html
+#RUN mkdir -p /home/john/public_html/cgi-bin
+#COPY script.py /home/john/public_html/cgi-bin/script.py
+#RUN chown -R john:john /home/john/public_html && chmod 755 /home/john/public_html/cgi-bin/script.py
 
-# Enable mod_userdir
-RUN sed -i 's/#LoadModule userdir_module/LoadModule userdir_module/' /usr/local/apache2/conf/httpd.conf
+# 6. Copy modified UserDir config
+COPY userdir.conf /etc/apache2/mods-available/userdir.conf
 
-# Create a directory for our custom Apache config files.
-RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
+CMD ["apachectl", "-D", "FOREGROUND"]
 
-# Copy our configs into that directory.
-COPY per-user-web-server/users-www.conf /usr/local/apache2/conf/sites-enabled/
 
-# Replace the default httpd suexec with the customizable Debian one.
-RUN cp /usr/lib/apache2/suexec /usr/local/apache2/bin/suexec && chown root:root /usr/local/apache2/bin/suexec && chmod 4755 /usr/local/apache2/bin/suexec
 
-# Make sure the suexec.log file exists and is writeable.
-RUN mkdir -p /var/log/apache2 && touch /var/log/apache2/suexec.log && chmod 666 /var/log/apache2/suexec.log
 
-# Copy our own config over the default suexec config.
-COPY per-user-web-server/users-suexec-www-data /etc/apache2/suexec/www-data
+
+
+
+
+
+#FROM httpd:latest
+#
+## Update the package list and install Python 3.
+#RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip && rm -rf /var/lib/apt/lists/*
+#
+## Install suEXEC, which allows us to limit how users can run CGI scripts.
+#RUN apt-get update && apt-get install -y apache2-suexec-custom
+## Enable the suEXEC module.
+#RUN sed -i 's/#LoadModule suexec_module modules\/mod_suexec.so/LoadModule suexec_module modules\/mod_suexec.so/' /usr/local/apache2/conf/httpd.conf
+#
+## Update httpd.conf to use 'tee' for ErrorLog. This writes to the file AND redirects to stderr (fd/2).
+#RUN sed -i 's/ErrorLog \/proc\/self\/fd\/2/ErrorLog \"|\/usr\/bin\/tee -a \/usr\/local\/apache2\/logs\/error_log > \/proc\/self\/fd\/2\"/' /usr/local/apache2/conf/httpd.conf
+#
+## Update httpd.conf to add a second CustomLog for the physical file. The original image already has one pointing to stdout (fd/1)
+#RUN echo 'CustomLog "/usr/local/apache2/logs/access_log" combined' >> /usr/local/apache2/conf/httpd.conf
+#
+## Append a single 'Include' line to the end of the main config so we can add our own config files without having to modify / replace the main httpd.conf.
+#RUN echo "IncludeOptional conf/sites-enabled/*.conf" >> /usr/local/apache2/conf/httpd.conf
+#
+## Uncomment the LoadModule line for cgid_module ("mod_cgi") so we can use that module in our own configs.
+#RUN sed -i 's/#LoadModule cgid_module/LoadModule cgid_module/' /usr/local/apache2/conf/httpd.conf
+#
+## Enable mod_userdir
+#RUN sed -i 's/#LoadModule userdir_module/LoadModule userdir_module/' /usr/local/apache2/conf/httpd.conf
+#
+## Create a directory for our custom Apache config files.
+#RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
+#
+## Copy our configs into that directory.
+#COPY per-user-web-server/users-www.conf /usr/local/apache2/conf/sites-enabled/
+#
+## Replace the default httpd suexec with the customizable Debian one.
+#RUN cp /usr/lib/apache2/suexec /usr/local/apache2/bin/suexec && chown root:root /usr/local/apache2/bin/suexec && chmod 4755 /usr/local/apache2/bin/suexec
+#
+## Make sure the suexec.log file exists and is writeable.
+#RUN mkdir -p /var/log/apache2 && touch /var/log/apache2/suexec.log && chmod 666 /var/log/apache2/suexec.log
+#
+## Copy our own config over the default suexec config.
+#COPY per-user-web-server/users-suexec-www-data /etc/apache2/suexec/www-data

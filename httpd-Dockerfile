@@ -32,5 +32,8 @@ COPY per-user-web-server/users-www.conf /usr/local/apache2/conf/sites-enabled/
 # Replace the default httpd suexec with the customizable Debian one.
 RUN cp /usr/lib/apache2/suexec /usr/local/apache2/bin/suexec && chown root:root /usr/local/apache2/bin/suexec && chmod 4755 /usr/local/apache2/bin/suexec
 
+# Make sure the suexec.log file exists and is writeable.
+RUN mkdir -p /var/log/apache2 && touch /var/log/apache2/suexec.log && chmod 666 /var/log/apache2/suexec.log
+
 # Copy our own config over the default suexec config.
 COPY per-user-web-server/users-suexec-www-data /etc/apache2/suexec/www-data

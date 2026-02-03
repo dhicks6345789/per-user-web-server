@@ -191,6 +191,17 @@ if [ ! -f "per-user-web-server/sessionManager/sessionManager" ]; then
     exit 1
 fi
 
+echo Building the Go web server.
+cd per-user-web-server/www
+bash build.sh
+cd ..
+cd ..
+if [ ! -f "per-user-web-server/www/wwwServer" ]; then
+    echo "Problem building the Go web server - stopping."
+    exit 1
+fi
+
+
 echo Building the custom Java authentication plugin for Guacamole...
 rm per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar
 cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..

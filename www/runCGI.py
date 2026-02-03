@@ -43,4 +43,5 @@ def run_as_user(uid, script_path):
 
 if __name__ == "__main__":
     # UID and path
+    print("runCGI: " + sys.argv[1] + ", " + sys.argv[2])
     run_as_user(int(sys.argv[1]), sys.argv[2])

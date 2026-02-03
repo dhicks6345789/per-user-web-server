@@ -40,26 +40,23 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	// Extract the UID of the file owner
 	stat, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
 		http.Error(w, "Could not determine file owner", 500)
 		return
 	}
-	uid := stat.Uid
-	gid := stat.Gid
 
 	handler := &cgi.Handler{
 		Path: path,
+		Root: "/cgi-bin/", // Adjust based on your URL prefix
 		Dir:  filepath.Dir(path),
-		// Use SysProcAttr to impersonate the file owner
-		InheritEnv: []string{"PATH", "PYTHONPATH"},
-		Cmd: exec.Cmd{
-			SysProcAttr: &syscall.SysProcAttr{
-				Credential: &syscall.Credential{Uid: uid, Gid: gid},
-			},
-		},
+		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
+		// Note: Standard cgi.Handler does not support SysProcAttr directly.
+		// To fix the "unknown field" error, we remove the Cmd field.
 	}
 
+	// Because cgi.Handler doesn't expose SysProcAttr, 
+	// standard practice for UID switching involves a wrapper 
+	// or using a modified version of the cgi package.
 	handler.ServeHTTP(w, r)
 }

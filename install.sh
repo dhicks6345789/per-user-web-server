@@ -203,7 +203,7 @@ cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /
 
 echo Make sure the Apache log files exist.
 mkdir -p /var/log/apache2
-touch /var/log/apache2/access.log
+touch /var/log/apache2/access_log
 touch /var/log/apache2/error_log
 
 echo Make sure the "www" folder for user website folders exists.

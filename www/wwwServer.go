@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	rootPath := "./www" // The directory containing your static files and CGI scripts
+	rootPath := "/var/www" // The directory containing your static files and CGI scripts
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fullPath := filepath.Join(rootPath, filepath.Clean(r.URL.Path))

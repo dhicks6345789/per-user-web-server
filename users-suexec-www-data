@@ -1,5 +1,5 @@
 /usr/local/apache2/htdocs
-./
+.
 #/var/www
 #public_html/cgi-bin
 # The first two lines contain the suexec document root and the suexec userdir

@@ -244,14 +244,14 @@ func main() {
 						},
 						mount.Mount{
 							Type: mount.TypeBind,
-							Source: "/var/log/apache2/access_log",
-							Target: "/var/log/apache2/access_log",
+							Source: "/var/log/apache2/access.log",
+							Target: "/var/log/apache2/access.log",
 							ReadOnly: true,
 						},
 						mount.Mount{
 							Type: mount.TypeBind,
-							Source: "/var/log/apache2/error_log",
-							Target: "/var/log/apache2/error_log",
+							Source: "/var/log/apache2/error.log",
+							Target: "/var/log/apache2/error.log",
 							ReadOnly: true,
 						},
 					},

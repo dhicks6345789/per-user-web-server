@@ -13,14 +13,11 @@ RUN echo "/home\ncgi-bin" > /etc/apache2/suexec/www-data
 # 3. Enable modules
 RUN a2enmod suexec cgid userdir
 
-## 4. CRITICAL: Permissions for UserDir traversal
-## Apache (www-data) must have 'x' on /home/user to reach public_html
-##RUN chmod 711 /home/john /home/alice
+# Make sure the suexec.log file exists and is writeable.
+#RUN mkdir -p /var/log/apache2 && touch /var/log/apache2/suexec.log && chown root:www-data /var/log/apache2/suexec.log && chmod 664 /var/log/apache2/suexec.log
 
-## 5. Set up john's public_html
-#RUN mkdir -p /home/john/public_html/cgi-bin
-#COPY script.py /home/john/public_html/cgi-bin/script.py
-#RUN chown -R john:john /home/john/public_html && chmod 755 /home/john/public_html/cgi-bin/script.py
+chmod 664 /var/log/apache2/suexec.log
+
 
 # 6. Copy modified UserDir config
 # COPY userdir.conf /etc/apache2/mods-available/userdir.conf

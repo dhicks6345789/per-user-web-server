@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"os/user"
 	//"os/exec"
 	"fmt"
 	"log"
@@ -43,21 +42,15 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	fileInfo, ok := info.Sys().(*syscall.Stat_t)
-	if !ok {
-		http.Error(w, "Could not determine file owner", 500)
-		return
-	}
-	
-	u, err := user.LookupId(fmt.Sprint(fileInfo.Uid))
-	if err != nil {
-		log.Printf("Could not find user for UID %s: %v", uidStr, err)
-		return
-	}
+	#fileInfo, ok := info.Sys().(*syscall.Stat_t)
+	#if !ok {
+		#http.Error(w, "Could not determine file owner", 500)
+		#return
+	#}
 
 	handler := &cgi.Handler{
 		Path: "/usr/local/bin/runCGI.py",
-		Args: []string{u, path},
+		Args: []string{path},
 		Root: "/cgi-bin/", // Adjust based on your URL prefix
 		Dir:  filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},

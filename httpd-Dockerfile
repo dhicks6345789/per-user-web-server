@@ -25,11 +25,8 @@ RUN a2enmod suexec cgid userdir
 # 6. Copy modified UserDir config
 # COPY userdir.conf /etc/apache2/mods-available/userdir.conf
 
-## Create a directory for our custom Apache config files.
-#RUN mkdir -p /usr/local/apache2/conf/sites-enabled/
-#
-# Copy our configs into the sites-enabled directory.
-COPY per-user-web-server/users-www.conf /usr/local/apache2/conf/sites-enabled/
+# Copy our config into the sites-enabled directory.
+COPY per-user-web-server/000-default.conf /etc/apache2/sites-enabled/000-default.conf
 
 CMD ["apachectl", "-D", "FOREGROUND"]
 

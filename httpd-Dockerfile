@@ -2,34 +2,17 @@ FROM debian:latest
 
 RUN apt-get update && apt-get install -y apache2 apache2-suexec-custom python3 && apt-get clean
 
-## 1. Create multiple users to test the "UserDir" isolation
-## RUN useradd -m -u 1001 -s /bin/bash john && useradd -m -u 1002 -s /bin/bash alice
-
-# 2. Configure suexec-custom to allow /home
-# Line 1: The DocRoot (/home)
-# Line 2: The subdir (public_html)
-RUN echo "/home\ncgi-bin" > /etc/apache2/suexec/www-data
+# Configure suexec-custom to allow /va/www/html
+RUN echo "/var/www/html\ncgi-bin" > /etc/apache2/suexec/www-data
 
 # 3. Enable modules
 RUN a2enmod suexec cgid userdir
 
 # Make sure the suexec.log file exists and is writeable.
-#RUN mkdir -p /var/log/apache2 && touch /var/log/apache2/suexec.log && chown root:www-data /var/log/apache2/suexec.log && chmod 664 /var/log/apache2/suexec.log
-
-chmod 664 /var/log/apache2/suexec.log
-
-
-# 6. Copy modified UserDir config
-# COPY userdir.conf /etc/apache2/mods-available/userdir.conf
+RUN mkdir -p /var/log/apache2 && touch /var/log/apache2/suexec.log && chown root:www-data /var/log/apache2/suexec.log && chmod 664 /var/log/apache2/suexec.log
 
 # Copy our config into the sites-enabled directory.
 COPY per-user-web-server/000-default.conf /etc/apache2/sites-enabled/000-default.conf
-
-## Replace the default httpd suexec with the customizable Debian one.
-#RUN cp /usr/lib/apache2/suexec /usr/local/apache2/bin/suexec && chown root:root /usr/local/apache2/bin/suexec && chmod 4755 /usr/local/apache2/bin/suexec
-
-# Copy our own config over the default suexec config.
-COPY per-user-web-server/users-suexec-www-data /etc/apache2/suexec/www-data
 
 CMD ["apachectl", "-D", "FOREGROUND"]
 

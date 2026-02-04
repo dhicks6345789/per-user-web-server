@@ -1,15 +1,5 @@
 name: pangolin
 services:
-  # Webconsole - a handy way to run console applications directly in the browser. See: https://github.com/dhicks6345789/web-console
-  webconsole:
-    image: {{WEBCONSOLE_DOCKER_IMAGE}}
-    container_name: webconsole
-    command: /usr/local/bin/webconsole --debug --localOnly false
-    networks:
-      - main
-    volumes:
-      - /etc/webconsole:/etc/webconsole
-
   # A Cloudflare Zero-Trust tunnel. Requires an access token obtained from the Cloudflare console.
   # Can provide both tunneling and authentication, used just as an option for tunneling here, with Pangolin used for authentication (and as an alternative for tunneling, if wanted).
   tunnel:
@@ -84,28 +74,10 @@ services:
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
-  
-  # httpd - the Apache web server.
-  #httpd:
-  #  image: {{HTTPD_DOCKER_IMAGE}}
-  #  container_name: httpd
-  #  restart: unless-stopped
-  #  networks:
-  #    - main
-  #  volumes:
-  #    # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
-  #    - /etc/passwd:/etc/passwd:ro
-  #    - /etc/group:/etc/group:ro
-  #    # The individual users' web folders.
-  #    #- /var/www:/usr/local/apache2/htdocs
-  #    - /var/www/html:/var/www/html
-  #    # We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
-  #    - /var/log/apache2/access.log:/var/log/apache2/access.log
-  #    - /var/log/apache2/error.log:/var/log/apache2/error.log
 
   # Our own custom Go web server.
   wwwserver:
-    image: {{WWWSERVER_DOCKER_IMAGE}}
+    image: {{DOCKERWWWSERVER_DOCKER_IMAGE}}
     command: /usr/local/bin/wwwServer
     container_name: wwwserver
     restart: unless-stopped

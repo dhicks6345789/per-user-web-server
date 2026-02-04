@@ -1,14 +1,4 @@
-FROM ubuntu:24.04
-
-# Avoid prompts during installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install Xfce, TigerVNC, and basic tools.
-RUN apt-get update && apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils sudo curl
-# Install a Python development environment.
-RUN apt-get install -y python3
-# Clear up apt lists.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+FROM {{DOCKERROOT_DOCKER_IMAGE}}
 
 # Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to
 # match up UIDs with the host, which we don't know until container creation time.

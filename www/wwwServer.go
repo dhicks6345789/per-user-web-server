@@ -73,7 +73,6 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		Args:   []string{"-u", username, path},
 		Dir:    filepath.Dir(path),
 		Env:    []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
-		//Stderr: w,
 	}
 	
 	var errBuf bytes.Buffer
@@ -81,7 +80,7 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 	// Clone handler to ensure thread-safety per request
 	handlerClone := *handler
 	//handlerClone.Stderr = &errBuf
-	handlerClone.Stderr = io.MultiWriter(w, &errBuf)
+	handlerClone.Stderr = io.MultiWriter(&errBuf, os.Stderr)
 	
 	handlerClone.ServeHTTP(w, r)
 
@@ -90,6 +89,4 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		w.Write([]byte("\n--- CGI Background Errors ---\n"))
 		w.Write(errBuf.Bytes())
 	}
-	
-	//handler.ServeHTTP(w, r)
 }

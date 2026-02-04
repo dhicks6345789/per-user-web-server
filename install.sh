@@ -219,7 +219,7 @@ chmod 711 /var/www
 
 echo Get docs-to-markdown.
 if [ ! -d "docs-to-markdown" ]; then
-    git clone https://github.com/dhicks6345789/docs-to-markdown.git
+    git clone -b WebconsoleUpdate https://github.com/dhicks6345789/docs-to-markdown.git
 fi
 cd docs-to-markdown
 git pull

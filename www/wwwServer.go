@@ -12,6 +12,14 @@ import (
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
 const rootPath = "/var/www"
 
+func fileExists(thePath string) bool {
+	_, pathErr := os.Stat(thePath)
+	if os.IsNotExist(pathErr) {
+		return false
+	}
+	return true
+}
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		requestPath := filepath.Clean(r.URL.Path)
@@ -29,11 +37,10 @@ func main() {
 		}
 		
 		if requestStatInfo.IsDir() {
-			for _, value := range []string{"index.py", "index.html"} {
-				_, defaultIndexErr := os.Stat(fullPath + "/" + value)
-				if !os.IsNotExist(defaultIndexErr) {
-					fullPath = fullPath + "/" + value
-				}
+			if fileExists(fullPath + "/" + "index.html") {
+				fullPath = fullPath + "/" + "index.html"
+			} else if fileExists(fullPath + "/" + "index.py") {
+				fullPath = fullPath + "/" + "index.py"
 			}
 		}
 

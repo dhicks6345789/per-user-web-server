@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 )
 
-// The root web server folder. Important: include the trailing slash so the prefix gets removed properly from request path strings.
-const rootPath = "/var/www/"
+// The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
+const rootPath = "/var/www"
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +30,7 @@ func main() {
 			return
 		}
 
-		if fullPath == "/" {
+		if (fullPath == rootPath) || (fullPath == rootPath + "/") {
 			http.ServeFile(w, r, "/root/docs-to-markdown/startScreen/startScreenIndex.html")
 			return
 		}
@@ -46,7 +46,7 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	username := strings.Split(strings.TrimPrefix(path, rootPath), "/")[0]
+	username := strings.Split(strings.TrimPrefix(path, rootPath+"/"), "/")[0]
 	
 	handler := &cgi.Handler{
 		Path: "/usr/bin/sudo",

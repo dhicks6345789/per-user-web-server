@@ -15,7 +15,7 @@ const rootPath = "/var/www/"
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fullPath := filepath.Join(rootPath, filepath.Clean(r.URL.Path))
-		log.Print("Serving: " + fullPath)
+		log.Print("wwwServer, Serving: " + fullPath)
 
 		// Check if the file exists
 		info, err := os.Stat(fullPath)
@@ -30,11 +30,16 @@ func main() {
 			return
 		}
 
+		if fullPath == "/" {
+			http.ServeFile(w, r, "/root/docs-to-markdown/startScreen/startScreenIndex.html")
+			return
+		}
+
 		// Otherwise, serve as a static file
 		http.ServeFile(w, r, fullPath)
 	})
 
-	log.Println("Server starting on :8080...")
+	log.Println("wwwServer starting on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
@@ -45,8 +50,8 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 	
 	handler := &cgi.Handler{
 		Path: "/usr/bin/sudo",
-		Args: []string{"-u", username, path},
-		Root: "/cgi-bin/", // Adjust based on your URL prefix
+		Args: []string{"-u", username, path, "2>&1"},
+		//Root: "/cgi-bin/", // Adjust based on your URL prefix
 		Dir:  filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
 	}

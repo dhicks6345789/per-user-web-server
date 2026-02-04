@@ -20,7 +20,6 @@ SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
 WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
 WWWSERVER_DOCKER_IMAGE="sansay.co.uk-wwwserver:0.1-beta.3"
-HTTPD_DOCKER_IMAGE="sansay.co.uk-httpd:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 
 # Read user-defined command-line flags.
@@ -223,9 +222,8 @@ if [ ! -d "/var/www/html" ]; then
     mkdir -p /var/www/html
 fi
 
-echo Copy over the Python CGI script that gives users the interface to the "www" folder.
-cp per-user-web-server/www/index.py /var/www/html/index.py
-chmod +x /var/www/html/index.py
+echo Copy over the index page that gives users the interface to the "www" folder.
+# To do: copy MenuPage to /var/www as "index.html", ready to be served by Go wwwServer.
 
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then
@@ -268,10 +266,12 @@ if [ $INSTALL_PANGOLIN = true ]; then
         systemctl stop webconsole
         systemctl disable webconsole
 
-        #echo "Building our custom Docker image for the Apache web server (httpd) - this might take a few minutes..."
-        #cp per-user-web-server/httpd-Dockerfile .
-        #docker build -f httpd-Dockerfile --progress=plain --tag=$HTTPD_DOCKER_IMAGE . 2>&1
+        echo "Building the Linux desktop Docker image - this might take a few minutes..."
+        cp per-user-web-server/docker-desktop-Dockerfile .
+        docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+
         echo "Building our custom Docker image for the web server - this might take a few minutes..."
+        sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" wwwServer-Dockerfile
         cp per-user-web-server/wwwServer-Dockerfile .
         docker build -f wwwServer-Dockerfile --progress=plain --tag=$WWWSERVER_DOCKER_IMAGE . 2>&1
 
@@ -279,13 +279,8 @@ if [ $INSTALL_PANGOLIN = true ]; then
         cp per-user-web-server/webconsole-Dockerfile .
         docker build -f webconsole-Dockerfile --progress=plain --tag=$WEBCONSOLE_DOCKER_IMAGE . 2>&1
 
-        echo "Building the Linux desktop Docker image - this might take a few minutes..."
-        cp per-user-web-server/docker-desktop-Dockerfile .
-        docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
-
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
         cp per-user-web-server/docker-compose.yml ./docker-compose.yml
-        #sed -i "s/{{HTTPD_DOCKER_IMAGE}}/$HTTPD_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{WWWSERVER_DOCKER_IMAGE}}/$WWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml

@@ -1,4 +1,3 @@
-FROM debian:latest
-RUN apt-get update && apt-get install -y python3 sudo && apt-get clean
+FROM {{DOCKERDESKTOP_DOCKER_IMAGE}}
 COPY per-user-web-server/www/wwwServer /usr/local/bin/wwwServer
 EXPOSE 8080

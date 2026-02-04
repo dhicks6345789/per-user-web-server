@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"io"
 	"log"
 	"bytes"
 	"strings"
@@ -79,8 +80,9 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		
 	// Clone handler to ensure thread-safety per request
 	handlerClone := *handler
-	handlerClone.Stderr = &errBuf
-
+	//handlerClone.Stderr = &errBuf
+	handlerClone.Stderr = io.MultiWriter(w, &errBuf)
+	
 	handlerClone.ServeHTTP(w, r)
 
 	// After execution, check if we caught any errors

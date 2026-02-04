@@ -28,11 +28,11 @@ func main() {
 			return
 		}
 		
-		if info.IsDir() || strings.HasSuffix(fullPath, "/") {
+		if info.IsDir() {
 			for _, value := range []string{"index.py", "index.html"} {
-				_, err := os.Stat(fullPath + value)
+				_, err := os.Stat(fullPath + "/" + value)
 				if !os.IsNotExist(err) {
-					fullPath = fullPath + value
+					fullPath = fullPath + "/" + value
 				}
 			}
 		}

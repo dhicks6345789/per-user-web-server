@@ -91,7 +91,8 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		Args:   []string{"-u", username, path},
 		Dir:    filepath.Dir(path),
 		Env:    []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
-		Stderr: io.MultiWriter(&errBuf, os.Stderr)
+		// We both capture any error output to display to the user and write it to stderr as normal so it appears in the logs.
+		Stderr: io.MultiWriter(&errBuf, os.Stderr),
 	}
 
 	// Handle the request - hand over to Go's standard library.

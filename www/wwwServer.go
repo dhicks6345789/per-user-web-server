@@ -58,10 +58,8 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 	handler := &cgi.Handler{
 		Path: path,
 		Args: []string{},
-		// The magic happens here
 		Dir: filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
-		SubvadeEnv: []string{"PYTHONPATH=/var/www/lib"},
 		SysProcAttr: &syscall.SysProcAttr{
 			Credential: &syscall.Credential{
 				Uid: 1001, // Replace with target User ID

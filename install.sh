@@ -18,9 +18,9 @@ SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
-WEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-webconsole:0.1-beta.3"
-WWWSERVER_DOCKER_IMAGE="sansay.co.uk-wwwserver:0.1-beta.3"
+DOCKERROOT_DOCKER_IMAGE="sansay.co.uk-dockerroot:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
+DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -263,27 +263,28 @@ if [ $INSTALL_PANGOLIN = true ]; then
         docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
     
         # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
-        systemctl stop webconsole
-        systemctl disable webconsole
+        #systemctl stop webconsole
+        #systemctl disable webconsole
+
+        echo "Building the root Docker image - this might take a few minutes..."
+        cp per-user-web-server/docker-root-Dockerfile .
+        docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
 
         echo "Building the Linux desktop Docker image - this might take a few minutes..."
         cp per-user-web-server/docker-desktop-Dockerfile .
+        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
         docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 
         echo "Building our custom Docker image for the web server - this might take a few minutes..."
-        sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" wwwServer-Dockerfile
-        cp per-user-web-server/wwwServer-Dockerfile .
-        docker build -f wwwServer-Dockerfile --progress=plain --tag=$WWWSERVER_DOCKER_IMAGE . 2>&1
+        cp per-user-web-server/docker-wwwServer-Dockerfile .
+        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
+        docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1
 
-        echo "Building Docker image for Webconsole - this might take a few minutes..."
-        cp per-user-web-server/webconsole-Dockerfile .
-        docker build -f webconsole-Dockerfile --progress=plain --tag=$WEBCONSOLE_DOCKER_IMAGE . 2>&1
-
-        # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values for the Webconsole Docker image and the cloudflared token.
+        # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
         cp per-user-web-server/docker-compose.yml ./docker-compose.yml
-        sed -i "s/{{WWWSERVER_DOCKER_IMAGE}}/$WWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
-        sed -i "s/{{WEBCONSOLE_DOCKER_IMAGE}}/$WEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
         # Start up the Docker containers.

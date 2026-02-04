@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"log"
+	"bytes"
 	"strings"
 	"net/http"
 	"net/http/cgi"

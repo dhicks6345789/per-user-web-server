@@ -42,6 +42,7 @@ func main() {
 			} else if fileExists(fullPath + "/" + "index.py") {
 				fullPath = fullPath + "/" + "index.py"
 			}
+			requestStatInfo, _ = os.Stat(fullPath)
 		}
 
 		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)

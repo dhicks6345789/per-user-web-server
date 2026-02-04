@@ -9,9 +9,10 @@ import (
 	"path/filepath"
 )
 
-func main() {
-	rootPath := "/var/www/" // The directory containing your static files and CGI scripts
+// The root web server folder. Important: include the trailing slash so the prefix gets removed properly from request path strings.
+rootPath := "/var/www/" 
 
+func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fullPath := filepath.Join(rootPath, filepath.Clean(r.URL.Path))
 		log.Print("Serving: " + fullPath)
@@ -40,7 +41,7 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	username := string.Split(strings.TrimPrefix(path, rootPath), "/")[0]
+	username := strings.Split(strings.TrimPrefix(path, rootPath), "/")[0]
 	
 	handler := &cgi.Handler{
 		Path: "/usr/bin/sudo",

@@ -53,4 +53,25 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
 	}
 	handler.ServeHTTP(w, r)
+
+	handler := &cgi.Handler{
+		Path: path,
+		Args: []string{},
+		// The magic happens here
+		Dir: filepath.Dir(path),
+		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
+		SubvadeEnv: []string{"PYTHONPATH=/var/www/lib"},
+		SysProcAttr: &syscall.SysProcAttr{
+			Credential: &syscall.Credential{
+				Uid: 1001, // Replace with target User ID
+				Gid: 1001, // Replace with target Group ID
+			},
+		},
+	}
+	//http.Handle("/rpc", handler)
+	//http.ListenAndServe(":8080", nil)
+
+
+
+	
 }

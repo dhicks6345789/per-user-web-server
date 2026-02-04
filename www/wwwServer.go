@@ -71,7 +71,22 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		Args:   []string{"-u", username, path},
 		Dir:    filepath.Dir(path),
 		Env:    []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
-		Stderr: w,
+		//Stderr: w,
 	}
-	handler.ServeHTTP(w, r)
+	
+	var errBuf bytes.Buffer
+		
+	// Clone handler to ensure thread-safety per request
+	handlerClone := *handler
+	handlerClone.Stderr = &errBuf
+
+	handlerClone.ServeHTTP(w, r)
+
+	// After execution, check if we caught any errors
+	if errBuf.Len() > 0 {
+		w.Write([]byte("\n--- CGI Background Errors ---\n"))
+		w.Write(errBuf.Bytes())
+	}
+	
+	//handler.ServeHTTP(w, r)
 }

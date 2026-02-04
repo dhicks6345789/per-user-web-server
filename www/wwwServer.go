@@ -24,8 +24,8 @@ func main() {
 		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
 
 		if strings.HasSuffix(fullPath, "/") {
-			for index, value := range []string{"index.py", "index.html"} {
-				info, err := os.Stat(fullPath + value)
+			for _, value := range []string{"index.py", "index.html"} {
+				_, err := os.Stat(fullPath + value)
 				if !os.IsNotExist(err) {
 					fullPath = fullPath + value
 				}

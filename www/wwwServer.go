@@ -17,12 +17,10 @@ func main() {
 		requestPath := filepath.Clean(r.URL.Path)
 		fullPath := filepath.Join(rootPath, requestPath)
 		
-		if requestPath == "" {
+		if requestPath == "" || requestPath == "/" {
 			fullPath = "/root/docs-to-markdown/startScreen/startScreenIndex.html"
 		}
 		
-		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
-
 		if strings.HasSuffix(fullPath, "/") {
 			for _, value := range []string{"index.py", "index.html"} {
 				_, err := os.Stat(fullPath + value)
@@ -32,6 +30,8 @@ func main() {
 			}
 		}
 
+		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
+
 		// Check if the file exists
 		info, err := os.Stat(fullPath)
 		if os.IsNotExist(err) {
@@ -39,13 +39,13 @@ func main() {
 			return
 		}
 
-		// Handle CGI scripts (assuming .cgi or .py extension)
+		// Handle CGI scripts (assuming .cgi or .py extension).
 		if !info.IsDir() && (filepath.Ext(fullPath) == ".cgi" || filepath.Ext(fullPath) == ".py") {
 			handleCGI(w, r, fullPath, info)
 			return
 		}
 
-		// Otherwise, serve as a static file
+		// Otherwise, serve as a static file.
 		http.ServeFile(w, r, fullPath)
 	})
 

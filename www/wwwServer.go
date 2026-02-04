@@ -45,29 +45,13 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		//http.Error(w, "Could not determine file owner", 500)
 		//return
 	//}
-
-	//handler := &cgi.Handler{
-		//Path: "/usr/local/bin/runCGI.py",
-		//Args: []string{path},
-		//Root: "/cgi-bin/", // Adjust based on your URL prefix
-		//Dir:  filepath.Dir(path),
-		//Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
-	//}
-	//handler.ServeHTTP(w, r)
-
+	
 	handler := &cgi.Handler{
-		Path: path,
-		Args: []string{},
-		Dir: filepath.Dir(path),
+		Path: "/usr/bin/sudo",
+		Args: []string{"-u", username, path},
+		Root: "/cgi-bin/", // Adjust based on your URL prefix
+		Dir:  filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
-		SysProcAttr: &syscall.SysProcAttr{
-			Credential: &syscall.Credential{
-				Uid: 1001, // Replace with target User ID
-				Gid: 1001, // Replace with target Group ID
-			},
-		},
 	}
 	handler.ServeHTTP(w, r)
-	//http.Handle("/rpc", handler)
-	//http.ListenAndServe(":8080", nil)
 }

@@ -10,7 +10,7 @@ import (
 )
 
 // The root web server folder. Important: include the trailing slash so the prefix gets removed properly from request path strings.
-rootPath := "/var/www/" 
+const rootPath = "/var/www/"
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

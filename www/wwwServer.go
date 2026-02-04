@@ -46,7 +46,7 @@ func main() {
 		}
 
 		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
-		
+
 		// Handle CGI scripts (assuming .cgi or .py extension).
 		if !requestStatInfo.IsDir() && (filepath.Ext(fullPath) == ".cgi" || filepath.Ext(fullPath) == ".py") {
 			handleCGI(w, r, fullPath, requestStatInfo)
@@ -67,10 +67,11 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 	username := strings.Split(strings.TrimPrefix(path, rootPath+"/"), "/")[0]
 	
 	handler := &cgi.Handler{
-		Path: "/usr/bin/sudo",
-		Args: []string{"-u", username, path, "2>&1"},
-		Dir:  filepath.Dir(path),
-		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
+		Path:   "/usr/bin/sudo",
+		Args:   []string{"-u", username, path},
+		Dir:    filepath.Dir(path),
+		Env:    []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
+		Stderr: w,
 	}
 	handler.ServeHTTP(w, r)
 }

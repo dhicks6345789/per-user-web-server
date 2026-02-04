@@ -22,16 +22,16 @@ func main() {
 		}
 
 		// Check if the path exists - it might be a file or a folder.
-		info, err := os.Stat(fullPath)
-		if os.IsNotExist(err) {
+		requestStatInfo, requestStatErr := os.Stat(fullPath)
+		if os.IsNotExist(requestStatErr) {
 			http.NotFound(w, r)
 			return
 		}
 		
-		if info.IsDir() {
+		if requestStatInfo.IsDir() {
 			for _, value := range []string{"index.py", "index.html"} {
-				_, err := os.Stat(fullPath + "/" + value)
-				if !os.IsNotExist(err) {
+				_, defaultIndexErr := os.Stat(fullPath + "/" + value)
+				if !os.IsNotExist(defaultIndexErr) {
 					fullPath = fullPath + "/" + value
 				}
 			}
@@ -40,8 +40,8 @@ func main() {
 		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
 		
 		// Handle CGI scripts (assuming .cgi or .py extension).
-		if !info.IsDir() && (filepath.Ext(fullPath) == ".cgi" || filepath.Ext(fullPath) == ".py") {
-			handleCGI(w, r, fullPath, info)
+		if !requestStatInfo.IsDir() && (filepath.Ext(fullPath) == ".cgi" || filepath.Ext(fullPath) == ".py") {
+			handleCGI(w, r, fullPath, requestStatInfo)
 			return
 		}
 

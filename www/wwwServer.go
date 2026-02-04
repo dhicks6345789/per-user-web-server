@@ -76,17 +76,15 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 	}
 	
 	var errBuf bytes.Buffer
-		
-	// Clone handler to ensure thread-safety per request
-	handlerClone := *handler
-	//handlerClone.Stderr = &errBuf
-	handlerClone.Stderr = io.MultiWriter(&errBuf, os.Stderr)
-	
-	handlerClone.ServeHTTP(w, r)
+	handler.Stderr = io.MultiWriter(&errBuf, os.Stderr)
+	handler.ServeHTTP(w, r)
 
-	// After execution, check if we caught any errors
+	// After execution, check if we caught any errors.
 	if errBuf.Len() > 0 {
-		w.Write([]byte("\n--- CGI Background Errors ---\n"))
+		w.Write([]byte("\n<div>\n"))
+		w.Write([]byte("<pre style=\"background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: 'Courier New', monospace;\">\n"))
 		w.Write(errBuf.Bytes())
+		w.Write([]byte("\n</pre>\n"))
+		w.Write([]byte("</div>\n"))
 	}
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	rootPath := "/var/www" // The directory containing your static files and CGI scripts
+	rootPath := "/var/www/" // The directory containing your static files and CGI scripts
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fullPath := filepath.Join(rootPath, filepath.Clean(r.URL.Path))
@@ -40,11 +40,7 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	//fileInfo, ok := info.Sys().(*syscall.Stat_t)
-	//if !ok {
-		//http.Error(w, "Could not determine file owner", 500)
-		//return
-	//}
+	username = string.Split(strings.TrimPrefix(path, rootPath), "/")[0]
 	
 	handler := &cgi.Handler{
 		Path: "/usr/bin/sudo",

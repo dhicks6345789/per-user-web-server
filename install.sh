@@ -200,7 +200,6 @@ if [ ! -f "per-user-web-server/www/wwwServer" ]; then
     exit 1
 fi
 
-
 echo Building the custom Java authentication plugin for Guacamole...
 rm per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar
 cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..
@@ -212,18 +211,18 @@ if [ ! -f "per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6
 fi
 cp per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar /etc/guacamole/extensions
 
-echo Make sure the Apache log files exist.
-mkdir -p /var/log/apache2
-touch /var/log/apache2/access.log
-touch /var/log/apache2/error.log
-
 echo Make sure the "www" folder for user website folders exists.
-if [ ! -d "/var/www/html" ]; then
-    mkdir -p /var/www/html
+if [ ! -d "/var/www" ]; then
+    mkdir -p /var/www
 fi
 
-echo Copy over the index page that gives users the interface to the "www" folder.
-# To do: copy MenuPage to /var/www as "index.html", ready to be served by Go wwwServer.
+echo Get docs-to-markdown.
+if [ ! -d "docs-to-markdown" ]; then
+    git clone https://github.com/dhicks6345789/docs-to-markdown.git
+fi
+cd docs-to-markdown
+git pull
+cd ..
 
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then

@@ -216,6 +216,7 @@ if [ ! -d "/var/www" ]; then
     mkdir -p /var/www
 fi
 chmod 711 /var/www
+cp /root/docs-to-markdown/startScreen/startScreenIndex.html /var/www/index.html
 
 echo Get docs-to-markdown.
 if [ ! -d "docs-to-markdown" ]; then

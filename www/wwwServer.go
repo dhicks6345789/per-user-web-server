@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"log"
-	"syscall"
 	"net/http"
 	"net/http/cgi"
 	"path/filepath"
@@ -40,7 +39,7 @@ func main() {
 }
 
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
-	username = string.Split(strings.TrimPrefix(path, rootPath), "/")[0]
+	username := string.Split(strings.TrimPrefix(path, rootPath), "/")[0]
 	
 	handler := &cgi.Handler{
 		Path: "/usr/bin/sudo",

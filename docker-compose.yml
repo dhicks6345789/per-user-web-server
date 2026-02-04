@@ -88,7 +88,7 @@ services:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
       # The individual users' web folders.
-      - /var/www/html:/var/www
+      - /var/www:/var/www
       ## We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
       #- /var/log/apache2/access.log:/var/log/apache2/access.log
       #- /var/log/apache2/error.log:/var/log/apache2/error.log

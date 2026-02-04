@@ -14,8 +14,23 @@ const rootPath = "/var/www"
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fullPath := filepath.Join(rootPath, filepath.Clean(r.URL.Path))
-		log.Print("wwwServer, Serving: " + fullPath)
+		requestPath := filepath.Clean(r.URL.Path)
+		fullPath := filepath.Join(rootPath, requestPath)
+		
+		if requestPath == "" {
+			fullPath = "/root/docs-to-markdown/startScreen/startScreenIndex.html"
+		}
+		
+		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
+
+		if strings.HasSuffix(fullPath, "/") {
+			for index, value := range []string{"index.py", "index.html"} {
+				info, err := os.Stat(fullPath + value)
+				if !os.IsNotExist(err) {
+					fullPath = fullPath + value
+				}
+			}
+		}
 
 		// Check if the file exists
 		info, err := os.Stat(fullPath)
@@ -27,11 +42,6 @@ func main() {
 		// Handle CGI scripts (assuming .cgi or .py extension)
 		if !info.IsDir() && (filepath.Ext(fullPath) == ".cgi" || filepath.Ext(fullPath) == ".py") {
 			handleCGI(w, r, fullPath, info)
-			return
-		}
-
-		if (fullPath == rootPath) || (fullPath == rootPath + "/") {
-			http.ServeFile(w, r, "/root/docs-to-markdown/startScreen/startScreenIndex.html")
 			return
 		}
 
@@ -51,7 +61,6 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 	handler := &cgi.Handler{
 		Path: "/usr/bin/sudo",
 		Args: []string{"-u", username, path, "2>&1"},
-		//Root: "/cgi-bin/", // Adjust based on your URL prefix
 		Dir:  filepath.Dir(path),
 		Env:  []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
 	}

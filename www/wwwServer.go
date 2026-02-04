@@ -18,7 +18,7 @@ func main() {
 		fullPath := filepath.Join(rootPath, requestPath)
 		
 		if requestPath == "" || requestPath == "/" {
-			fullPath = "/root/docs-to-markdown/startScreen/startScreenIndex.html"
+			fullPath = "/var/www/index.html"
 		}
 		
 		if strings.HasSuffix(fullPath, "/") {

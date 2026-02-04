@@ -215,6 +215,7 @@ echo Make sure the "www" folder for user website folders exists.
 if [ ! -d "/var/www" ]; then
     mkdir -p /var/www
 fi
+chmod 711 /var/www
 
 echo Get docs-to-markdown.
 if [ ! -d "docs-to-markdown" ]; then

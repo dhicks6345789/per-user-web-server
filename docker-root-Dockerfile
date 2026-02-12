@@ -6,6 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Xfce, TigerVNC, and basic tools.
 RUN apt-get update && apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils sudo curl
 
+RUN apt-get update
+
 # Install the Chromium web browser.
 RUN apt-get install -y chromium-browser
 

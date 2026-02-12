@@ -9,9 +9,9 @@ RUN apt-get update && apt-get install -y xfce4 xfce4-goodies tigervnc-standalone
 RUN apt-get update
 
 # Update and install software-properties-common
-apt-get install -y software-properties-common
+RUN apt-get install -y software-properties-common
 # Add the Chromium Team PPA
-add-apt-repository -y ppa:canonical-chromium-builds/stage
+RUN add-apt-repository -y ppa:canonical-chromium-builds/stage
 # Install the Chromium web browser.
 RUN apt-get update
 RUN apt-get install -y chromium-browser

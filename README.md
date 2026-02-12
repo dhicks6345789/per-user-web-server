@@ -1,15 +1,17 @@
 # per-user-web-server
 Configures a Debian installation as a development and hosting environment for a set of users. Integrates authentication handled via [Pangolin](https://github.com/fosrl/pangolin) with web-based remote desktop access via Guacamole to give each user an individual desktop environment.
 
-Intended for situations where you want to let each of a set of users develope and host their own web site and/or applications, but still private within your organisation. Ideal for schools and similar institutions.
+Intended for situations where you want to let each of a set of users develop and host their own web site and/or applications, but still private within your organisation. Ideal for schools and similar institutions.
 
-**Note: as of 22nd January 2026, still a work-in-progress, not actually working yet. The documentation below is curently more a to-do list than actual features.**
+**Note: as of 12th February 2026, still a work-in-progress, not actually working yet. The documentation below is curently more a to-do list than actual features.**
 
 ## What Does This Project Do?
-This project provides setup scripts that are intended for people who want a mechanism to set up a web server for hosting user websites, complete with user authentication with default access to only your users.
+This project is basically a script that you run on a Debian Linux machine (physical or virtual) that installs a number of open source projects and then adds some configuration and additional code to integrate those projects together.
+
+When installation is complete, you should have a server that your set of users can log in to and access a (Linux-based) remote desktop environment. That remote desktop can be linked to a user's cloud storage (e.g. Google Drive), so their storage appears seemlessly as part of the normal filesystem. There will also be a "www" folder accesible to the user, any files they place in there will be accesible on a web server. That web server is itself behind the authentication gateway, so you can restrict the people who can view those user websites.
 
 ### Prerequisites
-If you're using this project it's assumed you are probably a system administrator of some sort (maybe working for a school or other learning establishment, or maybe a small-scale hosting provider) wanting to set up a web server for your users. This project is not something you'll want to run on your desktop machine, you'll be wanting at least a basic, publicly-accessible server, either hosted on your own hardware or by a cloud hosting provider of some sort. As of writing (January 2026), a suitible hosted virtual machine from a public provider is available for under $5 a month, possibly even for free.
+If you're using this project it's assumed you are probably a system administrator of some sort (maybe working for a school or other learning establishment, or maybe a small-scale hosting provider) wanting to set up a web server for your users. This project is not something you'll want to run on your desktop machine, you'll be wanting at least a basic, publicly-accessible server, either hosted on your own hardware or by a cloud hosting provider of some sort. As of writing (February 2026), a suitible hosted virtual machine from a public provider is available for under $5 a month, possibly even for free.
 
 #### Linux Distribution
 This project has been tested on a Debian 13 "Trixie" server (August 2025) running on (virtual) AMD64 hardware. Other versions of Debian (the previous version 12, "Bookworm", in particular) will probably work okay, as would similar versions of Ubuntu. Other Linux distributions shouldn't be that difficult to adjust for if needed, as should the ARM version of Debian (for the Raspberry Pi and similar hardware - both WebConsole and Pangolin have binaries available for ARM hardware). Adjusting this project directly for a Windows (or MacOS) install might not be possible as Pangolin seems to be a Linux-only project, but using a different tunneling / authentication provider such as [Cloudflare Zero-Trust Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) along with the WebConsole server should work.
@@ -20,11 +22,9 @@ You should probably run this script on a virtual machine (VM) dedicated to runni
 The VM used for this server can probably be quite small, at least initially. The suggested reasonable minimum for Debian Trixie is 2 GB of RAM and 40 GB of storage, if you're using a hosting provider like AWS then their smallest available VM should be okay - for something like AWS, you might be able to manage with the resources available in the free pricing tier. Exactly how much RAM / CPU / storage you are going to need will depend on how many users you have and how much they'll be using the server, but you can probably set up a minimal test server initially and add more RAM / CPU / storage to it later.
 
 #### Domain / DNS
-You will need the ability to set up [sub-domains](https://en.wikipedia.org/wiki/Subdomain) to point it at your server. Generally, this means having access to the DNS configuration for your domain name. For the full setup, you will need two sub-domains - one for the Pangolin server (e.g. pangolin.example.com) and one for the web server (e.g. webserver.example.com). Both sub-domains can point at the same physical (or virtual) server, or they can be separate servers if you want.
+You will need the ability to set up [sub-domains](https://en.wikipedia.org/wiki/Subdomain) to point it at your server. Generally, this means having access to the DNS configuration for your domain name. You will probably want two sub-domains - one for the Pangolin server (e.g. pangolin.example.com) and one for the web server (e.g. webserver.example.com). Both sub-domains can point at the same physical (or virtual) server, or they can be separate servers if you want.
 
-In theory, you could set this web server up as your domain's default web server, i.e. at "www.example.com". However, this would give you a public website showing the main WebConsole menu page, which probably isn't want you want for your public-facing website. You might do better to install a standard web server alongside this setup and have that serve any public-facing web pages.
-
-Possible todo: add an option to install an instance of [Caddy](https://caddyserver.com/) to handle this.
+You can set this web server up as your domain's default web server, i.e. at "www.example.com". This project uses its own simple Go-based webserver to serve files and CGI scripts, that hasn't been tested with a high-traffic environment yet.
 
 #### Tunneling
 The Pangolin server handles authentication and routing of reqeusts to the correct handler. It can also handle tunneling connections, so the Pangolin server can be on a publically-accesible server whilest the web server can be behind a firewall. Alternativly, you can used your preffered tunneling solution (e.g. Cloudflare Tunnels) to make netwok services available, with Pangolin being used just for authentication and routing.

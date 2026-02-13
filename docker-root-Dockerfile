@@ -1,4 +1,5 @@
-FROM ubuntu:24.04
+#FROM ubuntu:24.04
+FROM debian:latest
 
 # Avoid prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9,15 +10,16 @@ RUN apt-get update
 # Install Xfce, TigerVNC, and basic tools.
 RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils sudo curl
 
-# For some reason, we seem to have to update repository lists again to avoid errors.
-RUN apt-get update
+## For some reason, we seem to have to update repository lists again to avoid errors.
+#RUN apt-get update
 
-# Update and install software-properties-common
-RUN apt-get install -y software-properties-common
-# Add the Chromium Team PPA
-RUN add-apt-repository -y ppa:canonical-chromium-builds/stage
-# Install the Chromium web browser.
-RUN apt-get update
+## Update and install software-properties-common
+#RUN apt-get install -y software-properties-common
+## Add the Chromium Team PPA
+#RUN add-apt-repository -y ppa:canonical-chromium-builds/stage
+## Install the Chromium web browser.
+#RUN apt-get update
+
 RUN apt-get install -y chromium-browser
 
 # Install a Python development environment.

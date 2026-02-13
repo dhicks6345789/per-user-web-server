@@ -24,11 +24,17 @@ cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
 chown $1:$1 /home/$1/startup.sh
 chmod u+x /home/$1/startup.sh
 
-mkdir -p /home/$1/.vnc
-chown -R $1:$1 /home/$1/.vnc
-cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
-chown $1:$1 /home/$1/.vnc/xstartup
-chmod u+x /home/$1/.vnc/xstartup
+#mkdir -p /home/$1/.vnc
+#chown -R $1:$1 /home/$1/.vnc
+#cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
+#chown $1:$1 /home/$1/.vnc/xstartup
+#chmod u+x /home/$1/.vnc/xstartup
+
+mkdir -p /home/$1/.config/tigervnc
+chown -R $1:$1 /home/$1/.config/tigervnc
+cp /root/docker-desktop-xstartup /home/$1/.config/tigervnc/xstartup
+chown $1:$1 /home/$1/.config/tigervnc/xstartup
+chmod u+x /home/$1/.config/tigervnc/xstartup
 
 # Run the user startup script as the user.
 su - $1 -c "bash /home/$1/startup.sh $1 $2 $3 $4 $5"

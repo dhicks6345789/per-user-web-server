@@ -20,7 +20,7 @@ RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x
 ## Install the Chromium web browser.
 #RUN apt-get update
 
-RUN apt-get install -y chromium-browser
+#RUN apt-get install -y chromium-browser
 
 # Install a Python development environment.
 RUN apt-get install -y python3 python3-pip

@@ -3,6 +3,8 @@
 unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
+/etc/init.d/dbus start
+
 #echo Xstartup section 1.
 ## Ensure a machine-id exists (critical for Debian/D-Bus).
 #if [ ! -f /var/lib/dbus/machine-id ]; then

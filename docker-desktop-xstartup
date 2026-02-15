@@ -3,9 +3,6 @@
 unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
-# Ensure DISPLAY is set (VNC usually does this, but let's be safe)
-# export DISPLAY=:1
-
 # Start the D-Bus session manually and capture the environment variables
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     eval $(dbus-launch --sh-syntax --exit-with-session)

@@ -10,6 +10,9 @@ RUN apt-get update
 # Install Xfce, TigerVNC, and basic tools.
 RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils xfce4-settings sudo curl
 
+# Set the XDG_CONFIG_DIRS variable for the Xfce (desktop GUI) configuration.
+ENV XDG_CONFIG_DIRS=/etc/xdg
+
 ## For some reason, we seem to have to update repository lists again to avoid errors.
 #RUN apt-get update
 

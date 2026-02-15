@@ -271,13 +271,13 @@ if [ $INSTALL_PANGOLIN = true ]; then
         cp per-user-web-server/docker-root-Dockerfile .
         docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
 
-        echo "Building the Linux desktop Docker image.
+        echo "Building the Linux desktop Docker image."
         cp per-user-web-server/docker-desktop-Dockerfile .
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
         docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
         docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 
-        echo "Building our custom Docker image for the web server.
+        echo "Building our custom Docker image for the web server."
         cp per-user-web-server/docker-wwwServer-Dockerfile .
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
         docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1

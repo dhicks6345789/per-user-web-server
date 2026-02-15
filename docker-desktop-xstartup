@@ -22,4 +22,4 @@ unset DBUS_SESSION_BUS_ADDRESS
 
 #exec startxfce4
 #exec dbus-launch --exit-with-session startxfce4
-/usr/bin/startxfce4 &
+/usr/bin/startxfce4

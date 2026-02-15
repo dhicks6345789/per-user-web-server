@@ -15,5 +15,3 @@ chmod 600 /home/$1/.config/tigervnc/passwd
 
 echo "Starting VNC server, password $4 on display number $5."
 vncserver -fg -localhost no -geometry 1280x720 :$5
-
-echo "VNC server startup done."

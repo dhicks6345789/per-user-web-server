@@ -4,7 +4,7 @@
 # $4=password
 # $5=vncdisplay
 
-# Set up VNC password.
+echo Setting up VNC password.
 mkdir -p /home/$1/.vnc
 echo -e "$4\n$4\nn" | vncpasswd -f > /home/$1/.vnc/passwd
 chmod 600 /home/$1/.vnc/passwd

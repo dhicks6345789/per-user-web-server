@@ -1,4 +1,3 @@
-#FROM ubuntu:24.04
 FROM debian:latest
 
 # Avoid prompts during installation
@@ -7,11 +6,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Get updated installation repository lists.
 RUN apt-get update
 
-# Install Xfce, TigerVNC, and basic tools.
-RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils xfce4-settings sudo curl
+# Update and install Xfce4, VNC server, and dependencies
+RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils
 
-# Set the XDG_CONFIG_DIRS variable for the Xfce (desktop GUI) configuration.
-ENV XDG_CONFIG_DIRS=/etc/xdg
+# Set up VNC configuration
+RUN mkdir -p ~/.vnc && echo "#!/bin/sh\nunset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nstartxfce4 &" > ~/.vnc/xstartup && chmod +x ~/.vnc/xstartup
+
+# Set a default VNC password (required for TigerVNC)
+#RUN mkdir -p ~/.vnc && echo "password" | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd
+## Expose VNC port
+#EXPOSE 5901
+## Start the VNC server on display :1
+#CMD ["vncserver", "-fg", ":1", "-geometry", "1280x800", "-localhost", "no"]
+
+
 
 ## For some reason, we seem to have to update repository lists again to avoid errors.
 #RUN apt-get update
@@ -25,17 +33,17 @@ ENV XDG_CONFIG_DIRS=/etc/xdg
 
 #RUN apt-get install -y chromium-browser
 
-# Install a Python development environment.
-RUN apt-get install -y python3 python3-pip
-# The Pandas data-processing library.
-RUN apt-get install -y python3-pandas
+## Install a Python development environment.
+#RUN apt-get install -y python3 python3-pip
+## The Pandas data-processing library.
+#RUN apt-get install -y python3-pandas
 
-# Install a Node.js development environment.
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-RUN apt-get install -y nodejs
+## Install a Node.js development environment.
+#RUN curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+#RUN apt-get install -y nodejs
 
-# Install the Google Gemini command-line (CLI) tool - depends on Node.js.
-RUN npm install -g @google/gemini-cli
+## Install the Google Gemini command-line (CLI) tool - depends on Node.js.
+#RUN npm install -g @google/gemini-cli
 
 # Clear up apt lists.
 # RUN apt-get clean && rm -rf /var/lib/apt/lists/*

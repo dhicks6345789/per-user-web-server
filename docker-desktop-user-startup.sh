@@ -12,6 +12,6 @@ mkdir -p /home/$1/.config/tigervnc && echo "$4" | vncpasswd -f > /home/$1/.confi
 echo "Starting VNC server, password $4 on display number $5."
 
 # Start TigerVNC.
-# vncserver -fg -localhost no -geometry 1280x720 :$5
-vncserver :$5 -geometry 1280x800 -depth 24
+vncserver -fg -localhost no -geometry 1280x720 :$5
+#vncserver :$5 -geometry 1280x800 -depth 24
 #tail -F /home/$1/.vnc/*.log

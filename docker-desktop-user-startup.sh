@@ -7,10 +7,10 @@
 echo Setting up VNC password...
 
 mkdir -p /home/$1/.vnc/
-#printf "$4" | vncpasswd -f > /home/$1/.vnc/passwd
-#chmod 600 /home/$1/.vnc/passwd
+printf "$4" | vncpasswd -f > /home/$1/.vnc/passwd
+chmod 600 /home/$1/.vnc/passwd
 
-#echo "Starting VNC server, password $4 on display number $5."
-#vncserver -fg -localhost no -geometry 1280x720 :$5
+echo "Starting VNC server, password $4 on display number $5."
+vncserver -fg -localhost no -geometry 1280x720 :$5
 
-bash
+echo "VNC server startup done."

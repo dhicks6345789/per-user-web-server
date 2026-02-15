@@ -4,9 +4,14 @@
 # $4=password
 # $5=vncdisplay
 
-echo Setting up VNC password.
-mkdir -p /home/$1/.vnc
-echo $4 | vncpasswd -f > /home/$1/.vnc/passwd
+echo Setting up VNC password...
+
+#mkdir -p /home/$1/.vnc
+#echo $4 | vncpasswd -f > /home/$1/.vnc/passwd
+#chmod 600 /home/$1/.vnc/passwd
+
+mkdir -p /home/$1/.vnc/
+printf "$4\n$4\nn\n" | vncpasswd /home/$1/.vnc/passwd
 chmod 600 /home/$1/.vnc/passwd
 
 echo "Starting VNC server, password $4 on display number $5."

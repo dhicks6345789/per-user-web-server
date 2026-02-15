@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 
 # Install Xfce, TigerVNC, and basic tools.
-RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils sudo curl
+RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils xfce4-settings sudo curl
 
 ## For some reason, we seem to have to update repository lists again to avoid errors.
 #RUN apt-get update

@@ -6,18 +6,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Get updated installation repository lists.
 RUN apt-get update
 
+# Install some basic utilities.
+RUN apt-get install -y curl sudo
+
 # Update and install Xfce4, VNC server, and dependencies
 RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils
 
 # Set up VNC configuration
 RUN mkdir -p ~/.vnc && echo "#!/bin/sh\nunset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nstartxfce4 &" > ~/.vnc/xstartup && chmod +x ~/.vnc/xstartup
-
-# Set a default VNC password (required for TigerVNC)
-#RUN mkdir -p ~/.vnc && echo "password" | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd
-## Expose VNC port
-#EXPOSE 5901
-## Start the VNC server on display :1
-#CMD ["vncserver", "-fg", ":1", "-geometry", "1280x800", "-localhost", "no"]
 
 
 

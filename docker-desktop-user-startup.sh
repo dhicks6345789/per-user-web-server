@@ -12,7 +12,7 @@ export DISPLAY=:$5
 # 3. Start the VNC Server
 # -forever keeps it alive after disconnect, -shared allows multiple connections\n\
 # -nopw is for testing (add -passwd yourpass for security)\n\
-x11vnc -display :$5 -passwd $4 -listen 0.0.0.0 -xkb -forever -shared &
+x11vnc -noshm -display :$5 -passwd $4 -listen 0.0.0.0 -xkb -forever -shared &
 # 4. Keep the container alive by tailing the log or running an app.
 xterm
 

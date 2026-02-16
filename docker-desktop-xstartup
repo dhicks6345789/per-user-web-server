@@ -4,24 +4,23 @@
 unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
-# Ensure a machine-id exists (critical for Debian/D-Bus).
-if [ ! -f /var/lib/dbus/machine-id ]; then
-    dbus-uuidgen | tee /var/lib/dbus/machine-id
-fi
+## Ensure a machine-id exists (critical for Debian/D-Bus).
+#if [ ! -f /var/lib/dbus/machine-id ]; then
+#    dbus-uuidgen | tee /var/lib/dbus/machine-id
+#fi
 
-# Start the D-Bus session manually and capture the environment variables.
-eval $(dbus-launch --sh-syntax --exit-with-session)
-set
+## Start the D-Bus session manually and capture the environment variables.
+#eval $(dbus-launch --sh-syntax --exit-with-session)
+#set
 
-# Now that DBUS_SESSION_BUS_ADDRESS is set, start the components.
-# This allows xfconfd to find the bus without needing X11 autolaunch.
-echo Starting xfconfd...
-/usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd
-#dbus-run-session -- /usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd &
+## Now that DBUS_SESSION_BUS_ADDRESS is set, start the components.
+## This allows xfconfd to find the bus without needing X11 autolaunch.
+#echo Starting xfconfd...
+#/usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd
+##dbus-run-session -- /usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd &
 
-[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
-[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+#[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+#[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
 
-#/usr/bin/startxfce4
 echo Starting Xfce4...
-dbus-launch --exit-with-session startxfce4
+exec dbus-launch --exit-with-session startxfce4

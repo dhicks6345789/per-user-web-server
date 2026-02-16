@@ -15,24 +15,24 @@ x11vnc -display :$5 -passwd $4 -listen 0.0.0.0 -xkb -forever -shared &
 # 4. Keep the container alive by tailing the log or running an app.
 xterm
 
-# 2. Define the XDG paths explicitly
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_RUNTIME_DIR="/tmp/runtime-$USER"
+## 2. Define the XDG paths explicitly
+#export XDG_CONFIG_HOME="$HOME/.config"
+#export XDG_DATA_HOME="$HOME/.local/share"
+#export XDG_CACHE_HOME="$HOME/.cache"
+#export XDG_RUNTIME_DIR="/tmp/runtime-$USER"
 
-# 3. Physically create the directories
-mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_RUNTIME_DIR"
-chmod 700 "$XDG_RUNTIME_DIR"
+## 3. Physically create the directories
+#mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_RUNTIME_DIR"
+#chmod 700 "$XDG_RUNTIME_DIR"
 
-echo Setting up VNC password...
+#echo Setting up VNC password...
 
-#mkdir -p /home/$1/.vnc/
-#echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
+##mkdir -p /home/$1/.vnc/
+###echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
 #chmod 600 /home/$1/.vnc/passwd
-mkdir -p /home/$1/.config/tigervnc
-echo "$4" | vncpasswd -f > /home/$1/.config/tigervnc/passwd
-chmod 600 /home/$1/.config/tigervnc/passwd
+#mkdir -p /home/$1/.config/tigervnc
+#echo "$4" | vncpasswd -f > /home/$1/.config/tigervnc/passwd
+#chmod 600 /home/$1/.config/tigervnc/passwd
 
-echo "Starting VNC server, password $4 on display number $5."
-vncserver -fg -localhost no -geometry 1280x720 :$5
+#echo "Starting VNC server, password $4 on display number $5."
+#vncserver -fg -localhost no -geometry 1280x720 :$5

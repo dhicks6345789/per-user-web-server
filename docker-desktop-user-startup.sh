@@ -8,6 +8,13 @@
 export HOME=/home/$1
 export USER=$1
 
+# 3. Start the VNC Server
+# -forever keeps it alive after disconnect, -shared allows multiple connections\n\
+# -nopw is for testing (add -passwd yourpass for security)\n\
+x11vnc -display :$5 -passwd $4 -listen 0.0.0.0 -xkb -forever -shared &
+# 4. Keep the container alive by tailing the log or running an app.
+xterm
+
 # 2. Define the XDG paths explicitly
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"

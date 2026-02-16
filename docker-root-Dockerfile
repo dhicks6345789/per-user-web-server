@@ -9,11 +9,10 @@ RUN apt-get update
 # Install some basic utilities.
 RUN apt-get install -y curl sudo
 
-# Update and install Xfce4, VNC server, and dependencies
-RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils
-
-# Set up VNC configuration
-RUN mkdir -p ~/.vnc && echo "#!/bin/sh\nunset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nstartxfce4 &" > ~/.vnc/xstartup && chmod +x ~/.vnc/xstartup
+## Update and install Xfce4, VNC server, and dependencies
+#RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils
+## Set up VNC configuration
+#RUN mkdir -p ~/.vnc && echo "#!/bin/sh\nunset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nstartxfce4 &" > ~/.vnc/xstartup && chmod +x ~/.vnc/xstartup
 
 
 

@@ -11,14 +11,17 @@ fi
 
 # Start the D-Bus session manually and capture the environment variables.
 eval $(dbus-launch --sh-syntax --exit-with-session)
+set
 
 # Now that DBUS_SESSION_BUS_ADDRESS is set, start the components.
 # This allows xfconfd to find the bus without needing X11 autolaunch.
-#/usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd &
-dbus-run-session -- /usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd &
+echo Starting xfconfd...
+/usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd &
+#dbus-run-session -- /usr/lib/x86_64-linux-gnu/xfce4/xfconf/xfconfd &
 
 [ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
 [ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
 
 #/usr/bin/startxfce4
+echo Starting Xfce4...
 dbus-launch --exit-with-session startxfce4

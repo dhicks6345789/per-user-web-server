@@ -4,14 +4,19 @@
 # $4=password
 # $5=vncdisplay
 
-# Ensure HOME is set.
+# Set the home directory.
 export HOME=/home/$1
+export USER=$1
+
+# 2. Define the XDG paths explicitly
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_RUNTIME_DIR="/tmp/runtime-$USER"
 
-# Create the xfce4 directory manually just in case.
-mkdir -p $XDG_CONFIG_HOME/xfce4
+# 3. Physically create the directories
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
 
 echo Setting up VNC password...
 

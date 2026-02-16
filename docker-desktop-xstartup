@@ -11,7 +11,9 @@ unset DBUS_SESSION_BUS_ADDRESS
 
 ## Start the D-Bus session manually and capture the environment variables.
 #eval $(dbus-launch --sh-syntax --exit-with-session)
-#set
+
+# Print out the enrivonment for the log.
+set
 
 ## Now that DBUS_SESSION_BUS_ADDRESS is set, start the components.
 ## This allows xfconfd to find the bus without needing X11 autolaunch.

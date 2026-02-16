@@ -5,11 +5,6 @@
 # $4=password
 # $5=vncdisplay
 
-/etc/init.d/dbus start
-
-rm -f /tmp/.X1-lock
-rm -f /tmp/.X11-unix
-
 # We haven't created the user yet, but their home folder already exists as we've mounted their "Documents" and "www" folders there at container creation time.
 # Set ownership of their home folder by numeric IDs, we'll crate the actual user in the next step.
 chown $2:$3 /home/$1
@@ -40,6 +35,12 @@ chown -R $1:$1 /home/$1/.config/tigervnc
 cp /root/docker-desktop-xstartup /home/$1/.config/tigervnc/xstartup
 chown $1:$1 /home/$1/.config/tigervnc/xstartup
 chmod u+x /home/$1/.config/tigervnc/xstartup
+
+# Start Xvfb (Virtual Monitor) in the background\n\
+Xvfb :1 -screen 0 1280x720x24 &
+sleep 2
+# 2. Start the Window Manager
+fluxbox &
 
 # Run the user startup script as the user.
 su - $1 -c "bash /home/$1/startup.sh $1 $2 $3 $4 $5"

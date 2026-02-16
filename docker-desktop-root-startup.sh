@@ -7,6 +7,9 @@
 
 /etc/init.d/dbus start
 
+rm -f /tmp/.X1-lock
+rm -f /tmp/.X11-unix
+
 # We haven't created the user yet, but their home folder already exists as we've mounted their "Documents" and "www" folders there at container creation time.
 # Set ownership of their home folder by numeric IDs, we'll crate the actual user in the next step.
 chown $2:$3 /home/$1

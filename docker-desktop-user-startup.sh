@@ -8,8 +8,8 @@
 export HOME=/home/$1
 export USER=$1
 #export DISPLAY=:$5
-export DISPLAY=:0
-export PORT=5900
+export DISPLAY=:1
+export PORT=5901
 
 echo "Starting VNC server, password $4 on display number $5."
 
@@ -17,7 +17,7 @@ echo "Starting VNC server, password $4 on display number $5."
 # -forever keeps it alive after disconnect, -shared allows multiple connections\n\
 # -nopw is for testing (add -passwd yourpass for security)\n\
 #x11vnc -noshm -display :$5 -passwd $4 -listen 0.0.0.0 -xkb -forever -shared &
-x11vnc -noshm -display :0 -nopw -listen 127.0.0.1 -xkb -forever -shared &
+x11vnc -noshm -display :1 -nopw -listen 127.0.0.1 -xkb -forever -shared &
 # 4. Keep the container alive by tailing the log or running an app.
 xterm
 

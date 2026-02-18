@@ -202,7 +202,7 @@ func main() {
 			// Temporary debugging.
 			hb := nat.PortBinding{
 				HostIP:   "0.0.0.0",
-				HostPort: "5901"
+				HostPort: "5901",
 			}
 			
 			// Create the container that holds the user's desktop session.

@@ -150,8 +150,8 @@ func main() {
 			}
 			//VNCPort = possibleVNCPort
 			//VNCDisplay := int(VNCPort) - 5900
-			VNCPort = 5900
-			VNCDisplay := 0
+			VNCPort = 5901
+			VNCDisplay := 1
 
 			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their desktop image they have the appropriate ownership and permissions.
 			userUIDStr := ""

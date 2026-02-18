@@ -220,6 +220,14 @@ func main() {
 				// Set up mount points in the container. Confusingly, these mount points, in /home/username, will be created before the actual user inside the container.
 				// Therefore, there is a startup script (that runs as root) inside the container that sets up the named user, matching UIDs with the host.
 				HostConfig: &container.HostConfig{
+					PortBindings: nat.PortMap{
+						nat.Port("5901/tcp"): []nat.PortBinding{
+							{
+								HostIP:   "0.0.0.0", // Accessible from anywhere.
+								HostPort: "5901",    // The port on your actual machine.
+							},
+						},
+					},
 					Mounts: []mount.Mount{
 						/*
 						// We use the rclone Docker plugin to mount the user's Google Drive home folder as their "Documents" folder in their new desktop container.

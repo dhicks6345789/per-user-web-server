@@ -122,17 +122,20 @@ fi
 # Make sure rclone (for accessing / mounting cloud storage services such as Google Drive) is installed.
 if [ ! -f "/usr/bin/rclone" ]; then
     apt-get install -y rclone
-    # We also install the rclone plugin for Docker, so we can use rclone to mount file systems directly inside containers.
-    sudo mkdir -p /var/lib/docker-plugins/rclone/config
-    sudo mkdir -p /var/lib/docker-plugins/rclone/cache
+    ## We also install the rclone plugin for Docker, so we can use rclone to mount file systems directly inside containers.
+    #sudo mkdir -p /var/lib/docker-plugins/rclone/config
+    #sudo mkdir -p /var/lib/docker-plugins/rclone/cache
 fi
 
-cp per-user-web-server/rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
+#cp per-user-web-server/rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
+mkdir -p /root/.config/rclone
+cp per-user-web-server/rclone.conf /root/.config/rclone/rclone.conf
 if [ ! -f "pangolin.json" ]; then
     echo "Missing pangolin.json - authentication credentials for rclone to connect to Google Drive. Stopping."
     exit 1
 fi
-cp pangolin.json /var/lib/docker-plugins/rclone/config/pangolin.json
+#cp pangolin.json /var/lib/docker-plugins/rclone/config/pangolin.json
+cp pangolin.json /root/.config/rclone/pangolin.json
 
 # 18/12/2025: The Pangolin installer seems to make use of the "add-apt-repository" command. This isn't available in Debian 13 (Trixie) as the "software-properties-common" package has been removed from the distribution.
 # What seems to work is installing "software-properties-common" from a .deb file (making sure its dependencies are installed first).

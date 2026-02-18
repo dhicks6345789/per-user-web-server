@@ -205,7 +205,7 @@ func main() {
 				HostPort: "5901",
 			}
 			// Explicitly cast the string to the network.Port type
-			containerPort := network.Port("5901/tcp")
+			containerPort := network.Port(ParsePort("5901/tcp"))
 			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()

@@ -4,41 +4,25 @@
 # $4=password
 # $5=vncdisplay
 
-# Set the home directory.
-export HOME=/home/$1
-export USER=$1
-#export DISPLAY=:$5
-export DISPLAY=:1
-export PORT=5901
+## Set the home directory.
+#export HOME=/home/$1
+#export USER=$1
+##export DISPLAY=:$5
+#export DISPLAY=:1
+#export PORT=5901
+
+mkdir -p /home/$1/.vnc
+chown -R $1:$1 /home/$1/.vnc
+cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
+chown $1:$1 /home/$1/.vnc/xstartup
+chmod u+x /home/$1/.vnc/xstartup
+
+#mkdir -p /home/$1/.config/tigervnc
+#chown -R $1:$1 /home/$1/.config/tigervnc
+#cp /root/docker-desktop-xstartup /home/$1/.config/tigervnc/xstartup
+#chown $1:$1 /home/$1/.config/tigervnc/xstartup
+#chmod u+x /home/$1/.config/tigervnc/xstartup
 
 echo "Starting VNC server, password $4 on display number $5."
-
-# 3. Start the VNC Server
-# -forever keeps it alive after disconnect, -shared allows multiple connections\n\
-# -nopw is for testing (add -passwd yourpass for security)\n\
-#x11vnc -noshm -display :$5 -passwd $4 -listen 0.0.0.0 -xkb -forever -shared &
-x11vnc -noshm -display :1 -nopw -listen 127.0.0.1 -xkb -forever -shared &
-# 4. Keep the container alive by tailing the log or running an app.
-xterm
-
-## 2. Define the XDG paths explicitly
-#export XDG_CONFIG_HOME="$HOME/.config"
-#export XDG_DATA_HOME="$HOME/.local/share"
-#export XDG_CACHE_HOME="$HOME/.cache"
-#export XDG_RUNTIME_DIR="/tmp/runtime-$USER"
-
-## 3. Physically create the directories
-#mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_RUNTIME_DIR"
-#chmod 700 "$XDG_RUNTIME_DIR"
-
-#echo Setting up VNC password...
-
-##mkdir -p /home/$1/.vnc/
-###echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
-#chmod 600 /home/$1/.vnc/passwd
-#mkdir -p /home/$1/.config/tigervnc
-#echo "$4" | vncpasswd -f > /home/$1/.config/tigervnc/passwd
-#chmod 600 /home/$1/.config/tigervnc/passwd
-
-#echo "Starting VNC server, password $4 on display number $5."
-#vncserver -fg -localhost no -geometry 1280x720 :$5
+vncserver :$5 -geometry 1280x800 -depth 24
+tail -f ~/.vnc/*.log"

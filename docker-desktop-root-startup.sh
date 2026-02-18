@@ -24,6 +24,7 @@ echo "Created user $1 with IDs $2:$3."
 # Set up VNC home folder.
 mkdir -p /home/$1/.vnc
 chown $1:$1 /home/$1/.vnc/
+rm /home/$1/.vnc/*
 
 echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
 chown $1:$1 /home/$1/.vnc/passwd

@@ -9,6 +9,7 @@ systemctl stop PUWSSessionManager
 go get github.com/moby/moby/client
 go get github.com/moby/moby/api/types/container
 go get github.com/docker/go-connections/nat
+go get github.com/docker/docker/api/types/network
 go get golang.org/x/crypto/argon2
 
 # Clear out any previously-compile binary.

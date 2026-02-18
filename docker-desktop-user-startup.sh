@@ -8,7 +8,7 @@
 export HOME=/home/$1
 export USER=$1
 export DISPLAY=:$5
-export PORT=5901
+export PORT=5900
 
 # 3. Start the VNC Server
 # -forever keeps it alive after disconnect, -shared allows multiple connections\n\

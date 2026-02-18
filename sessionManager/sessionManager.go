@@ -228,7 +228,7 @@ func main() {
 				// Therefore, there is a startup script (that runs as root) inside the container that sets up the named user, matching UIDs with the host.
 				HostConfig: &container.HostConfig{
 					PortBindings: network.PortMap{
-						nat.Port("5901/tcp"): []nat.PortBinding{hb},
+						network.Port("5901/tcp"): []nat.PortBinding{hb},
 					},
 					Mounts: []mount.Mount{
 						/*

@@ -199,6 +199,12 @@ func main() {
 				return
 			}
 			
+			// Temporary debugging.
+			hb := nat.PortBinding{
+				HostIP:   "0.0.0.0",
+				HostPort: "5901"
+			}
+			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
 			exposedPort, _ := network.ParsePort(strconv.Itoa(int(VNCPort)) + "/TCP")
@@ -222,12 +228,7 @@ func main() {
 				// Therefore, there is a startup script (that runs as root) inside the container that sets up the named user, matching UIDs with the host.
 				HostConfig: &container.HostConfig{
 					PortBindings: nat.PortMap{
-						nat.Port("5901/tcp"): []nat.PortBinding{
-							{
-								HostIP:   "0.0.0.0", // Accessible from anywhere.
-								HostPort: "5901",    // The port on your actual machine.
-							},
-						},
+						nat.Port("5901/tcp"): []nat.PortBinding{hb},
 					},
 					Mounts: []mount.Mount{
 						/*

@@ -147,8 +147,10 @@ func main() {
 				http.Error(httpResponse, "No free sessions.", http.StatusInternalServerError)
 				return
 			}
-			VNCPort = possibleVNCPort
-			VNCDisplay := int(VNCPort) - 5900
+			//VNCPort = possibleVNCPort
+			//VNCDisplay := int(VNCPort) - 5900
+			VNCPort = 0
+			VNCDisplay := 5900
 
 			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their desktop image they have the appropriate ownership and permissions.
 			userUIDStr := ""

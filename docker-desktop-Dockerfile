@@ -3,6 +3,9 @@ FROM {{DOCKERROOT_DOCKER_IMAGE}}
 # Install desktop environment, VNC server, and tools
 RUN apt-get install -y xfce4 xfce4-goodies tightvncserver dbus-x11 x11-xserver-utils
 
+# Expose VNC port
+EXPOSE 5901
+
 # Set VNC password (standard: 'password') 
 # In a production env, use a more secure method
 #RUN mkdir ~/.vnc && echo "password" | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd

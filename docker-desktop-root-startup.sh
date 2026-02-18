@@ -19,19 +19,26 @@ echo "$1:$4" | chpasswd
 echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/users
 echo "Created user $1 with IDs $2:$3."
 
+
+
+# Set up VNC home folder.
+mkdir -p /home/$1/.vnc
+chown $1:$1 /home/$1/.vnc/
+
+echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
+chown $1:$1 /home/$1/.vnc/passwd
+chmod 600 /home/$1/.vnc/passwd
+
+cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
+chown $1:$1 /home/$1/.vnc/xstartup
+chmod u+x /home/$1/.vnc/xstartup
+
+
+
 # Set up the user startup script.
 cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
 chown $1:$1 /home/$1/startup.sh
 chmod u+x /home/$1/startup.sh
-
-
-cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
-chown $1:$1 /home/$1/startup.sh
-chmod u+x /home/$1/startup.sh
-
-&" > ~/.vnc/xstartup && \
-    chmod +x ~/.vnc/xstartup
-
 
 # Run the user startup script as the user.
 su - $1 -c "bash /home/$1/startup.sh $1 $2 $3 $4 $5"

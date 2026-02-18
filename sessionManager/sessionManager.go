@@ -199,7 +199,7 @@ func main() {
 			}
 
 			// Temporary debugging.
-			hostPort, _ := network.Port(network.ParsePort("5901/tcp"))
+			hostPort, _ := network.ParsePort("5901/tcp")
 			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()

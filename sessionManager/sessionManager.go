@@ -15,6 +15,7 @@ import (
 	"slices"
 	"strings"
 	"strconv"
+	"net/netip"
 	"net/http"
 	"context"
 	"crypto/rand"
@@ -29,7 +30,6 @@ import (
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/api/types/mount"
-	//"github.com/docker/go-connections/nat"
 )
 
 func runShellCommand(command string, args ...string) string {
@@ -201,6 +201,7 @@ func main() {
 
 			// Temporary debugging.
 			hostPort, _ := network.ParsePort("5901/tcp")
+			hostIP, _ := netip.ParseAddr("0.0.0.0")
 			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
@@ -228,7 +229,7 @@ func main() {
 					PortBindings: network.PortMap{
 						hostPort: []network.PortBinding{
 							{
-								HostIP:   "0.0.0.0",
+								HostIP:   hostIP,
 								HostPort: "5901",
 							},
 						},

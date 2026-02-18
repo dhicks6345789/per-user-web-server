@@ -197,6 +197,9 @@ func main() {
 				http.Error(httpResponse, "Error assigning directory /var/www" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			// Temporary debugging.
+			hostPort, _ := network.Port(network.ParsePort("5901/tcp"))
 			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
@@ -222,7 +225,7 @@ func main() {
 				HostConfig: &container.HostConfig{
 					// Temporary debugging - map port 5901.
 					PortBindings: network.PortMap{
-						network.Port(network.ParsePort("5901/tcp")): []nat.PortBinding{
+						hostPort: []nat.PortBinding{
 							HostIP:   "0.0.0.0",
 							HostPort: "5901",
 						},

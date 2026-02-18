@@ -84,8 +84,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
         // Set protocol and connection parameters.
         guacConfig.setProtocol("vnc");
         guacConfig.setParameter("hostname", "desktop-" + username);
-        //guacConfig.setParameter("port", desktopPort);
-        guacConfig.setParameter("port", "0");
+        guacConfig.setParameter("port", desktopPort);
         guacConfig.setParameter("username", username);
         guacConfig.setParameter("password", VNCPassword);
         guacConfigs.put("Developer Desktop: " + username, guacConfig);

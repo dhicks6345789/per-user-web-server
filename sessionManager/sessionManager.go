@@ -217,8 +217,9 @@ func main() {
 				// Set up mount points in the container. Confusingly, these mount points, in /home/username, will be created before the actual user inside the container.
 				// Therefore, there is a startup script (that runs as root) inside the container that sets up the named user, matching UIDs with the host.
 				HostConfig: &container.HostConfig{
-					// We use the rclone Docker plugin to mount the user's Google Drive home folder as their "Documents" folder in their new desktop container.
 					Mounts: []mount.Mount{
+						/*
+						// We use the rclone Docker plugin to mount the user's Google Drive home folder as their "Documents" folder in their new desktop container.
 						mount.Mount{
 							Type: mount.TypeVolume,
 							Target: "/home/" + username + "/Documents",
@@ -233,6 +234,14 @@ func main() {
 									},
 								},
 							},
+						},*/
+						// We mount the host's user's home folder into the container. We have to match up the UIDs for the host and containers, hence us having to pass in the
+						// host user's UID to the container's startup script.
+						mount.Mount{
+							Type: mount.TypeBind,
+							Source: "/home/" + username,
+							Target: "/home/" + username,
+							ReadOnly: false,
 						},
 						// We mount the host www folder into the container. We have to match up the UIDs for the host and containers, hence us having to pass in the
 						// host user's UID to the container's startup script.

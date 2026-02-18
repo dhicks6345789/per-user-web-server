@@ -29,7 +29,6 @@ import (
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/api/types/mount"
-	"github.com/docker/go-connections/nat"
 )
 
 func runShellCommand(command string, args ...string) string {

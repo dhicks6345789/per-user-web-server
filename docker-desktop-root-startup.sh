@@ -29,9 +29,9 @@ echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
 chown $1:$1 /home/$1/.vnc/passwd
 chmod 600 /home/$1/.vnc/passwd
 
-cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
-chown $1:$1 /home/$1/.vnc/xstartup
-chmod u+x /home/$1/.vnc/xstartup
+#cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
+#chown $1:$1 /home/$1/.vnc/xstartup
+#chmod u+x /home/$1/.vnc/xstartup
 
 
 

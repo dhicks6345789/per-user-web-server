@@ -19,28 +19,29 @@ echo "$1:$4" | chpasswd
 echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/users
 echo "Created user $1 with IDs $2:$3."
 
+mkdir -p /home/$1/.vnc
+chown -R $1:$1 /home/$1/.vnc
+cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
+chown $1:$1 /home/$1/.vnc/xstartup
+chmod u+x /home/$1/.vnc/xstartup
+
+#mkdir -p /home/$1/.config/tigervnc
+#chown -R $1:$1 /home/$1/.config/tigervnc
+#cp /root/docker-desktop-xstartup /home/$1/.config/tigervnc/xstartup
+#chown $1:$1 /home/$1/.config/tigervnc/xstartup
+#chmod u+x /home/$1/.config/tigervnc/xstartup
+
+## Start Xvfb (Virtual Monitor) in the background\n\
+#Xvfb :0 -screen 1 1280x720x24 &
+#sleep 2
+## 2. Start the Window Manager
+#fluxbox &
+
+
 # Set up the user startup script, which is where the VNC startup happens.
 cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
 chown $1:$1 /home/$1/startup.sh
 chmod u+x /home/$1/startup.sh
-
-#mkdir -p /home/$1/.vnc
-#chown -R $1:$1 /home/$1/.vnc
-#cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
-#chown $1:$1 /home/$1/.vnc/xstartup
-#chmod u+x /home/$1/.vnc/xstartup
-
-mkdir -p /home/$1/.config/tigervnc
-chown -R $1:$1 /home/$1/.config/tigervnc
-cp /root/docker-desktop-xstartup /home/$1/.config/tigervnc/xstartup
-chown $1:$1 /home/$1/.config/tigervnc/xstartup
-chmod u+x /home/$1/.config/tigervnc/xstartup
-
-# Start Xvfb (Virtual Monitor) in the background\n\
-Xvfb :0 -screen 1 1280x720x24 &
-sleep 2
-# 2. Start the Window Manager
-fluxbox &
 
 # Run the user startup script as the user.
 su - $1 -c "bash /home/$1/startup.sh $1 $2 $3 $4 $5"

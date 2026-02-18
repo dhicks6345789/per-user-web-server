@@ -27,8 +27,7 @@ import (
 	// The Docker management library - originally docker/docker, but now called "moby".
 	"github.com/moby/moby/client"
 	"github.com/moby/moby/api/types/container"
-	//"github.com/moby/moby/api/types/network"
-	"github.com/docker/docker/api/types/network"
+	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/api/types/mount"
 	"github.com/docker/go-connections/nat"
 )

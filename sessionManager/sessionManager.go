@@ -226,7 +226,7 @@ func main() {
 				HostConfig: &container.HostConfig{
 					// Temporary debugging - map port 5901.
 					PortBindings: network.PortMap{
-						hostPort: []nat.PortBinding{
+						hostPort: []network.PortBinding{
 							HostIP:   "0.0.0.0",
 							HostPort: "5901",
 						},

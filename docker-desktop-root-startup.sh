@@ -37,7 +37,7 @@ chown $1:$1 /home/$1/.config/tigervnc/xstartup
 chmod u+x /home/$1/.config/tigervnc/xstartup
 
 # Start Xvfb (Virtual Monitor) in the background\n\
-Xvfb :1 -screen 0 1280x720x24 &
+Xvfb :0 -screen 0 1280x720x24 &
 sleep 2
 # 2. Start the Window Manager
 fluxbox &

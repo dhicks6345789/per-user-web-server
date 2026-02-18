@@ -27,4 +27,4 @@ chmod 600 /home/$1/.vnc/passwd
 
 echo "Starting VNC server, password $4 on display number $5."
 vncserver :$5 -geometry 1280x800 -depth 24
-tail -f ~/.vnc/*.log"
+tail -f /home/$1/.vnc/*.log

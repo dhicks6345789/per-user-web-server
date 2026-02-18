@@ -1,8 +1,16 @@
 FROM {{DOCKERROOT_DOCKER_IMAGE}}
 
-# Install Xvfb, a window manager, and the VNC server.
-# We include 'dbus-x11' to prevent errors with many modern GUI apps.
-RUN apt-get install -y xvfb x11vnc fluxbox dbus-x11 xterm
+# Install desktop environment, VNC server, and tools
+RUN apt-get install -y xfce4 xfce4-goodies tightvncserver dbus-x11 x11-xserver-utils
+
+# Set VNC password (standard: 'password') 
+# In a production env, use a more secure method
+#RUN mkdir ~/.vnc && echo "password" | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd
+
+# Start the VNC server on container launch
+#CMD ["sh", "-c", "vncserver :1 -geometry 1280x800 -depth 24 && tail -f ~/.vnc/*.log"]
+
+#RUN apt-get install -y chromium-browser
 
 # Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to
 # match up UIDs with the host, which we don't know until container creation time.

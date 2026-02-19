@@ -12,4 +12,4 @@ sleep 2
 # 5. Start the panel and the rest of the desktop
 xfce4-panel &
 xfdesktop &
-xfwm4
+xfwm4 &

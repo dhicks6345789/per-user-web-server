@@ -1,7 +1,10 @@
 #!/bin/sh
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
-exec startxfce4
+
+echo Bananas
+
+#unset SESSION_MANAGER
+#unset DBUS_SESSION_BUS_ADDRESS
+#exec startxfce4
 
 ## 2. Force start a D-Bus session for this user
 #eval $(dbus-launch --sh-syntax --exit-with-session)

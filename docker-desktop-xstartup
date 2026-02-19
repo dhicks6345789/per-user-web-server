@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/bin/sh
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+exec startxfce4
+
 #unset SESSION_MANAGER
 #unset DBUS_SESSION_BUS_ADDRESS
 
@@ -13,5 +17,3 @@
 #xfce4-panel &
 #xfdesktop &
 #xfwm4 &
-
-startxfce4

@@ -6,5 +6,5 @@
 
 echo "Starting VNC server, password $4 on display number $5."
 #vncserver :$5 -geometry 1280x800 -depth 24
-vncserver :$5 -depth 24 -PasswordFile /home/$1/.vnc/passwd
+/usr/bin/Xtigervnc :1 -rfbport 5901 -PasswordFile /home/$1/.vncpasswd -SecurityTypes VncAuth -auth /home/d.hicks/.Xauthority -geometry 1920x1200 -depth 24
 tail -f /home/$1/.vnc/*.log

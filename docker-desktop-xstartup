@@ -1,18 +1,20 @@
 #!/bin/bash
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
 
-export DISPLAY=:1
-export XKL_XMODMAP_DISABLE=1
+# 2. Force start a D-Bus session for this user
+eval $(dbus-launch --sh-syntax --exit-with-session)
 
-# 4. Start the core components manually if the session manager fails
-# This ensures even if the full 'session' hits a snag, the desktop loads.
+# 3. Start the settings daemon (This MUST run for the panel to know its config)
 xfsettingsd &
-xfwm4 &
+
+# 4. Give xfconfd a second to wake up
+sleep 1
+
+# 5. Start the panel and the rest of the desktop
 xfce4-panel &
 xfdesktop &
-thunar --daemon &
+xfwm4 &
 
-## Clear any old session variables.
-#unset SESSION_MANAGER
-#unset DBUS_SESSION_BUS_ADDRESS
-#
-#exec dbus-launch --exit-with-session startxfce4
+# 6. Finally, start the session manager
+exec startxfce4

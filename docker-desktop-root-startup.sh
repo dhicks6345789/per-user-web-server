@@ -53,7 +53,7 @@ cp /root/docker-desktop-xstartup /home/$1/.config/tigervnc/xstartup
 chown $1:$1 /home/$1/.config/tigervnc/xstartup
 chmod u+x /home/$1/.config/tigervnc/xstartup
 
-
+tigervncsession $1 :1
 
 # Set up and run the user startup script, as the user.
 cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh

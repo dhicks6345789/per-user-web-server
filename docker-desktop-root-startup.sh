@@ -36,10 +36,8 @@ chmod 600 /home/$1/.vnc/passwd
 
 
 
-# Set up the user startup script.
+# Set up and run the user startup script, as the user.
 cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
 chown $1:$1 /home/$1/startup.sh
 chmod u+x /home/$1/startup.sh
-
-# Run the user startup script as the user.
 su - $1 -c "bash /home/$1/startup.sh $1 $2 $3 $4 $5"

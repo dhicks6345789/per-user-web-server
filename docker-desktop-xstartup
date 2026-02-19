@@ -1,16 +1,14 @@
 #!/bin/bash
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
+#unset SESSION_MANAGER
+#unset DBUS_SESSION_BUS_ADDRESS
 
-# 2. Force start a D-Bus session for this user
-eval $(dbus-launch --sh-syntax --exit-with-session)
+## 2. Force start a D-Bus session for this user
+#eval $(dbus-launch --sh-syntax --exit-with-session)
 
-# 3. Start the settings daemon (This MUST run for the panel to know its config)
+# Start the settings daemon (This MUST run for the panel to know its config).
 xfsettingsd &
-
-# 4. Give xfconfd a second to wake up
-sleep 1
-
+# Give xfconfd a second to wake up
+sleep 2
 # 5. Start the panel and the rest of the desktop
 xfce4-panel &
 xfdesktop &

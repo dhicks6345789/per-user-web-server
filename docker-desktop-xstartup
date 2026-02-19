@@ -1,6 +1,15 @@
 #!/bin/bash
 
+export DISPLAY=:1
+export XKL_XMODMAP_DISABLE=1
+
+# 4. Start the core components manually if the session manager fails
+# This ensures even if the full 'session' hits a snag, the desktop loads.
+xfsettingsd &
+xfwm4 &
 xfce4-panel &
+xfdesktop &
+thunar --daemon &
 
 ## Clear any old session variables.
 #unset SESSION_MANAGER

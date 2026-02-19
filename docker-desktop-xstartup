@@ -5,11 +5,13 @@
 ## 2. Force start a D-Bus session for this user
 #eval $(dbus-launch --sh-syntax --exit-with-session)
 
-# Start the settings daemon (This MUST run for the panel to know its config).
-xfsettingsd &
-# Give xfconfd a second to wake up
-sleep 2
-# 5. Start the panel and the rest of the desktop
-xfce4-panel &
-xfdesktop &
-xfwm4 &
+## Start the settings daemon (This MUST run for the panel to know its config).
+#xfsettingsd &
+## Give xfconfd a second to wake up
+#sleep 2
+## 5. Start the panel and the rest of the desktop
+#xfce4-panel &
+#xfdesktop &
+#xfwm4 &
+
+startxfce4

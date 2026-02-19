@@ -15,6 +15,3 @@ sleep 1
 xfce4-panel &
 xfdesktop &
 xfwm4 &
-
-# 6. Finally, start the session manager
-exec startxfce4

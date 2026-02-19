@@ -9,11 +9,11 @@
 # Set ownership of their home folder by numeric IDs, we'll crate the actual user in the next step.
 chown $2:$3 /home/$1
 
-# Create the user's group.
+# First, create the user's group...
 groupadd -g $3 $1
-# Create the user with a home directory and bash shell.
+# ...and then the actual user, with a home directory and bash shell.
 useradd -m --uid "$2" --gid "$3" -s /bin/bash "$1"
-# Set the user's password.
+# Set the user's password to the passed-in password.
 echo "$1:$4" | chpasswd
 # Add the user to the sudoers list, letting them use "sudo" without a password.
 echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/users
@@ -21,15 +21,17 @@ echo "Created user $1 with IDs $2:$3."
 
 
 
-# Set up VNC home folder.
+# Set up VNC home folder...
 mkdir -p /home/$1/.vnc
 chown $1:$1 /home/$1/.vnc/
 rm /home/$1/.vnc/*
 
+# ...with the passed-in VNC password (same as their standard user password set above)...
 echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
 chown $1:$1 /home/$1/.vnc/passwd
 chmod 600 /home/$1/.vnc/passwd
 
+# ...and copy in the XStartup script that starts up the user's desktop environment when they connect via VNC.
 cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
 chown $1:$1 /home/$1/.vnc/xstartup
 chmod u+x /home/$1/.vnc/xstartup

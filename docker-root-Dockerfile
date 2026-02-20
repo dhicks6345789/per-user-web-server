@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 
 # Install some basic utilities.
-RUN apt-get install -y curl sudo
+RUN apt-get install -y curl sudo wget
 
 
 

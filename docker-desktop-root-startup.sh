@@ -40,6 +40,7 @@ chmod u+x /home/$1/.vnc/xstartup
 
 # Set up VNC home folder...
 mkdir -p /home/$1/.config/tigervnc
+chown $1:$1 /home/$1/.config
 chown $1:$1 /home/$1/.config/tigervnc
 rm /home/$1/.config/tigervnc/*
 

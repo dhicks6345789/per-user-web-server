@@ -21,24 +21,7 @@ echo "Created user $1 with IDs $2:$3."
 
 
 
-## Set up VNC home folder...
-#mkdir -p /home/$1/.vnc
-#chown $1:$1 /home/$1/.vnc/
-#rm /home/$1/.vnc/*
-
-## ...with the passed-in VNC password (same as their standard user password set above)...
-#echo "$4" | vncpasswd -f > /home/$1/.vnc/passwd
-#chown $1:$1 /home/$1/.vnc/passwd
-#chmod 600 /home/$1/.vnc/passwd
-
-## ...and copy in the XStartup script that starts up the user's desktop environment when they connect via VNC.
-#cp /root/docker-desktop-xstartup /home/$1/.vnc/xstartup
-#chown $1:$1 /home/$1/.vnc/xstartup
-#chmod u+x /home/$1/.vnc/xstartup
-
-
-
-# Set up VNC home folder...
+# Set up the TigerVNC home folder...
 mkdir -p /home/$1/.config/tigervnc
 chown $1:$1 /home/$1/.config
 chown $1:$1 /home/$1/.config/tigervnc

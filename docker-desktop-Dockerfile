@@ -6,7 +6,7 @@ RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-c
 # Expose VNC port for VNC display ":1".
 EXPOSE 5901
 
-# Install Chrome web browser.
+# Install Chrome web browser - note, not Chromium.
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
 RUN rm google-chrome-stable_current_amd64.deb

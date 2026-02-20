@@ -1,4 +1,4 @@
-# Use the latest Ubuntu base image.
+# Use the latest Debian base image.
 FROM debian:latest
 
 # Prevent interactive prompts during installation
@@ -10,12 +10,10 @@ RUN apt-get update
 # Install some basic utilities.
 RUN apt-get install -y curl sudo wget
 
-
-
-## Install a Python development environment.
-#RUN apt-get install -y python3 python3-pip
-## The Pandas data-processing library.
-#RUN apt-get install -y python3-pandas
+# Install a Python development environment.
+RUN apt-get install -y python3 python3-pip
+# The Pandas data-processing library.
+RUN apt-get install -y python3-pandas
 
 ## Install a Node.js development environment.
 #RUN curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
@@ -23,6 +21,3 @@ RUN apt-get install -y curl sudo wget
 
 ## Install the Google Gemini command-line (CLI) tool - depends on Node.js.
 #RUN npm install -g @google/gemini-cli
-
-# Clear up apt lists.
-# RUN apt-get clean && rm -rf /var/lib/apt/lists/*

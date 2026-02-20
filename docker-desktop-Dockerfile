@@ -1,5 +1,8 @@
 FROM {{DOCKERROOT_DOCKER_IMAGE}}
 
+# Update apt repository lists again.
+RUN apt-get update
+
 # Install a desktop environment - XFCE4 and TigerVNC.
 RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-common dbus-x11 x11-xserver-utils xterm
 
@@ -20,5 +23,5 @@ COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup
 COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-root-startup.sh
 COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
 
-# Clean up apt lists.
+# Clean up apt repository lists.
 # RUN apt-get clean && rm -rf /var/lib/apt/lists/*

@@ -1,8 +1,7 @@
 FROM {{DOCKERROOT_DOCKER_IMAGE}}
 
-# Install desktop environment, VNC server, and tools
-#RUN apt-get install -y xfce4 xfce4-goodies tightvncserver dbus-x11 x11-xserver-utils
-RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server dbus-x11 x11-xserver-utils
+# Install a desktop environment - XFCE4 and TigerVNC.
+RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-common dbus-x11 x11-xserver-utils xterm
 
 # Expose VNC port
 EXPOSE 5901
@@ -14,3 +13,5 @@ EXPOSE 5901
 COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup
 COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-root-startup.sh
 COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
+
+# && apt-get clean && rm -rf /var/lib/apt/lists/*

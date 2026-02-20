@@ -6,11 +6,13 @@ RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-c
 # Expose VNC port for VNC display ":1".
 EXPOSE 5901
 
-# Install Chrome web browser - note, not Chromium.
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
-RUN rm google-chrome-stable_current_amd64.deb
-# RUN apt-get install -y chromium
+# Install the Chromium web browser.
+RUN apt-get install -y chromium
+
+## Install the Chrome web browser - note, this is not Chromium, but the actual Google Chrome release.
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+#RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
+#RUN rm google-chrome-stable_current_amd64.deb
 
 # Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to
 # match up UIDs with the host, which we don't know until container creation time.

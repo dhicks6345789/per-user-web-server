@@ -41,7 +41,7 @@ chmod u+x /home/$1/.vnc/xstartup
 # Set up VNC home folder...
 mkdir -p /home/$1/.config/tigervnc
 chown $1:$1 /home/$1/.config/tigervnc
-rm /home/$1/.vnc/.config/tigervnc/*
+rm /home/$1/.config/tigervnc/*
 
 # ...with the passed-in VNC password (same as their standard user password set above)...
 echo "$4" | tigervncpasswd -f > /home/$1/.config/tigervnc/passwd

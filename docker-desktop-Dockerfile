@@ -3,10 +3,10 @@ FROM {{DOCKERROOT_DOCKER_IMAGE}}
 # Install a desktop environment - XFCE4 and TigerVNC.
 RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-common dbus-x11 x11-xserver-utils xterm
 
-# Expose VNC port
+# Expose VNC port for VNC display ":1".
 EXPOSE 5901
 
-#RUN apt-get install -y chromium-browser
+RUN apt-get install -y chromium-browser
 
 # Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to
 # match up UIDs with the host, which we don't know until container creation time.
@@ -14,4 +14,5 @@ COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup
 COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-root-startup.sh
 COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
 
-# && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Clean up apt lists.
+# RUN apt-get clean && rm -rf /var/lib/apt/lists/*

@@ -208,13 +208,13 @@ func main() {
 				http.Error(httpResponse, "Error assigning directory /var/www" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return
 			}
-
-			// Connect /home/username/Documents to the user's Google Drive.
+			
+			// Make sure the user has a "Coding" folder in their Google Drive root, with various sub-folders.
 			userCodingDirCreateOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
-			fmt.Println("userCodingDirCreateOutput: " + userCodingDirCreateOutput)
+			userCodingDirCreateOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding/www")
+			// Mount (using rclone) /home/username/Documents to the user's Google Drive.
 			userCodingDirMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents")
-			fmt.Println("userCodingDirMountOutput: " + userCodingDirMountOutput)
-
+			
 			/*
 			// Two variables used below in the VNC-for-debugging purposes.
 			hostPort, _ := network.ParsePort("5901/tcp")

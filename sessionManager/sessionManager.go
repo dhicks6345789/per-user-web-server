@@ -40,6 +40,15 @@ func runShellCommand(command string, args ...string) string {
 	return strings.TrimSpace(string(cmdOutput))
 }
 
+func startShellCommand(command string, args ...string) string {
+	shellCmd := exec.Command(command, args...)
+	shellErr := shellCmd.Start()
+	if shellErr != nil {
+		return "Error starting process: " + shellErr.Error()
+	}
+	return ""
+}
+
 func main() {
 	// We want each desktop instance to have a separate, un-guessable VNC password. However, we also want that password to be consistant so we can easily reconnect a user to their session.
 	// Rather than hold session passwords in memory, we use a hash function to generate a password for each session from the username and a secret seed value.
@@ -203,7 +212,7 @@ func main() {
 			// Connect /home/username/Documents to the user's Google Drive.
 			userCodingDirCreateOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
 			fmt.Println("userCodingDirCreateOutput: " + userCodingDirCreateOutput)
-			userCodingDirMountOutput := runShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents", "&")
+			userCodingDirMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents")
 			fmt.Println("userCodingDirMountOutput: " + userCodingDirMountOutput)
 
 			/*

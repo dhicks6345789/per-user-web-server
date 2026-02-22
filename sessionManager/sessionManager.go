@@ -210,10 +210,21 @@ func main() {
 			}
 			
 			// Make sure the user has a "Coding" folder in their Google Drive root, with various sub-folders.
-			_ = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
-			_ = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding/www")
+			mkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
+			if mkdirOutput != "" {
+				fmt.Println("mkdirOutput: " + mkdirOutput)
+			}
+			
+			mkdirOutput = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding/www")
+			if mkdirOutput != "" {
+				fmt.Println("mkdirOutput: " + mkdirOutput)
+			}
+			
 			// Mount (using rclone) /home/username/Documents to the user's Google Drive.
-			_ = startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents")
+			rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents")
+			if rcloneMount != "" {
+				fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
+			}
 			
 			/*
 			// Two variables used below in the VNC-for-debugging purposes.

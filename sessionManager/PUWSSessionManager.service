@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 Type=simple
 ExecStart=/usr/local/bin/sessionManager
-StandardOutput=append:/var/log/PUWSSessionManager/output.log
+StandardOutput=append:/var/log/PUWSSessionManager.log
 StandardError=inherit
 
 ExecStop=kill $MAINPID

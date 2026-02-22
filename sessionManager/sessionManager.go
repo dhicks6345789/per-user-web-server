@@ -198,9 +198,15 @@ func main() {
 				return
 			}
 
-			// Temporary debugging.
+			// Connect /home/username/Documents to the user's Google Drive.
+			userCreateOutput = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
+			userCreateOutput = runShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode": "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents", "&")
+
+			/*
+			// Two variables used below in the VNC-for-debugging purposes.
 			hostPort, _ := network.ParsePort("5901/tcp")
 			hostIP, _ := netip.ParseAddr("0.0.0.0")
+			*/
 			
 			// Create the container that holds the user's desktop session.
 			containerContext := context.Background()
@@ -221,10 +227,10 @@ func main() {
 						"pangolin_main": &network.EndpointSettings{},
 					},
 				},
-				// Set up mount points in the container. Confusingly, these mount points, in /home/username, will be created before the actual user inside the container.
-				// Therefore, there is a startup script (that runs as root) inside the container that sets up the named user, matching UIDs with the host.
 				HostConfig: &container.HostConfig{
-					// Temporary debugging - map port 5901.
+					/*
+					// Map port 5901 to the host to enable a VNC connection for debugging purposes. Enable if you need to do some temporary debugging, shouldn't
+					// be needed in production.
 					PortBindings: network.PortMap{
 						hostPort: []network.PortBinding{
 							{
@@ -233,9 +239,14 @@ func main() {
 							},
 						},
 					},
+					*/
+					// Set up mount points in the container. Confusingly, these mount points, in /home/username, will be created before the actual user inside the container.
+					// Therefore, there is a startup script (that runs as root) inside the container that sets up the named user, matching UIDs with the host.
 					Mounts: []mount.Mount{
 						/*
-						// We use the rclone Docker plugin to mount the user's Google Drive home folder as their "Documents" folder in their new desktop container.
+						// Use the rclone Docker plugin to mount the user's Google Drive home folder as their "Documents" folder in their new desktop container.
+						// Note, February 2026: on a reboot of the host server, the rclone plugin seems to fail to start, stopping operation of the remote desktop container.
+						// My guess is that this is something to do with cached state data for the plugin. Disabled for now as I don't understand what the problem is.
 						mount.Mount{
 							Type: mount.TypeVolume,
 							Target: "/home/" + username + "/Documents",
@@ -259,8 +270,8 @@ func main() {
 							Target: "/home/" + username,
 							ReadOnly: false,
 						},
-						// We mount the host www folder into the container. We have to match up the UIDs for the host and containers, hence us having to pass in the
-						// host user's UID to the container's startup script.
+						// We mount the host www folder into the container. This is separate from the user's main home folder, we have a (custom) web server in a separate container
+						// that 
 						mount.Mount{
 							Type: mount.TypeBind,
 							Source: "/var/www/" + username,

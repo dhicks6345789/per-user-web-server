@@ -200,7 +200,7 @@ func main() {
 
 			// Connect /home/username/Documents to the user's Google Drive.
 			userCreateOutput = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
-			userCreateOutput = runShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode": "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents", "&")
+			userCreateOutput = runShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/d.hicks/Documents", "&")
 
 			/*
 			// Two variables used below in the VNC-for-debugging purposes.

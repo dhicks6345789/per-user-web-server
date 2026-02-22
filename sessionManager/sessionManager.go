@@ -15,12 +15,14 @@ import (
 	"slices"
 	"strings"
 	"strconv"
-	"net/netip"
 	"net/http"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"path/filepath"
+
+	// Only needed if we need to map a container's port to the host for VNC debugging purposes.
+	//"net/netip"
 
 	// The Argon2 hashing library, used to produce passwords for VNC sessions.
 	"golang.org/x/crypto/argon2"

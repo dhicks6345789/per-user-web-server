@@ -35,12 +35,14 @@ import (
 )
 
 func runShellCommand(command string, args ...string) string {
+	fmt.Println("runShellCommand: " + command + " " + strings.Join(args, " "))
 	shellCmd := exec.Command(command, args...)
 	cmdOutput, _ := shellCmd.CombinedOutput()
 	return strings.TrimSpace(string(cmdOutput))
 }
 
 func startShellCommand(command string, args ...string) string {
+	fmt.Println("startShellCommand: " + command + " " + strings.Join(args, " "))
 	shellCmd := exec.Command(command, args...)
 	shellErr := shellCmd.Start()
 	if shellErr != nil {

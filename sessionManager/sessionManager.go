@@ -221,6 +221,11 @@ func main() {
 			if mkdirOutput != "" {
 				fmt.Println("mkdirOutput: " + mkdirOutput)
 			}
+
+			mkdirOutput = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding/Hugo")
+			if mkdirOutput != "" {
+				fmt.Println("mkdirOutput: " + mkdirOutput)
+			}
 			
 			// Mount (using rclone) /home/username/Documents to the user's Google Drive.
 			umountOutput := runShellCommand("umount", "/home/" + username + "/Documents")

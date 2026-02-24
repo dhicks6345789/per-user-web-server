@@ -27,7 +27,7 @@ RUN apt-get install -y flatpak
 
 # Install Pinta, a bitmap graphics editing program.
 RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-RUN flatpak install flathub com.github.PintaProject.Pinta
+RUN flatpak install -y flathub com.github.PintaProject.Pinta
 
 
 

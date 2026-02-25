@@ -40,23 +40,10 @@ wget https://github.com/PintaProject/Pinta/releases/download/3.1.1/pinta-3.1.1.t
 tar xf pinta-3.1.1.tar.gz
 cd pinta-3.1.1
 
+./configure --prefix=/usr/local
+
 dotnet build
-dotnet run --project Pinta
-DOTNET_ROLL_FORWARD=Major dotnet run --project Pinta
-
-
-
-
-
-
-
-
-# Install the Flatpak framework.
-RUN apt-get install -y flatpak
-
-# Install Pinta, a bitmap graphics editing program.
-RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-RUN flatpak install -y flathub com.github.PintaProject.Pinta
+# DOTNET_ROLL_FORWARD=Major dotnet run --project Pinta
 
 
 

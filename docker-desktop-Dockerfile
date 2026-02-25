@@ -15,6 +15,10 @@ RUN apt-get install -y locales
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen
 RUN locale-gen
 
+# Set environment variables for character encodings.
+RUN echo LANG=en_GB.UTF-8 >> /etc/environment
+RUN echo LC_ALL=en_GB.UTF-8 >> /etc/environment
+
 
 
 # Install the Chromium web browser.

@@ -38,6 +38,7 @@ RUN apt-get install -y libadwaita-1-dev
 # Install Pinta, a bitmap graphics editing program - a Linux clone of the popular Paint.NET Windows application. A simpler user interface than GNU Gimp (installed above), but more trouble to install.
 RUN cd /usr/local/bin && wget https://github.com/PintaProject/Pinta/releases/download/3.1.1/pinta-3.1.1.tar.gz && tar xf pinta-3.1.1.tar.gz
 RUN cd /usr/local/bin/pinta-3.1.1 && ./configure --prefix=/usr/local && dotnet build && cd .. && rm pinta-3.1.1.tar.gz
+RUN chmod a+rwx -R /usr/local/bin/pinta-3.1.1
 # DOTNET_ROLL_FORWARD=Major dotnet run --project Pinta
 
 

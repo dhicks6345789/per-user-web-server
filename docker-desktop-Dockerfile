@@ -20,6 +20,35 @@ RUN apt-get install -y chromium
 # Install Inkscape, a vector graphics editing program.
 RUN apt-get install -y inkscape
 
+# Install GNU Gimp, a bitmap graphics editing program.
+RUN apt-get install -y gimp
+
+# Install the Microsoft .Net framework, v10 - needed for Pinta, but bound to be useful for other stuff.
+RUN wget https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+RUN dpkg -i packages-microsoft-prod.deb
+RUN rm packages-microsoft-prod.deb
+RUN apt-get update
+RUN apt-get install -y dotnet-sdk-10.0
+
+# Install some tools / frameworks needed for Pinta.
+apt-get install -y pkg-config
+apt-get install -y intltool
+apt-get install -y libadwaita-1-dev
+
+# Install Pinta, a bitmpa graphics editing program. A Linux clone of the popular Paint.NET Windows application. A simpler user interface than GNU Gimp (installed above), but more trouble to install.
+wget https://github.com/PintaProject/Pinta/releases/download/3.1.1/pinta-3.1.1.tar.gz
+tar xf pinta-3.1.1.tar.gz
+cd pinta-3.1.1
+
+dotnet build
+dotnet run --project Pinta
+DOTNET_ROLL_FORWARD=Major dotnet run --project Pinta
+
+
+
+
+
+
 
 
 # Install the Flatpak framework.

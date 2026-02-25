@@ -40,8 +40,8 @@ RUN cd /usr/local/bin && wget https://github.com/PintaProject/Pinta/releases/dow
 RUN cd /usr/local/bin/pinta-3.1.1 && ./configure --prefix=/usr/local && dotnet build && cd .. && rm pinta-3.1.1.tar.gz
 RUN chown root:root -R /usr/local/bin/pinta-3.1.1
 RUN chmod a+rwx -R /usr/local/bin/pinta-3.1.1
-COPY per-user-web-server/pinta.sh /usr/local/bin/pinta.sh
-RUN chmod a+x /usr/local/bin/pinta.sh
+COPY per-user-web-server/pinta.sh /usr/local/bin/pinta
+RUN chmod a+x /usr/local/bin/pinta
 
 # To do: add shortcuts for:
 # Pinta, Gimp, Inkscape, Chrome(ium), IDLE, Python Interactive Prompt, terminal, VSCode

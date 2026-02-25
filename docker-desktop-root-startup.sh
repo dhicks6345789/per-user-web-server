@@ -5,10 +5,6 @@
 # $4=password
 # $5=vncdisplay
 
-# Set up environment variables for character encodings.
-export LANG=en_GB.UTF-8
-export LC_ALL=en_GB.UTF-8
-
 # We haven't created the user yet, but their home folder already exists as we've mounted their "Documents" and "www" folders there at container creation time.
 # Set ownership of their home folder by numeric IDs, we'll crate the actual user in the next step.
 chown $2:$3 /home/$1

@@ -10,6 +10,7 @@ RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-c
 EXPOSE 5901
 
 
+
 # Install the "locales" package and set up the environment to use UK UTF-8 encoding.
 RUN apt-get install -y locales
 RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen
@@ -21,8 +22,19 @@ RUN echo LC_ALL=en_GB.UTF-8 >> /etc/environment
 
 
 
-# Install the Chromium web browser.
-RUN apt-get install -y chromium
+# Install gnupg2.
+apt-get install -y gnupg2
+
+# Enable 32-bit architecture for Windows application support.
+dpkg --add-architecture i386
+apt-get update
+
+# Install WINE.
+mkdir -pm755 /etc/apt/keyrings
+wget -O - https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key
+wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/trixie/winehq-trixie.sources
+apt-get update
+apt-get install -y --install-recommends winehq-stable
 
 
 

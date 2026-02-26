@@ -21,6 +21,9 @@ INSTALL_PANGOLIN=false
 DOCKERROOT_DOCKER_IMAGE="sansay.co.uk-dockerroot:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
+DOCKERCLASSTIMETABLER_DOCKER_IMAGE="sansay.co.uk-dockerclasstimetabler:0.1-beta.3"
+DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
+DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -277,19 +280,37 @@ if [ $INSTALL_PANGOLIN = true ]; then
         echo "Building the Linux desktop Docker image."
         cp per-user-web-server/docker-desktop-Dockerfile .
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
-        docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
+        #docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
         docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+
+        echo "Building the Linux WINE image."
+        cp per-user-web-server/docker-WINE-Dockerfile .
+        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-WINE-Dockerfile
+        docker build -f docker-WINE-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
+
+        echo "Building the Linux calc image."
+        cp per-user-web-server/docker-calc-Dockerfile .
+        sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-calc-Dockerfile
+        docker build -f docker-calc-Dockerfile --progress=plain --tag=$DOCKERCALC_DOCKER_IMAGE . 2>&1
 
         echo "Building our custom Docker image for the web server."
         cp per-user-web-server/docker-wwwServer-Dockerfile .
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
         docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1
 
+        echo "Building the custom Docker image for Class Timetabler."
+        cp per-user-web-server/docker-classTimetabler-Dockerfile .
+        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-classTimetabler-Dockerfile
+        docker build -f docker-classTimetabler-Dockerfile --progress=plain --tag=$DOCKERCLASSTIMETABLER_DOCKER_IMAGE . 2>&1
+
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
         cp per-user-web-server/docker-compose.yml ./docker-compose.yml
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{DOCKERCALC_DOCKER_IMAGE}}/$DOCKERCALC_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
+        sed -i "s/{{DOCKERCLASSTIMETABLER_DOCKER_IMAGE}}/$DOCKERCLASSTIMETABLERSERVER_DOCKER_IMAGE/g" docker-compose.yml
         sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
         # Start up the Docker containers.

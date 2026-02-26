@@ -1,0 +1,36 @@
+FROM {{DOCKERROOT_DOCKER_IMAGE}}
+
+# Update apt repository lists again.
+RUN apt-get update
+
+# Install a desktop environment - XFCE4 and TigerVNC.
+RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-common dbus-x11 x11-xserver-utils xterm
+
+# Expose VNC port for VNC display ":1".
+EXPOSE 5901
+
+
+# Install the "locales" package and set up the environment to use UK UTF-8 encoding.
+RUN apt-get install -y locales
+RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen
+RUN locale-gen
+
+# Set environment variables for character encodings.
+RUN echo LANG=en_GB.UTF-8 >> /etc/environment
+RUN echo LC_ALL=en_GB.UTF-8 >> /etc/environment
+
+
+
+# Install the Chromium web browser.
+RUN apt-get install -y chromium
+
+
+
+# Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to
+# match up UIDs with the host, which we don't know until container creation time.
+#COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup
+#COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-root-startup.sh
+#COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
+
+# Clean up apt repository lists.
+# RUN apt-get clean && rm -rf /var/lib/apt/lists/*

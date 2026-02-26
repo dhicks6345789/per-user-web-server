@@ -1,0 +1,7 @@
+FROM {{DOCKERWINE_DOCKER_IMAGE}}
+
+# Update apt repository lists again.
+RUN apt-get update
+
+# Copy in the Windows executable.
+#COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup

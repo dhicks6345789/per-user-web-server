@@ -36,7 +36,7 @@ RUN apt-get install -y inkscape
 RUN apt-get install -y gimp
 
 # Install IDLE, the Python IDE. The base Python3 environment is already installed by the root Dockerfile, this is the IDE for the desktop environment.
-RUN apt-get install -y python3-idle
+RUN apt-get install -y idle
 
 # Install the Microsoft .Net framework, v10 - needed for Pinta, but bound to be useful for other stuff.
 RUN wget https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb -O packages-microsoft-prod.deb

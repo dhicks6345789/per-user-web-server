@@ -29,6 +29,9 @@ RUN apt-get install -y chromium
 #RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
 #RUN rm google-chrome-stable_current_amd64.deb
 
+# Install LibreOffice, an office software suite
+RUN apt-get install -y libreoffice
+
 # Install Inkscape, a vector graphics editing program.
 RUN apt-get install -y inkscape
 

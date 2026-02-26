@@ -211,18 +211,8 @@ func main() {
 				return
 			}
 			
-			// Make sure the user has a "Coding" folder in their Google Drive root, with various sub-folders.
+			// Make sure the user has a "Coding" folder in their Google Drive root, that's the folder we mount as the user's "Documents" folder inside their desktop environment.
 			mkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
-			if mkdirOutput != "" {
-				fmt.Println("mkdirOutput: " + mkdirOutput)
-			}
-			
-			mkdirOutput = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding/www")
-			if mkdirOutput != "" {
-				fmt.Println("mkdirOutput: " + mkdirOutput)
-			}
-
-			mkdirOutput = runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding/Hugo")
 			if mkdirOutput != "" {
 				fmt.Println("mkdirOutput: " + mkdirOutput)
 			}

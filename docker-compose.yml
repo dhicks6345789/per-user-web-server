@@ -96,7 +96,7 @@ services:
   # Class Timetabler.
   classTimetabler:
     image: {{DOCKERCLASSTIMETABLER_DOCKER_IMAGE}}
-    command: /root/class-timetabler/dev.sh
+    #command: /root/class-timetabler/dev.sh
     container_name: classTimetabler
     restart: unless-stopped
     networks:

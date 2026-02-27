@@ -3,10 +3,12 @@
 if [ ! -d "/root/class-timetabler" ]; then
   cd /root
   git clone https://github.com/ukfootprint/class-timetabler.git
+
+  # Remove the Python venv included (probably wrongly) in the Git repository.
   #rm -rf /root/class-timetabler/backend/venv
   
-  "dev": "vite --host"
-  /root/class-timetabler/frontend/package.json
+  # Tell the application to listen to requests other than just from localhost.
+  sed -i "s/\"dev\": \"vite\"/\"dev\": \"vite --host\"/g" /root/class-timetabler/frontend/package.json
 fi
 
 if [ ! -d "/root/class-timetabler/backend/venv" ]; then

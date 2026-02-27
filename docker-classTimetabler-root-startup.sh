@@ -3,7 +3,7 @@
 if [ ! -d "/root/class-timetabler" ]; then
   cd /root
   git clone https://github.com/ukfootprint/class-timetabler.git
-  #rm -rf /root/class-timetabler/backend/venv
+  rm -rf /root/class-timetabler/backend/venv
 fi
 
 if [ ! -d "/root/class-timetabler/backend/venv" ]; then

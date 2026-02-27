@@ -1,7 +1,5 @@
 FROM {{DOCKERROOT_DOCKER_IMAGE}}
 
-RUN apt-get install -y python3-venv
-
 # Expose port 3000 for the frontend, Pangolin can direct traffic to this port.
 EXPOSE 3000
 

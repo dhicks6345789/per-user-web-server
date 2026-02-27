@@ -5,3 +5,4 @@ EXPOSE 3000
 
 # Copy in the startup scripts.
 COPY per-user-web-server/docker-classTimetabler-root-startup.sh /root/docker-desktop-root-startup.sh
+chmod u+x /root/docker-desktop-root-startup.sh

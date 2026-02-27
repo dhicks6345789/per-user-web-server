@@ -301,6 +301,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
         echo "Building the custom Docker image for Class Timetabler."
         cp per-user-web-server/docker-classTimetabler-Dockerfile .
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-classTimetabler-Dockerfile
+        docker rmi $DOCKERCLASSTIMETABLER_DOCKER_IMAGE
         docker build -f docker-classTimetabler-Dockerfile --progress=plain --tag=$DOCKERCLASSTIMETABLER_DOCKER_IMAGE . 2>&1
 
         # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.

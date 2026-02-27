@@ -96,7 +96,7 @@ services:
   # Class Timetabler.
   classTimetabler:
     image: {{DOCKERCLASSTIMETABLER_DOCKER_IMAGE}}
-    command: /root/docker-classTimetabler-root-startup.sh
+    command: bash /root/docker-classTimetabler-root-startup.sh
     container_name: classTimetabler
     restart: unless-stopped
     networks:

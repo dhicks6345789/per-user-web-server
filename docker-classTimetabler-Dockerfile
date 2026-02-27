@@ -4,5 +4,5 @@ FROM {{DOCKERROOT_DOCKER_IMAGE}}
 EXPOSE 3000
 
 # Copy in the startup scripts.
-COPY per-user-web-server/docker-classTimetabler-root-startup.sh /root/docker-desktop-root-startup.sh
-RUN chmod u+x /root/docker-desktop-root-startup.sh
+COPY per-user-web-server/docker-classTimetabler-root-startup.sh /root/docker-classTimetabler-root-startup.sh
+RUN chmod u+x /root/docker-classTimetabler-root-startup.sh

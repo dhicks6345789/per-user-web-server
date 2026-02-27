@@ -4,6 +4,9 @@ if [ ! -d "/root/class-timetabler" ]; then
   cd /root
   git clone https://github.com/ukfootprint/class-timetabler.git
   #rm -rf /root/class-timetabler/backend/venv
+  
+  "dev": "vite --host"
+  /root/class-timetabler/frontend/package.json
 fi
 
 if [ ! -d "/root/class-timetabler/backend/venv" ]; then

@@ -25,7 +25,19 @@ RUN echo LC_ALL=en_GB.UTF-8 >> /etc/environment
 RUN apt-get install -y chromium
 # ...also, fix the Chromeium desktop shortcut so it starts with the "--no-sandbox" option, required for Chromeium to run inside a (unprivilaged) Docker container.
 RUN sed -i -e 's/Exec=\/usr\/bin\/chromium/Exec=\/usr\/bin\/chromium --no-sandbox/' /usr/share/applications/chromium.desktop
+
 RUN /usr/bin/update-desktop-database /usr/share/applications/
+
+RUN sed -i -e 's/WebBrowser=debian-sensible-browser/WebBrowser=chromium--no-sandbox/' /etc/xdg/xfce4/helpers.rc
+RUN cp /usr/share/applications/chromium.desktop /usr/share/xfce4/helpers/chromium--no-sandbox.desktop
+
+# Associate the browser with web protocols.
+RUN mkdir -p /usr/share/applications
+RUN xdg-mime default chromium.desktop x-scheme-handler/http
+RUN xdg-mime default chromium.desktop x-scheme-handler/https
+RUN xdg-mime default chromium.desktop text/html
+
+
 
 ## Install the Chrome web browser - note, this is not Chromium, but the actual Google Chrome release.
 #RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb

@@ -25,11 +25,11 @@ echo "Created user $1 with IDs $2:$3."
 if [ ! -d "/home/$1/.local/share/xfce4/helpers" ]; then
   mkdir -p /home/$1/.local/share/xfce4/helpers
   cp /root/docker-desktop-custom-WebBrowser.desktop /home/$1/.local/share/xfce4/helpers/custom-WebBrowser.desktop
-  chown -R $1:$1 /home/$1/.local/share/xfce4/helpers
+  chown -R $1:$1 /home/$1/.local
   
   mkdir -p /home/$1/.config/xfce4
   cp /root/docker-desktop-helpers.rc /home/$1/.config/xfce4/helpers.rc
-  chown -R $1:$1 /home/$1/.config/xfce4
+  chown -R $1:$1 /home/$1/.config
 fi
 
 

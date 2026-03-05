@@ -21,6 +21,19 @@ echo "Created user $1 with IDs $2:$3."
 
 
 
+# Set up the XFCE4 desktop with custom shortcuts.
+if [ ! -d "/home/$1/.local/share/xfce4/helpers" ]; then
+  mkdir -p /home/$1/.local/share/xfce4/helpers
+  cp /root/docker-desktop-custom-WebBrowser.desktop /home/$1/.local/share/xfce4/helpers/custom-WebBrowser.desktop
+  chown -R $1:$1 /home/$1/.local/share/xfce4/helpers
+  
+  mkdir -p /home/$1/.config/xfce4
+  cp /root/docker-desktop-helpers.rc /home/$1/.config/xfce4/helpers.rc
+  chown -R $1:$1 /home/$1/.config/xfce4
+fi
+
+
+
 # Set up the TigerVNC home folder...
 mkdir -p /home/$1/.config/tigervnc
 chown $1:$1 /home/$1/.config

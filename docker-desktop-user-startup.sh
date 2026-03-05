@@ -4,12 +4,6 @@
 # $4=password
 # $5=vncdisplay
 
-if [ ! -d "/home/$1/.local/share/xfce4/helpers" ]; then
-  mkdir -p /home/$1/.local/share/xfce4/helpers  
-  cp custom-WebBrowser.desktop /home/$1/.local/share/xfce4/helpers
-  echo WebBrowser=custom-WebBrowser > /home/$1/.config/xfce4/helpers.rc && echo >> /home/$1/.config/xfce4/helpers.rc
-fi
-
 if [ ! -d "/home/$1/Documents/www" ]; then
   mkdir -p "/home/$1/Documents/www"
 fi

@@ -61,18 +61,15 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     
     // Figure out the endpoint this authentication provider is sitting at, which will tell us the name of the Docker image to load.
     HttpServletRequest request = credentials.getRequest();
-    String requestURI = request.getRequestURI();
-    logger.info("RequestURL: " + request.getRequestURL());
-    logger.info("RequestURI: " + request.getRequestURI());
-    String imageName = requestURI.split("/")[0].toLowerCase();
+    String imageName = request.getRequestURI().split("/")[1].toLowerCase();
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
-    logger.info("User " + username + " connected to Guacamole at " + imageName + " - contacing Session Manager for session details.");
+    logger.info("User " + username + " connected to Guacamole at " + imageName + " - contacting Session Manager for session details.");
 
     // Call the Session Manager service (a basic, self-contained HTTP server written in Go) to tell it the user wants to connect to a VNC desktop instance.
     // We pass in the username, if there's a free slot available we should get back a VNC port number and password.
     HttpClient sessionManagerClient = HttpClient.newHttpClient();
-    HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username)).build();
+    HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username + "&image=" + imageName)).build();
     try {
       HttpResponse<String> sessionManagerResponse = sessionManagerClient.send(sessionManagerRequest, HttpResponse.BodyHandlers.ofString());
       logger.info("Session Manager responded: " + sessionManagerResponse.body());

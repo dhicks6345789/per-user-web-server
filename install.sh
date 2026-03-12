@@ -275,13 +275,16 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
         echo "Building the root Docker image - this might take a few minutes..."
         cp per-user-web-server/docker-root-Dockerfile .
-        docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
-
+        #docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
+        docker rmi $DOCKERROOT_DOCKER_IMAGE
+        docker build --no-cache -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
+        
         echo "Building the Linux desktop Docker image."
         cp per-user-web-server/docker-desktop-Dockerfile .
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
-        #docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
-        docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+        #docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+        docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
+        docker build --no-cache -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 
         echo "Building the Linux WINE image."
         cp per-user-web-server/docker-WINE-Dockerfile .

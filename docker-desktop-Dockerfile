@@ -32,7 +32,7 @@ RUN sed -i -e 's/WebBrowser=debian-sensible-browser/WebBrowser=chromium--no-sand
 RUN cp /usr/share/applications/chromium.desktop /usr/share/xfce4/helpers/chromium--no-sandbox.desktop
 
 RUN echo "#!/bin/bash" > /usr/bin/chromium--no-sandbox
-RUN echo "/usr/bin/chromium --no-sandbox" >> /usr/bin/chromium--no-sandbox
+RUN echo "/usr/bin/chromium --no-sandbox \"$@\"" >> /usr/bin/chromium--no-sandbox
 RUN chmod a+x /usr/bin/chromium--no-sandbox
 
 

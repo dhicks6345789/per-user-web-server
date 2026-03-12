@@ -102,7 +102,7 @@ func main() {
 	// To do: somewhere, add a periodic function that can do things like close sessions that have been disconnected from for a set time.
 	
 	// Endpoint connectOrStartSession - returns a port number and password to connect with VNC.
-	// Usage: POST /connectOrStartSession?username=USERNAME
+	// Usage: POST /connectOrStartSession?username=USERNAME&imagename=IMAGENAME
 	// Returns: JSON { portNumber, password }
 	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new desktop session (container).
 	http.HandleFunc("/connectOrStartSession", func(httpResponse http.ResponseWriter, r *http.Request) {

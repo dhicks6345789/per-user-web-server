@@ -26,6 +26,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 
+import javax.servlet.http.HttpServletRequest;
+
 // We're implementing Guacamole's SimpleAuthenticationProvider interface, we need to import some of Guacamole's libraries.
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.auth.simple.SimpleAuthenticationProvider;

@@ -102,7 +102,7 @@ func main() {
 	// To do: somewhere, add a periodic function that can do things like close sessions that have been disconnected from for a set time.
 	
 	// Endpoint connectOrStartSession - returns a port number and password to connect with VNC.
-	// Usage: POST /connectOrStartSession?username=USERNAME&imagename=IMAGENAME
+	// Usage: POST /connectOrStartSession?username=USERNAME&image=IMAGENAME
 	// Returns: JSON { portNumber, password }
 	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new desktop session (container).
 	http.HandleFunc("/connectOrStartSession", func(httpResponse http.ResponseWriter, r *http.Request) {
@@ -113,8 +113,13 @@ func main() {
 		}
 		// Get any passed variables using FormValue or PostForm.
 		username := strings.TrimSpace(r.FormValue("username"))
+		imageName := strings.TrimSpace(r.FormValue("image"))
 		if username == "" {
 			http.Error(httpResponse, "Missing 'username' parameter", http.StatusBadRequest)
+			return
+		}
+		if imageName == "" {
+			http.Error(httpResponse, "Missing 'image' parameter", http.StatusBadRequest)
 			return
 		}
 
@@ -130,11 +135,11 @@ func main() {
 		var VNCPorts []uint16
 		var VNCPort uint16 = 0
 		var possibleVNCPort uint16 = 0
-		// Go through the list of containers looking for any where the image used matches our "dockerdesktop" image.
+		// Go through the list of containers looking for any where the image used matches our named docker image.
 		for _, item := range containers.Items {
-			if strings.HasPrefix(item.Names[0], "/desktop-") {
+			if strings.HasPrefix(item.Names[0], "/" + imageName + "-") {
 				VNCPorts = append(VNCPorts, item.Ports[0].PrivatePort)
-				if strings.TrimPrefix(item.Names[0], "/desktop-") == username {
+				if strings.TrimPrefix(item.Names[0], "/" + imageName + "-") == username {
 					VNCPort = item.Ports[0].PrivatePort
 					fmt.Printf("Found on port: %d", VNCPort)
 				}
@@ -147,11 +152,11 @@ func main() {
 
 		// If no existing session found, start one.
 		if VNCPort == 0 {
-			// Start an instance of our "desktop" Docker container - see for example code:
+			// Start an instance of our named Docker container - see for example code:
 			// https://docs.docker.com/reference/api/engine/sdk/examples/
 			// And for create options:
 			// https://github.com/moby/moby/blob/master/api/types/container/config.go
-			fmt.Println("Starting desktop session for user: ", username)
+			fmt.Println("Starting " + imageName + " session for user: ", username)
 			
 			// First, find an available VNC port number.
 			for possibleVNCPort = 5901; slices.Contains(VNCPorts, possibleVNCPort) && possibleVNCPort <= 5920; possibleVNCPort = possibleVNCPort + 1 {
@@ -166,7 +171,7 @@ func main() {
 			VNCPort = 5901
 			VNCDisplay := 1
 
-			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their desktop image they have the appropriate ownership and permissions.
+			// Make sure there is a user with that username on the host machine so that when we create folders to mount in their Docker image they have the appropriate ownership and permissions.
 			userUIDStr := ""
 			userGIDStr := ""
 			userTryCount := 0
@@ -243,7 +248,7 @@ func main() {
 					// Run the container as the user.
 					// User: userUIDStr + ":" + userGIDStr,
 					// Pass in the VNC password and display number to the custom startup script that runs inside the container.
-					Cmd: []string{"bash", "/root/docker-desktop-root-startup.sh", username, userUIDStr, userGIDStr, VNCPassword, strconv.Itoa(VNCDisplay)},
+					Cmd: []string{"bash", "/root/docker-" + imageName + "-root-startup.sh", username, userUIDStr, userGIDStr, VNCPassword, strconv.Itoa(VNCDisplay)},
 					Tty: false,
 				},
 				NetworkingConfig: &network.NetworkingConfig{
@@ -306,9 +311,9 @@ func main() {
 					},
 				},
 				// We use our own container image.
-				Image: "sansay.co.uk-dockerdesktop:0.1-beta.3",
+				Image: "sansay.co.uk-docker" + imageName + ":0.1-beta.3",
 				// Use a consistant name we can use later for management.
-				Name: "desktop-" + username,
+				Name: imageName + "-" + username,
 			})
 			// Check the container create process worked okay.
 			if containerCreateErr != nil {
@@ -348,7 +353,7 @@ func main() {
 			}
 		}
 
-		// If we've got to this point, we should have a running "desktop" container with a VNC session started up on a known port and with a known password.
+		// If we've got to this point, we should have a running container with a VNC session started up on a known port and with a known password.
 		httpResponse.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(httpResponse, "{\"portNumber\":\"" + strconv.Itoa(int(VNCPort)) + "\", \"password\":\"" + VNCPassword + "\"}")
 	})

@@ -287,9 +287,9 @@ if [ $INSTALL_PANGOLIN = true ]; then
         #docker build --no-cache -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
 
         echo "Building the Linux WINE image."
-        cp per-user-web-server/docker-WINE-Dockerfile .
+        cp per-user-web-server/docker-wine-Dockerfile .
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-WINE-Dockerfile
-        docker build -f docker-WINE-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
+        docker build -f docker-wine-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
 
         echo "Building the Linux calc image."
         cp per-user-web-server/docker-calc-Dockerfile .

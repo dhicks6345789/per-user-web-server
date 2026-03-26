@@ -1,18 +1,6 @@
 # A script to set up a per-user web server. See:
 # https://github.com/dhicks6345789/per-user-web-server
 
-copyOrDownload () {
-    echo Copying $1 to $2, mode $3...
-    if [ -f $1 ]; then
-        cp $1 $2
-    elif [ -f moodle-server/$1 ]; then
-        cp moodle-server/$1 $2
-    else
-        wget https://github.com/dhicks6345789/moodle-server/raw/master/$1 -O $2
-    fi
-    chmod $3 $2
-}
-
 # Set default command-line flag values.
 SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
@@ -24,6 +12,8 @@ DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 DOCKERCLASSTIMETABLER_DOCKER_IMAGE="sansay.co.uk-dockerclasstimetabler:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
+
+BUILD_LIST=("all")
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -72,12 +62,34 @@ while test $# -gt 0; do
             CLOUDFLARE_ZONE_ID=$1
             shift
             ;;
+        -build)
+            shift
+            BUILD_LIST=',' read -r -a my_array <<< "$1"
+            shift
+            ;;
         *)
             echo "$1 is not a recognized flag."
             exit 1;
             ;;
     esac
 done
+
+
+
+for pl in "${BUILD_LIST[@]}"; do
+    case "$pl" in
+        -root)
+            BUILD_ROOT=true
+            ;;
+        -desktop)
+            BUILD_DESKTOP=true
+            ;;
+        -all)
+            BUILD_ROOT=true
+            BUILD_DESKTOP=true
+            ;;
+done
+
 
 
 # Figure out the version (by release codename) of Debian we are using.

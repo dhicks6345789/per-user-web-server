@@ -81,7 +81,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       if (VNCPassword.equals("")) {
         logger.info("Problem finding / starting desktop instance for user " + username);
       } else {
-        logger.info("Connecting user " + username + " to " + imageName " + " instance via VNC.");
+        logger.info("Connecting user " + username + " to " + imageName + " instance via VNC.");
       
         // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
         GuacamoleConfiguration guacConfig = new GuacamoleConfiguration();

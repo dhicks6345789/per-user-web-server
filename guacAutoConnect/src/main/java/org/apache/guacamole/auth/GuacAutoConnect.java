@@ -67,7 +67,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     logger.info("User " + username + " connected to Guacamole at " + imageName + " - contacting Session Manager for session details.");
 
     // Call the Session Manager service (a basic, self-contained HTTP server written in Go) to tell it the user wants to connect to a VNC desktop instance.
-    // We pass in the username, if there's a free slot available we should get back a VNC port number and password.
+    // We pass in the username, if there's a free slot available we should get back a password we can use to connect to the VNC session.
     HttpClient sessionManagerClient = HttpClient.newHttpClient();
     HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username + "&image=" + imageName)).build();
     try {
@@ -76,24 +76,23 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       
       // Parse the JSON data returned from the Session Manager. To do: probably best to check for error messages first.
       JSONObject obj = new JSONObject(sessionManagerResponse.body());
-      String desktopPort = obj.getString("portNumber");
       String VNCPassword = obj.getString("password");
       
-      if (desktopPort.equals("")) {
+      if (VNCPassword.equals("")) {
         logger.info("Problem finding / starting desktop instance for user " + username);
       } else {
-        logger.info("Connecting user " + username + " to desktop on port " + desktopPort);
+        logger.info("Connecting user " + username + " to " + imageName " + " instance via VNC.");
       
         // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
         GuacamoleConfiguration guacConfig = new GuacamoleConfiguration();
     
         // Set protocol and connection parameters.
         guacConfig.setProtocol("vnc");
-        guacConfig.setParameter("hostname", "desktop-" + username);
-        guacConfig.setParameter("port", desktopPort);
+        guacConfig.setParameter("hostname", imageName + "-" + username);
+        guacConfig.setParameter("port", "5901");
         guacConfig.setParameter("username", username);
         guacConfig.setParameter("password", VNCPassword);
-        guacConfigs.put("Developer Desktop: " + username, guacConfig);
+        guacConfigs.put(imageName + ": " + username, guacConfig);
       }
     } catch (java.io.IOException | java.lang.InterruptedException e) {
       System.err.println("An error occurred while calling the Session Manager service: " + e.getMessage());

@@ -76,6 +76,9 @@ done
 
 
 
+BUILD_ROOT=false
+BUILD_DESKTOP=false
+BUILD_WINE=false
 for pl in "${BUILD_LIST[@]}"; do
     case "$pl" in
         -root)
@@ -84,9 +87,13 @@ for pl in "${BUILD_LIST[@]}"; do
         -desktop)
             BUILD_DESKTOP=true
             ;;
+        -wine)
+            BUILD_WINE=true
+            ;;
         -all)
             BUILD_ROOT=true
             BUILD_DESKTOP=true
+            BUILD_WINE=true
             ;;
 done
 
@@ -285,23 +292,29 @@ if [ $INSTALL_PANGOLIN = true ]; then
         #systemctl stop webconsole
         #systemctl disable webconsole
 
-        echo "Building the root Docker image - this might take a few minutes..."
-        cp per-user-web-server/docker-root-Dockerfile .
-        docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
-        #docker rmi $DOCKERROOT_DOCKER_IMAGE
-        #docker build --no-cache -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
-        
-        echo "Building the Linux desktop Docker image."
-        cp per-user-web-server/docker-desktop-Dockerfile .
-        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
-        docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
-        #docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
-        #docker build --no-cache -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+        if [ $BUILD_ROOT = true ]; then
+            echo "Building the root Docker image - this might take a few minutes..."
+            cp per-user-web-server/docker-root-Dockerfile .
+            docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
+            #docker rmi $DOCKERROOT_DOCKER_IMAGE
+            #docker build --no-cache -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
+        fi
 
-        echo "Building the Linux WINE image."
-        cp per-user-web-server/docker-wine-Dockerfile .
-        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wine-Dockerfile
-        docker build -f docker-wine-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
+        if [ $BUILD_DESKTOP = true ]; then
+            echo "Building the Linux desktop Docker image."
+            cp per-user-web-server/docker-desktop-Dockerfile .
+            sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
+            docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+            #docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
+            #docker build --no-cache -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+        fi
+
+        if [ $BUILD_WINE = true ]; then
+            echo "Building the Linux WINE image."
+            cp per-user-web-server/docker-wine-Dockerfile .
+            sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wine-Dockerfile
+            docker build -f docker-wine-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
+        fi
 
         echo "Building the Linux calc image."
         cp per-user-web-server/docker-calc-Dockerfile .

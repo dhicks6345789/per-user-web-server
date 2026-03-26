@@ -95,6 +95,7 @@ for pl in "${BUILD_LIST[@]}"; do
             BUILD_DESKTOP=true
             BUILD_WINE=true
             ;;
+    esac
 done
 
 

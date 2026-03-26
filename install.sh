@@ -276,8 +276,15 @@ if [ $INSTALL_PANGOLIN = true ]; then
         echo "--- Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select \"no\" when asked if you want to install Gerbil, Pangolin\'s tunneling component. ---"
     fi
     
+    # Get the Pangolin installer.
     wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
-    ./installer
+    # Check if Pangolin has already been installed.
+    PANGOLININSTALLED = $(docker images --format "{{.Repository}}" | grep -c pangolin)
+    if [ "$PANGOLININSTALLED" -eq 0 ]; then
+        ./installer
+    else
+        echo "no\n" | ./installer
+    fi
 
     # Install the rclone Docker plugin.
     docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions

@@ -119,15 +119,6 @@ services:
       #- /var/log/apache2/access.log:/var/log/apache2/access.log
       #- /var/log/apache2/error.log:/var/log/apache2/error.log
 
-  # Class Timetabler.
-  classTimetabler:
-    image: {{DOCKERCLASSTIMETABLER_DOCKER_IMAGE}}
-    command: bash /root/docker-classTimetabler-root-startup.sh
-    container_name: classTimetabler
-    restart: unless-stopped
-    networks:
-      - main
-
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:
   main:

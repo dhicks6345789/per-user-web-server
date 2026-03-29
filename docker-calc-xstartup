@@ -10,6 +10,10 @@ xfwm4 &
 if [ -d "~/Casio" ]; then
     exec wine "~/Casio/fx-83GT X_85GT X Emulator.exe"
 else
-  wine "/tmp/installer.exe"
-
+    # Download the (windows) installer for the Casio FX-83GT / FX-85GT emulator.
+    curl https://info.casio.co.uk/hubfs/CAL/Emulators/Install/ClassWiz%20Emulator%20Subscription%20for%20fx-83GT%20X_85GT%20X%20Ver.2.01_c.exe -o ~/installer.exe
+    wine "~/installer.exe"
+    mkdir ~/Casio
+    cp -R "home/d.hicks/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator/*" ~/Casio
+    exec wine "~/Casio/fx-83GT X_85GT X Emulator.exe"
 fi

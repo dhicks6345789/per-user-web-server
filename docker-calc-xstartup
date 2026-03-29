@@ -7,17 +7,15 @@ unset DBUS_SESSION_BUS_ADDRESS
 # Start the window manager.
 xfwm4 &
 
-if [ -d "~/Casio" ]; then
-    cd ~/Casio
-    wine "fx-83GT X_85GT X Emulator.exe"
-else
+if [ ! -d ~/Casio ]; then
     # Download the (windows) installer for the Casio FX-83GT / FX-85GT emulator.
     curl https://info.casio.co.uk/hubfs/CAL/Emulators/Install/ClassWiz%20Emulator%20Subscription%20for%20fx-83GT%20X_85GT%20X%20Ver.2.01_c.exe -o ~/installer.exe
     #exec startxfce4
     cd ~
     wine installer.exe
     mkdir ~/Casio
-    cp -R "home/d.hicks/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator/*" ~/Casio
-    cd ~/Casio
-    wine "fx-83GT X_85GT X Emulator.exe"
+    cp -R "~/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator/*" ~/Casio
 fi
+
+cd ~/Casio
+wine "fx-83GT X_85GT X Emulator.exe"

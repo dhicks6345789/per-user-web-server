@@ -46,7 +46,7 @@ chown $1:$1 /home/$1/.config/tigervnc/passwd
 chmod 600 /home/$1/.config/tigervnc/passwd
 
 # ...and copy in the XStartup script that starts up the user's desktop environment when they connect via VNC.
-cp /root/docker-desktop-xstartup /home/$1/.config/tigervnc/xstartup
+cp /root/docker-calc-xstartup /home/$1/.config/tigervnc/xstartup
 chown $1:$1 /home/$1/.config/tigervnc/xstartup
 chmod u+x /home/$1/.config/tigervnc/xstartup
 

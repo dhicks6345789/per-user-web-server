@@ -58,8 +58,10 @@ services:
     image: guacamole/guacamole:latest
     container_name: desktop
     restart: unless-stopped
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
+    #ports:
+      #- "8080:8080"
     environment:
       GUACD_HOSTNAME: guacd
       HTTP_AUTH_ENABLED: "true"
@@ -80,8 +82,10 @@ services:
     image: guacamole/guacamole:latest
     container_name: calc
     restart: unless-stopped
-    ports:
-      - "8080:8081"
+    expose:
+      - "8080"
+    #ports:
+      #- "8081:8080"
     environment:
       GUACD_HOSTNAME: guacd
       HTTP_AUTH_ENABLED: "true"

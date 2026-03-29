@@ -64,9 +64,9 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     String imageName = request.getRequestURI().split("/")[1].toLowerCase();
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
-    logger.info("User " + username + " connected to Guacamole at " + imageName + " - contacting Session Manager for session details.");
+    logger.info("User " + username + " connected to Guacamole at \"/" + imageName + "\" - contacting Session Manager for session details.");
 
-    // Call the Session Manager service (a basic, self-contained HTTP server written in Go) to tell it the user wants to connect to a VNC desktop instance.
+    // Call the Session Manager service to tell it the user wants to connect to a VM instance via VNC.
     // We pass in the username, if there's a free slot available we should get back a password we can use to connect to the VNC session.
     HttpClient sessionManagerClient = HttpClient.newHttpClient();
     HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username + "&image=" + imageName)).build();
@@ -81,7 +81,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       if (VNCPassword.equals("")) {
         logger.info("Problem finding / starting desktop instance for user " + username);
       } else {
-        logger.info("Connecting user " + username + " to " + imageName + " instance via VNC.");
+        logger.info("Connecting user " + username + " to \"" + imageName + "\" instance via VNC.");
       
         // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
         GuacamoleConfiguration guacConfig = new GuacamoleConfiguration();

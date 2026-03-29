@@ -54,7 +54,7 @@ services:
       - main
   
   # Guacamole Client - The Guacamole web interface for the "desktop" image.
-  guacamole:
+  desktop:
     image: guacamole/guacamole:latest
     container_name: desktop
     restart: unless-stopped
@@ -76,7 +76,7 @@ services:
       - /etc/guacamole:/etc/guacamole
 
   # Guacamole Client - The Guacamole web interface for the "calc" image.
-  guacamole:
+  calc:
     image: guacamole/guacamole:latest
     container_name: calc
     restart: unless-stopped

@@ -104,7 +104,7 @@ func main() {
 	// Endpoint connectOrStartSession - returns a port number and password to connect with VNC.
 	// Usage: POST /connectOrStartSession?username=USERNAME&image=IMAGENAME
 	// Returns: JSON { portNumber, password }
-	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new desktop session (container).
+	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new session (container).
 	http.HandleFunc("/connectOrStartSession", func(httpResponse http.ResponseWriter, r *http.Request) {
 		// Parse the HTTP GET/POST request form data.
 		if err := r.ParseForm(); err != nil {
@@ -238,7 +238,7 @@ func main() {
 			hostIP, _ := netip.ParseAddr("0.0.0.0")
 			*/
 			
-			// Create the container that holds the user's desktop session.
+			// Create the container that holds the user's VNC session.
 			containerContext := context.Background()
 			exposedPort, _ := network.ParsePort(strconv.Itoa(int(VNCPort)) + "/TCP")
 			resp, containerCreateErr := cli.ContainerCreate(containerContext, client.ContainerCreateOptions{

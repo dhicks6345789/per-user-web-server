@@ -1,8 +1,0 @@
-FROM {{DOCKERROOT_DOCKER_IMAGE}}
-
-# Expose port 3000 for the frontend, Pangolin can direct traffic to this port.
-EXPOSE 3000
-
-# Copy in the startup scripts.
-COPY per-user-web-server/docker-classTimetabler-root-startup.sh /root/docker-classTimetabler-root-startup.sh
-RUN chmod u+x /root/docker-classTimetabler-root-startup.sh

@@ -20,8 +20,8 @@ wine "fx-83GT X_85GT X Emulator.exe" &
 echo "Starting ClassWiz Emulator..."  > ~/.local/state/xstartup.log 2>&1
 echo ~ >> ~/.local/state/xstartup.log 2>&1
 set >> ~/.local/state/xstartup.log 2>&1
-echo "---" >> >> ~/.local/state/xstartup.log 2>&1
-pwd >> >> ~/.local/state/xstartup.log 2>&1
+echo "---" >> ~/.local/state/xstartup.log 2>&1
+pwd >> ~/.local/state/xstartup.log 2>&1
 
 # For debugging - have xdotool list all available named windows to the log file.
 # xdotool search --all --name "." getwindowname %@ >> ~/.local/state/xstartup.log 2>&1

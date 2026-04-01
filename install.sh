@@ -62,13 +62,8 @@ while test $# -gt 0; do
             shift
             ;;
         -build)
-            echo "Build list parameter found!"
             shift
-            echo "One..."
-            echo $1
             IFS=',' read -ra BUILD_LIST <<< "$1"
-            echo "$BUILD_LIST"
-            echo "---"
             shift
             ;;
         *)
@@ -80,13 +75,12 @@ done
 
 
 
+# Figure out the items we want to build.
 BUILD_ROOT=false
 BUILD_DESKTOP=false
 BUILD_WINE=false
-echo "Figuring out build list..."
-for pl in "${BUILD_LIST[@]}"; do
-    echo "$pl"
-    case "$pl" in
+for BUILD_ITEM in "${BUILD_LIST[@]}"; do
+    case "$BUILD_ITEM" in
         -root)
             BUILD_ROOT=true
             ;;
@@ -104,9 +98,6 @@ for pl in "${BUILD_LIST[@]}"; do
     esac
 done
 
-
-echo "$BUILD_LIST"
-exit 0
 
 
 # Figure out the version (by release codename) of Debian we are using.

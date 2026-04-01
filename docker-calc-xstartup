@@ -14,7 +14,11 @@ fi
 cd ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator"
 wine "fx-83GT X_85GT X Emulator.exe"
 
-xdotool search --all --name "." getwindowname %@ > /tmp/startup.log 2>&1
+echo "Oranges!" 2>&1
+
+echo "Bananas!"  > /tmp/startup.log 2>&1
+
+xdotool search --all --name "." getwindowname %@ >> /tmp/startup.log 2>&1
 
 # 1. Find the Window ID (search by name)
 #WID=$(xdotool search --name "Your Application Name")

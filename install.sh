@@ -74,8 +74,6 @@ while test $# -gt 0; do
 done
 
 
-echo "Build List:"
-echo "$BUILD_LIST"
 
 # Figure out the items we want to build.
 BUILD_ROOT=false
@@ -93,9 +91,11 @@ for BUILD_ITEM in "${BUILD_LIST[@]}"; do
             BUILD_DESKTOP=true
             ;;
         -wine)
+            echo "WINE found"
             BUILD_WINE=true
             ;;
         -calc)
+            echo "CALC found"
             BUILD_CALC=true
             ;;
         -all)

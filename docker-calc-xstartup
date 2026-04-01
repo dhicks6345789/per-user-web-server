@@ -31,9 +31,9 @@ xdotool windowfocus --sync $WINID key "Return" >> ~/.local/state/xstartup.log 2>
 # Find the Window ID of the FX-83/85GT X Emulator, waiting until the window is open.
 WINID=$(xdotool search --sync --name "fx-83/85GT X Emulator") >> ~/.local/state/xstartup.log 2>&1
 # Focus that window and send keys.
-sleep 1
+sleep 2
 xdotool windowfocus --sync $WINID key "alt+w" >> ~/.local/state/xstartup.log 2>&1
-sleep 1
+sleep 2
 xdotool windowfocus --sync $WINID type "f" >> ~/.local/state/xstartup.log 2>&1
 
 # For debugging - send a test string to the calculator.

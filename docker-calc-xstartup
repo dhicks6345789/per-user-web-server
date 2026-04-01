@@ -2,9 +2,11 @@
 unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
-# Start the window manager.
-#xfwm4 &
-#startxfce4 &
+# For debugging - start the full XFCE4 window system.
+# startxfce4 &
+
+# For debugging - start just the XFCE4 window manager.
+# xfwm4 &
 
 if [ ! -d ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator" ]; then
     # Download the (windows) installer for the Casio FX-83GT / FX-85GT emulator.
@@ -15,7 +17,7 @@ fi
 cd ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator"
 wine "fx-83GT X_85GT X Emulator.exe" &
 
-echo "One"  > /tmp/startup.log 2>&1
+echo "Starting ClassWiz Emulator..."  > /tmp/startup.log 2>&1
 
 # Find the Window ID of the Activation Wizard, waiting until the window is open.
 WINID=$(xdotool search --sync --name "ClassWiz Emulator Subscription for fx-83/85GT X Activation Wizard") >> /tmp/startup.log 2>&1
@@ -23,9 +25,9 @@ WINID=$(xdotool search --sync --name "ClassWiz Emulator Subscription for fx-83/8
 xdotool windowfocus --sync $WINID key "Down" >> /tmp/startup.log 2>&1
 xdotool windowfocus --sync $WINID key "Return" >> /tmp/startup.log 2>&1
 
-#sleep 2
-#echo "Three" >> /tmp/startup.log 2>&1
-#xdotool search --all --name "." getwindowname %@ >> /tmp/startup.log 2>&1
+sleep 2
+echo "Searching for window name..." >> /tmp/startup.log 2>&1
+xdotool search --all --name "." getwindowname %@ >> /tmp/startup.log 2>&1
 
 # Find the Window ID of the FX-83/85GT X Emulator, waiting until the window is open.
 WINID=$(xdotool search --sync --name "fx-83/85GT X Emulator") >> /tmp/startup.log 2>&1

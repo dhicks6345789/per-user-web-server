@@ -15,6 +15,8 @@ if [ ! -d "~/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscript
 fi
 
 cd "~/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator"
+pwd
+ls -la
 wine "fx-83GT X_85GT X Emulator.exe"
 
 tail -f /dev/null

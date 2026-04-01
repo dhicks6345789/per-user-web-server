@@ -41,7 +41,7 @@ xdotool windowfocus --sync $WINID key "alt+w" >> ~/.local/state/xstartup.log 2>&
 xdotool windowfocus --sync $WINID type "f" >> ~/.local/state/xstartup.log 2>&1
 
 # For debugging - send a test string to the calculator.
-xdotool windowfocus --sync $WINID type "8008135" >> ~/.local/state/xstartup.log 2>&1
+xdotool windowfocus --sync $WINID type "5318008" >> ~/.local/state/xstartup.log 2>&1
 
 # Start a constant "null" process so the container doesn't exit.
 tail -f /dev/null

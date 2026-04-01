@@ -100,7 +100,7 @@ for pl in "${BUILD_LIST[@]}"; do
 done
 
 
-echo BUILD_LIST
+echo "$BUILD_LIST"
 exit 0
 
 

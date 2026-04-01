@@ -30,7 +30,7 @@ xdotool windowfocus --sync $WINID key "Return" >> /tmp/startup.log 2>&1
 # Find the Window ID of the FX-83/85GT X Emulator, waiting until the window is open.
 WINID=$(xdotool search --sync --name "fx-83/85GT X Emulator") >> /tmp/startup.log 2>&1
 # Focus that window and send keys.
-xdotool windowfocus --sync $WINID key "alt-w" >> /tmp/startup.log 2>&1
+xdotool windowfocus --sync $WINID key "alt+w" >> /tmp/startup.log 2>&1
 xdotool windowfocus --sync $WINID key "f" >> /tmp/startup.log 2>&1
 
 # Start a constant "null" process so the container doesn't exit.

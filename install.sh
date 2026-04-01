@@ -79,6 +79,7 @@ done
 BUILD_ROOT=false
 BUILD_DESKTOP=false
 BUILD_WINE=false
+BUILD_CALC=false
 for BUILD_ITEM in "${BUILD_LIST[@]}"; do
     case "$BUILD_ITEM" in
         -root)
@@ -90,13 +91,22 @@ for BUILD_ITEM in "${BUILD_LIST[@]}"; do
         -wine)
             BUILD_WINE=true
             ;;
+        -calc)
+            BUILD_CALC=true
+            ;;
         -all)
             BUILD_ROOT=true
             BUILD_DESKTOP=true
             BUILD_WINE=true
+            BUILD_CALC=true
             ;;
     esac
 done
+
+echo "$BUILD_LIST"
+echo "$BUILD_WINE"
+echo "$BUILD_CALC"
+exit 0
 
 
 
@@ -324,10 +334,12 @@ if [ $INSTALL_PANGOLIN = true ]; then
             docker build -f docker-wine-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
         fi
 
-        echo "Building the Linux calc image."
-        cp per-user-web-server/docker-calc-Dockerfile .
-        sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-calc-Dockerfile
-        docker build -f docker-calc-Dockerfile --progress=plain --tag=$DOCKERCALC_DOCKER_IMAGE . 2>&1
+        if [ $BUILD_CALC = true ]; then
+            echo "Building the Linux calc image."
+            cp per-user-web-server/docker-calc-Dockerfile .
+            sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-calc-Dockerfile
+            docker build -f docker-calc-Dockerfile --progress=plain --tag=$DOCKERCALC_DOCKER_IMAGE . 2>&1
+        fi
 
         echo "Building our custom Docker image for the web server."
         cp per-user-web-server/docker-wwwServer-Dockerfile .

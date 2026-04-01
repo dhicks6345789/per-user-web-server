@@ -25,8 +25,8 @@ WINID=$(xdotool search --sync --name "ClassWiz Emulator Subscription for fx-83/8
 echo "$WINID" >> /tmp/startup.log 2>&1
 
 # Focus that window and send keys.
-xdotool windowactivate --sync $WINID key "Down" >> /tmp/startup.log 2>&1
-xdotool windowactivate --sync $WINID key "Return" >> /tmp/startup.log 2>&1
+xdotool windowfocus --sync $WINID key "Down" >> /tmp/startup.log 2>&1
+xdotool windowfocus --sync $WINID key "Return" >> /tmp/startup.log 2>&1
 
 # Start a constant "null" process so the container doesn't exit.
 tail -f /dev/null

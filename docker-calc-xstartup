@@ -3,7 +3,7 @@ unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
 # Start the window manager.
-xfwm4 &
+#xfwm4 &
 
 if [ ! -d ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator" ]; then
     # Download the (windows) installer for the Casio FX-83GT / FX-85GT emulator.
@@ -13,6 +13,5 @@ fi
 
 cd ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator"
 wine "fx-83GT X_85GT X Emulator.exe"
-#wine "fx-83GT X_85GT X Emulator.exe" & sleep 0.5 && wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz && wmctrl -r :ACTIVE: -e 0,0,0,-1,-1 --toggle,undecorated
 
 tail -f /dev/null

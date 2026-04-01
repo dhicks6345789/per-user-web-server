@@ -17,7 +17,6 @@ cd ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83
 wine "fx-83GT X_85GT X Emulator.exe" &
 
 # Start the log file, handy for debugging.
-mkdir ~/.local/state
 echo "Starting ClassWiz Emulator..."  > ~/.local/state/xstartup.log 2>&1
 echo ~ >> ~/.local/state/xstartup.log 2>&1
 set >> ~/.local/state/xstartup.log 2>&1

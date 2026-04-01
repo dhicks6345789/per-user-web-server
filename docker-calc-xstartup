@@ -12,7 +12,7 @@ if [ ! -d ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscriptio
 fi
 
 cd ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator"
-wine "fx-83GT X_85GT X Emulator.exe"
+wine "fx-83GT X_85GT X Emulator.exe" &
 
 echo "Oranges!" 2>&1
 

@@ -100,6 +100,9 @@ for pl in "${BUILD_LIST[@]}"; do
 done
 
 
+echo BUILD_LIST
+exit 0
+
 
 # Figure out the version (by release codename) of Debian we are using.
 debianversion=`cat /etc/os-release | grep CODENAME | sed 's/=/\n/g' | grep -v CODENAME`

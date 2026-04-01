@@ -64,7 +64,9 @@ while test $# -gt 0; do
         -build)
             echo "Build list parameter found!"
             shift
-            BUILD_LIST=',' read -r -a my_array <<< "$1"
+            MY_LIST=',' read -r -a my_array <<< "$1"
+            echo "$MY_LIST"
+            echo "---"
             shift
             ;;
         *)

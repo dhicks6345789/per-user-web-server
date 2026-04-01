@@ -81,8 +81,6 @@ BUILD_DESKTOP=false
 BUILD_WINE=false
 BUILD_CALC=false
 for BUILD_ITEM in "${BUILD_LIST[@]}"; do
-    echo "Build item:"
-    echo "$BUILD_ITEM"
     case "$BUILD_ITEM" in
         "root")
             BUILD_ROOT=true
@@ -106,11 +104,6 @@ for BUILD_ITEM in "${BUILD_LIST[@]}"; do
             ;;
     esac
 done
-
-echo "$BUILD_LIST"
-echo "$BUILD_WINE"
-echo "$BUILD_CALC"
-exit 0
 
 
 

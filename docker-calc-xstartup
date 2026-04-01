@@ -14,4 +14,13 @@ fi
 cd ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator"
 wine "fx-83GT X_85GT X Emulator.exe"
 
+# 1. Find the Window ID (search by name)
+WID=$(xdotool search --name "Your Application Name")
+
+# 2. Focus the window and send keys
+#xdotool windowactivate --sync $WID key "ctrl+s" 
+#xdotool windowactivate --sync $WID type "Hello World"
+#xdotool windowactivate --sync $WID key "Return"
+
+# Start a constant "null" process so the container doesn't exit.
 tail -f /dev/null

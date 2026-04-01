@@ -84,21 +84,21 @@ for BUILD_ITEM in "${BUILD_LIST[@]}"; do
     echo "Build item:"
     echo "$BUILD_ITEM"
     case "$BUILD_ITEM" in
-        -root)
+        "root")
             BUILD_ROOT=true
             ;;
-        -desktop)
+        "desktop")
             BUILD_DESKTOP=true
             ;;
-        -wine)
+        "wine")
             echo "WINE found"
             BUILD_WINE=true
             ;;
-        -calc)
+        "calc")
             echo "CALC found"
             BUILD_CALC=true
             ;;
-        -all)
+        "all")
             BUILD_ROOT=true
             BUILD_DESKTOP=true
             BUILD_WINE=true

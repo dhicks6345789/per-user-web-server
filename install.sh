@@ -78,7 +78,9 @@ done
 BUILD_ROOT=false
 BUILD_DESKTOP=false
 BUILD_WINE=false
+echo "Figuring out build list..."
 for pl in "${BUILD_LIST[@]}"; do
+    echo "$pl"
     case "$pl" in
         -root)
             BUILD_ROOT=true

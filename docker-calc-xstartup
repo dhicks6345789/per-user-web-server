@@ -4,7 +4,7 @@ unset DBUS_SESSION_BUS_ADDRESS
 
 # Start the window manager.
 #xfwm4 &
-startxfce4 &
+#startxfce4 &
 
 if [ ! -d ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator" ]; then
     # Download the (windows) installer for the Casio FX-83GT / FX-85GT emulator.
@@ -20,7 +20,7 @@ echo "One"  > /tmp/startup.log 2>&1
 #xdotool search --all --name "." getwindowname %@ >> /tmp/startup.log 2>&1
 
 # Find the Window ID of the ClassWiz Emulator, waiting until the window is open.
-WINID=$(xdotool --sync search --name "ClassWiz Emulator Subscription for fx-83/85GT X Activation Wizard") >> /tmp/startup.log 2>&1
+WINID=$(xdotool search --sync --name "ClassWiz Emulator Subscription for fx-83/85GT X Activation Wizard") >> /tmp/startup.log 2>&1
 
 echo "$WINID" >> /tmp/startup.log 2>&1
 

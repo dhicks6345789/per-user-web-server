@@ -37,7 +37,7 @@ RUN apt-get update
 RUN apt-get install -y --install-recommends winehq-stable
 
 # Install "xdotool", a tool for automating GUI applications.
-RUN apt install -y xdotool
+RUN apt-get install -y xdotool
 
 
 

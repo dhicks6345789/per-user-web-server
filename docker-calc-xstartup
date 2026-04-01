@@ -14,10 +14,10 @@ if [ ! -d "~/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscript
     wine installer.exe
 fi
 
-cd "~/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator" 2>&1
-pwd 2>&1
-ls -la 2>&1
-wine "fx-83GT X_85GT X Emulator.exe" 2>&1
+cd "~/.wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator" > /tmp/startup.log 2>&1
+pwd >> /tmp/startup.log 2>&1
+ls -la >> /tmp/startup.log 2>&1
+wine "fx-83GT X_85GT X Emulator.exe" >> /tmp/startup.log 2>&1
 
 echo Waiting...
 

@@ -36,6 +36,9 @@ RUN wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/d
 RUN apt-get update
 RUN apt-get install -y --install-recommends winehq-stable
 
+# Install "xdotool", a tool for automating GUI applications.
+RUN apt install -y xdotool
+
 
 
 # Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to

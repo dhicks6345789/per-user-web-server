@@ -66,8 +66,8 @@ while test $# -gt 0; do
             shift
             echo "One..."
             echo $1
-            MY_LIST=',' read -r -a my_array <<< "$1"
-            echo "$MY_LIST"
+            IFS=',' read -ra BUILD_LIST <<< "$1"
+            echo "$BUILD_LIST"
             echo "---"
             shift
             ;;

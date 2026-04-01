@@ -35,5 +35,7 @@ WINID=$(xdotool search --sync --name "fx-83/85GT X Emulator") >> /tmp/startup.lo
 xdotool windowfocus --sync $WINID key "alt+w" >> /tmp/startup.log 2>&1
 xdotool windowfocus --sync $WINID key "f" >> /tmp/startup.log 2>&1
 
+xdotool windowfocus --sync $WINID key "1" >> /tmp/startup.log 2>&1
+
 # Start a constant "null" process so the container doesn't exit.
 tail -f /dev/null

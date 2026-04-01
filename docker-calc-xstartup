@@ -28,9 +28,8 @@ WINID=$(xdotool search --sync --name "ClassWiz Emulator Subscription for fx-83/8
 xdotool windowfocus --sync $WINID key "Down" >> ~/.local/state/xstartup.log 2>&1
 xdotool windowfocus --sync $WINID key "Return" >> ~/.local/state/xstartup.log 2>&1
 
-sleep 1
-
 # Find the Window ID of the FX-83/85GT X Emulator, waiting until the window is open.
+sleep 1
 WINID=$(xdotool search --sync --name "fx-83/85GT X Emulator") >> ~/.local/state/xstartup.log 2>&1
 # Focus that window and send keys.
 sleep 1

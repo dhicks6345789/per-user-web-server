@@ -13,7 +13,7 @@ if [ ! -d ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscriptio
     wine installer.exe
 fi
 
-# wine "fx-83GT X_85GT X Emulator.exe"
-wine "fx-83GT X_85GT X Emulator.exe" & sleep 0.5 && wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz && wmctrl -r :ACTIVE: -e 0,0,0,-1,-1 --toggle,undecorated
+wine "fx-83GT X_85GT X Emulator.exe"
+#wine "fx-83GT X_85GT X Emulator.exe" & sleep 0.5 && wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz && wmctrl -r :ACTIVE: -e 0,0,0,-1,-1 --toggle,undecorated
 
 tail -f /dev/null

@@ -74,6 +74,8 @@ while test $# -gt 0; do
 done
 
 
+echo "Build List:"
+echo "$BUILD_LIST"
 
 # Figure out the items we want to build.
 BUILD_ROOT=false

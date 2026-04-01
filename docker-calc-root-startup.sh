@@ -19,20 +19,9 @@ echo "$1:$4" | chpasswd
 echo "$1 ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/users
 echo "Created user $1 with IDs $2:$3."
 
-
-
-# Set up the XFCE4 desktop with custom shortcuts.
-if [ ! -d "/home/$1/.local/share/xfce4/helpers" ]; then
-  mkdir -p /home/$1/.local/share/xfce4/helpers
-  cp /root/docker-desktop-custom-WebBrowser.desktop /home/$1/.local/share/xfce4/helpers/custom-WebBrowser.desktop
-  chown -R $1:$1 /home/$1/.local
-  
-  mkdir -p /home/$1/.config/xfce4
-  cp /root/docker-desktop-helpers.rc /home/$1/.config/xfce4/helpers.rc
-  chown -R $1:$1 /home/$1/.config
-fi
-
-
+# Create a folder for the user to write any log files to.
+mkdir -p /home/$1/.local/state
+chown $1:$1 /home/$1/.local/state
 
 # Set up the TigerVNC home folder...
 mkdir -p /home/$1/.config/tigervnc
@@ -49,8 +38,6 @@ chmod 600 /home/$1/.config/tigervnc/passwd
 cp /root/docker-calc-xstartup /home/$1/.config/tigervnc/xstartup
 chown $1:$1 /home/$1/.config/tigervnc/xstartup
 chmod u+x /home/$1/.config/tigervnc/xstartup
-
-
 
 # Set up and run the user startup script, as the user.
 cp /root/docker-calc-user-startup.sh /home/$1/startup.sh

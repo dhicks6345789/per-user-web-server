@@ -11,7 +11,7 @@ DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
-DOCKEREXAMS_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
+DOCKEREXAMS_DOCKER_IMAGE="sansay.co.uk-dockerexams:0.1-beta.3"
 
 BUILD_LIST=("all")
 

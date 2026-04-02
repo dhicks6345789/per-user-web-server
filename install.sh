@@ -11,6 +11,7 @@ DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
+DOCKEREXAMS_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
 
 BUILD_LIST=("all")
 
@@ -61,6 +62,11 @@ while test $# -gt 0; do
             CLOUDFLARE_ZONE_ID=$1
             shift
             ;;
+        -exampad_key)
+            shift
+            EXAMPAD_KEY=$1
+            shift
+            ;;
         -build)
             shift
             IFS=',' read -ra BUILD_LIST <<< "$1"
@@ -89,18 +95,20 @@ for BUILD_ITEM in "${BUILD_LIST[@]}"; do
             BUILD_DESKTOP=true
             ;;
         "wine")
-            echo "WINE found"
             BUILD_WINE=true
             ;;
         "calc")
-            echo "CALC found"
             BUILD_CALC=true
+            ;;
+        "exams")
+            BUILD_EXAMS=true
             ;;
         "all")
             BUILD_ROOT=true
             BUILD_DESKTOP=true
             BUILD_WINE=true
             BUILD_CALC=true
+            BUILD_EXAMS=true
             ;;
     esac
 done
@@ -336,6 +344,13 @@ if [ $INSTALL_PANGOLIN = true ]; then
             cp per-user-web-server/docker-calc-Dockerfile .
             sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-calc-Dockerfile
             docker build -f docker-calc-Dockerfile --progress=plain --tag=$DOCKERCALC_DOCKER_IMAGE . 2>&1
+        fi
+
+        if [ $BUILD_EXAMS = true ]; then
+            echo "Building the Linux Exams image."
+            cp per-user-web-server/docker-exams-Dockerfile .
+            sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-exams-Dockerfile
+            docker build -f docker-exams-Dockerfile --progress=plain --tag=$DOCKEREXAMS_DOCKER_IMAGE . 2>&1
         fi
 
         echo "Building our custom Docker image for the web server."

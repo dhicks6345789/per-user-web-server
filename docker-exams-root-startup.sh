@@ -39,6 +39,10 @@ cp /root/docker-exams-xstartup /home/$1/.config/tigervnc/xstartup
 chown $1:$1 /home/$1/.config/tigervnc/xstartup
 chmod u+x /home/$1/.config/tigervnc/xstartup
 
+# Copy over the MSI installer to the user's home folder.
+cp /root/ExamPad+.msi /home/$1/ExamPad+.msi
+chown $1:$1 /home/$1/ExamPad+.msi
+
 # Set up and run the user startup script, as the user.
 cp /root/docker-exams-user-startup.sh /home/$1/startup.sh
 chown $1:$1 /home/$1/startup.sh

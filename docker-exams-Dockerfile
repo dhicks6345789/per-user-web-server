@@ -3,12 +3,6 @@ FROM {{DOCKERWINE_DOCKER_IMAGE}}
 # Update apt repository lists again.
 RUN apt-get update
 
-# Install ExamPad+.
-if [ ! -f "ExamPad+.msi" ]; then
-    echo "Can't find file ExamPad+.msi - you need to download it from their website."
-    exit 1
-fi
-
 # Copy the (Windows) installer for ExamPad+ into the Docker image.
 COPY ExamPad+.msi /root/ExamPad+.msi
 

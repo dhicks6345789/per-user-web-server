@@ -348,6 +348,13 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
         if [ $BUILD_EXAMS = true ]; then
             echo "Building the Linux Exams image."
+            
+            # Check we have the (Windows) ExamPad+ installer file.
+            if [ ! -f "ExamPad+.msi" ]; then
+                echo "Can't find file ExamPad+.msi - you need to download it from their website."
+                exit 1
+            fi
+            
             cp per-user-web-server/docker-exams-Dockerfile .
             sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-exams-Dockerfile
             docker rmi $DOCKEREXAMS_DOCKER_IMAGE

@@ -7,9 +7,7 @@ unset DBUS_SESSION_BUS_ADDRESS
 # For debugging - start just the XFCE4 window manager.
 # xfwm4 &
 
-wine msiexec /i ExamPad+.msi /qb
-
-sleep 10
+#wine msiexec /i ExamPad+.msi /qb
 startxfce4 &
 
 #if [ ! -d ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator" ]; then

@@ -350,6 +350,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
             echo "Building the Linux Exams image."
             cp per-user-web-server/docker-exams-Dockerfile .
             sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-exams-Dockerfile
+            docker rmi $DOCKEREXAMS_DOCKER_IMAGE
             docker build -f docker-exams-Dockerfile --progress=plain --tag=$DOCKEREXAMS_DOCKER_IMAGE . 2>&1
         fi
 

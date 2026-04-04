@@ -7,17 +7,13 @@ unset DBUS_SESSION_BUS_ADDRESS
 # For debugging - start just the XFCE4 window manager.
 # xfwm4 &
 
-wine msiexec /i ExamPad+.msi /qb
-startxfce4 &
+if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
+  # Run the (Windows) installer.
+  wine msiexec /i ExamPad+.msi /qb
+fi
 
-#if [ ! -d ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator" ]; then
-#    # Download the (windows) installer for the Casio FX-83GT / FX-85GT emulator.
-#    curl https://info.casio.co.uk/hubfs/CAL/Emulators/Install/ClassWiz%20Emulator%20Subscription%20for%20fx-83GT%20X_85GT%20X%20Ver.2.01_c.exe -o installer.exe
-#    wine installer.exe
-#fi
-
-#cd ".wine/drive_c/Program Files (x86)/CASIO/ClassWiz Emulator Subscription/fx-83GT X_85GT X Emulator"
-#wine "fx-83GT X_85GT X Emulator.exe" &
+cd ".wine/drive_c/Program Files/ExamPad+"
+wine "ExamPad+.exe" &
 
 ## Start the log file, handy for debugging.
 #echo "Starting ClassWiz Emulator..."  > ~/.local/state/xstartup.log 2>&1

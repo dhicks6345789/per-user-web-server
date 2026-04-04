@@ -84,8 +84,6 @@ services:
     restart: unless-stopped
     expose:
       - "8080"
-    #ports:
-      #- "8081:8080"
     environment:
       GUACD_HOSTNAME: guacd
       HTTP_AUTH_ENABLED: "true"
@@ -101,6 +99,28 @@ services:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
 
+  # Guacamole Client - The Guacamole web interface for the "exams" image.
+  exams:
+    image: guacamole/guacamole:latest
+    container_name: exams
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      GUACD_HOSTNAME: guacd
+      HTTP_AUTH_ENABLED: "true"
+      HTTP_AUTH_HEADER: Remote-User
+      WEBAPP_CONTEXT: exams
+    depends_on:
+      - guacd
+    networks:
+      - main
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # /etc/guacamole is where the custom Java extension needs to be placed.
+      - /etc/guacamole:/etc/guacamole
+  
   # Our own custom Go web server.
   wwwserver:
     image: {{DOCKERWWWSERVER_DOCKER_IMAGE}}

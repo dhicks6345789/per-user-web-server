@@ -8,9 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 
 # Install some basic utilities.
-RUN apt-get install -y curl sudo wget nano procps
-
-
+RUN apt-get install -y curl sudo wget nano procps unzip p7zip
 
 # Install a Python development environment.
 RUN apt-get install -y python3 python3-pip python3-venv

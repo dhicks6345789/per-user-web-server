@@ -3,7 +3,7 @@ unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
 # For debugging - start a full XFCE4 desktop environment.
-startxfce4 &
+#startxfce4 &
 # For debugging - start just the XFCE4 window manager.
 # xfwm4 &
 
@@ -11,6 +11,13 @@ if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   # Run the (Windows) installer.
   wine msiexec /i ExamPad+.msi /qb
 fi
+
+if [ ! -d ".winetricks" ]; then
+  # Download the winetricks script and make it executable
+  wine msiexec /i ExamPad+.msi /qb
+fi
+
+
 
 #cd ".wine/drive_c/Program Files/ExamPad+"
 #wine "ExamPad+.exe" &

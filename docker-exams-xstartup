@@ -19,11 +19,6 @@ fi
 
 wine ".wine/drive_c/Program Files/ExamPad+/ExamPad+.exe"
 
-
-
-#cd ".wine/drive_c/Program Files/ExamPad+"
-#wine "ExamPad+.exe" &
-
 ## Start the log file, handy for debugging.
 #echo "Starting ClassWiz Emulator..."  > ~/.local/state/xstartup.log 2>&1
 
@@ -34,7 +29,7 @@ wine ".wine/drive_c/Program Files/ExamPad+/ExamPad+.exe"
 #WINID=$(xdotool search --sync --name "ClassWiz Emulator Subscription for fx-83/85GT X Activation Wizard") >> ~/.local/state/xstartup.log 2>&1
 ## Focus that window and send keys.
 #xdotool windowfocus --sync $WINID key "Down" >> ~/.local/state/xstartup.log 2>&1
-x#dotool windowfocus --sync $WINID key "Return" >> ~/.local/state/xstartup.log 2>&1
+#xdotool windowfocus --sync $WINID key "Return" >> ~/.local/state/xstartup.log 2>&1
 
 ## Find the Window ID of the FX-83/85GT X Emulator, waiting until the window is open.
 #sleep 1

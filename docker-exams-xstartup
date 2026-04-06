@@ -12,10 +12,10 @@ if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   wine msiexec /i ExamPad+.msi /qb
 fi
 
-#if [ ! -d ".winetricks" ]; then
-#  # Download the winetricks script and make it executable
-#  wine msiexec /i ExamPad+.msi /qb
-#fi
+if [ ! -f ".wine/drive_c/windows/Fonts/bananas.ttf" ]; then
+  # Use Winetricks to install "corefonts".
+  winetricks corefonts
+fi
 
 
 

@@ -12,10 +12,12 @@ if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   wine msiexec /i ExamPad+.msi /qb
 fi
 
-if [ ! -f ".wine/drive_c/windows/Fonts/bananas.ttf" ]; then
+if [ ! -f ".wine/drive_c/windows/Fonts/times.ttf" ]; then
   # Use Winetricks to install "corefonts".
   winetricks corefonts
 fi
+
+wine ".wine/drive_c/Program Files/ExamPad+/ExamPad+.exe"
 
 
 

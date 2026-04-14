@@ -65,6 +65,7 @@ EOF
 
 
 cat << EOF > /home/$1/autoResize.sh
+sleep 6
 while true; do
   # This waits for the root window to change size.
   xev -root -event config | grep -m 1 "ConfigureNotify"

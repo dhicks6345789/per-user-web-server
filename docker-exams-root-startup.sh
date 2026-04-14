@@ -39,6 +39,31 @@ cp /root/docker-exams-xstartup /home/$1/.config/tigervnc/xstartup
 chown $1:$1 /home/$1/.config/tigervnc/xstartup
 chmod u+x /home/$1/.config/tigervnc/xstartup
 
+
+
+mkdir -p /etc/xdg/xfce4/kiosk
+cat << EOF > /etc/xdg/xfce4/kiosk/kioskrc
+[xfce4-panel]
+CustomizePanel=NONE
+
+[xfce4-session]
+CustomizeSplash=NONE
+CustomizeChooser=NONE
+CustomizeLogout=NONE
+CustomizeCompatibility=NONE
+Shutdown=NONE
+CustomizeSecurity=NONE
+
+[xfdesktop]
+UserMenu=NONE
+CustomizeBackdrop=NONE
+CustomizeDesktopMenu=NONE
+CustomizeWindowlist=NONE
+CustomizeDesktopIcons=NONE
+EOF
+
+
+
 # Copy over the MSI installer to the user's home folder.
 cp /root/ExamPad+.msi /home/$1/ExamPad+.msi
 chown $1:$1 /home/$1/ExamPad+.msi

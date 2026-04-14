@@ -53,6 +53,12 @@ chown $1:$1 /home/$1/autoResize.sh
 chmod u+x /home/$1/autoResize.sh
 
 
+# To do: edit:
+# /etc/xdg/openbox/rc.xml
+# add exampad+.exe to applications section to make full screen.
+# Remove XFCE4 from image?
+
+
 
 # Copy over the MSI installer to the user's home folder.
 cp /root/ExamPad+.msi /home/$1/ExamPad+.msi

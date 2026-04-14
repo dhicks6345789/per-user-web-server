@@ -68,11 +68,11 @@ cat << EOF > /home/$1/autoResize.sh
 sleep 6
 while true; do
   # This waits for the root window to change size.
-  xev -root -event config | grep -m 1 "ConfigureNotify"
+  xev -root -event structure | grep -m 1 "ConfigureNotify"
   # Force XFCE to refresh the workspace.
   xfdesktop --reload
   # Optional: Force Wine to realize the desktop changed.
-  wine explorer /desktop=shell,${NEW_RES}
+  # wine explorer /desktop=shell,${NEW_RES}
 done
 EOF
 chown $1:$1 /home/$1/autoResize.sh

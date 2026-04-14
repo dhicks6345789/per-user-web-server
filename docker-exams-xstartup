@@ -8,6 +8,8 @@ startxfce4 &
 #xfsettingsd &
 #xfwm4 --daemon
 
+bash /home/$1/autoResize.sh &
+
 if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   # Run the (Windows) installer.
   wine msiexec /i ExamPad+.msi /qb

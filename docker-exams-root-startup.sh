@@ -41,29 +41,6 @@ chmod u+x /home/$1/.config/tigervnc/xstartup
 
 
 
-mkdir -p /etc/xdg/xfce4/kiosk
-cat << EOF > /etc/xdg/xfce4/kiosk/kioskrc
-[xfce4-panel]
-CustomizePanel=NONE
-
-[xfce4-session]
-CustomizeSplash=NONE
-CustomizeChooser=NONE
-CustomizeLogout=NONE
-CustomizeCompatibility=NONE
-Shutdown=NONE
-CustomizeSecurity=NONE
-
-[xfdesktop]
-UserMenu=NONE
-CustomizeBackdrop=NONE
-CustomizeDesktopMenu=NONE
-CustomizeWindowlist=NONE
-CustomizeDesktopIcons=NONE
-EOF
-
-
-
 cat << EOF > /home/$1/autoResize.sh
 sleep 6
 while true; do
@@ -71,8 +48,6 @@ while true; do
   xev -root -event structure | grep -m 1 "ConfigureNotify"
   # Force XFCE to refresh the workspace.
   xfdesktop --reload
-  # Optional: Force Wine to realize the desktop changed.
-  # wine explorer /desktop=shell,${NEW_RES}
 done
 EOF
 chown $1:$1 /home/$1/autoResize.sh

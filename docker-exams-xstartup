@@ -9,6 +9,8 @@ unset DBUS_SESSION_BUS_ADDRESS
 
 openbox-session &
 
+xprop &
+
 bash /home/$1/autoResize.sh &
 
 if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then

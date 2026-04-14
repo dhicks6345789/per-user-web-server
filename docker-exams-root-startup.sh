@@ -64,6 +64,21 @@ EOF
 
 
 
+cat << EOF > /home/$1/autoResize.sh
+while true; do
+  # This waits for the root window to change size.
+  xev -root -event config | grep -m 1 "ConfigureNotify"
+  # Force XFCE to refresh the workspace.
+  xfdesktop --reload
+  # Optional: Force Wine to realize the desktop changed.
+  wine explorer /desktop=shell,${NEW_RES}
+done
+EOF
+chown $1:$1 /home/$1/autoResize.sh
+chmod u+x /home/$1/autoResize.sh
+
+
+
 # Copy over the MSI installer to the user's home folder.
 cp /root/ExamPad+.msi /home/$1/ExamPad+.msi
 chown $1:$1 /home/$1/ExamPad+.msi

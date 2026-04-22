@@ -47,7 +47,7 @@ while true; do
   xev -root -event structure | grep -m 1 "ConfigureNotify"
   # Force XFCE to refresh the workspace.
   #xfdesktop --reload
-  xfwm4 --replace
+  xfwm4 --replace &
 done
 EOF
 chown $1:$1 /home/$1/autoResize.sh

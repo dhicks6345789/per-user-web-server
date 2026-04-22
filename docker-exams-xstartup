@@ -3,11 +3,20 @@ unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
 # For debugging - start a full XFCE4 desktop environment.
-startxfce4 &
+#startxfce4 &
 # For debugging - start just the XFCE4 window manager.
 #xfwm4 &
 
 #openbox-session &
+
+# Start the settings daemon (required for themes/settings).
+xfsettingsd &
+# Start the window manager.
+xfwm4 &
+# Start the desktop manager (icons/wallpaper).
+xfdesktop &
+
+
 
 bash /home/$1/autoResize.sh &
 

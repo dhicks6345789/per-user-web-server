@@ -7,7 +7,7 @@ unset DBUS_SESSION_BUS_ADDRESS
 # For debugging - start just the XFCE4 window manager.
 #xfwm4 &
 
-picom &
+picom --backend glx &
 openbox-session &
 
 bash /home/$1/autoResize.sh &

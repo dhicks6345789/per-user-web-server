@@ -54,15 +54,13 @@ chmod u+x /home/$1/autoResize.sh
 
 
 
-sed -i '/\<\/applications\>/i \
-<applications> \
+sed -i '/<\/applications>/i \
   <application name="exampad+.exe"> \
     <fullscreen>yes</fullscreen> \
     <decor>no</decor> \
     <focus>yes</focus> \
     <layer>above</layer> \
-  </application> \
-</applications> \' /etc/xdg/openbox/rc.xml
+  </application> \' /etc/xdg/openbox/rc.xml
 
 
 

@@ -26,7 +26,7 @@ sleep 1
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
 xfconf-query -c xfwm4 -p /general/workspace_count -s 1
 xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -r
-xfce4-panel -r
+#xfce4-panel -r
 
 bash /home/$1/autoResize.sh &
 

@@ -8,6 +8,7 @@ startxfce4 &
 bash /home/$1/autoResize.sh &
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
 xfconf-query -c xfwm4 -p /general/workspace_count -s 1
+xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -n -t int -s 1
 
 if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   # Run the ExamPad+ (Windows) installer.

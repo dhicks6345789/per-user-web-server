@@ -42,6 +42,7 @@ chmod u+x /home/$1/.config/tigervnc/xstartup
 
 
 cat << EOF > /home/$1/autoResize.sh
+xfdesktop --reload
 while true; do
   # This waits for the root window to change size.
   xev -root -event structure | grep -m 1 "ConfigureNotify"

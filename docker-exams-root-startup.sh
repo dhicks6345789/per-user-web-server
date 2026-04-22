@@ -60,6 +60,14 @@ sed -i '/<\/applications>/i \
     <decor>no</decor>
     <focus>yes</focus>
     <layer>above</layer>
+    <position force="yes">
+      <x>0</x>
+      <y>0</y>
+    </position>
+    <size force="yes">
+      <width>100%</width>
+      <height>100%</height>
+    </size>
   </application>' /etc/xdg/openbox/rc.xml
 
 

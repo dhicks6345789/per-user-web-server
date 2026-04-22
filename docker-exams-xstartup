@@ -15,7 +15,7 @@ bash /home/$1/autoResize.sh &
 while ! pgrep -x xfce4-panel > /dev/null; do
     sleep 0.1 # High frequency check (100ms) to catch it quickly
 done
-pkill -x xfce4-panel
+#pkill -x xfce4-panel
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
 
 

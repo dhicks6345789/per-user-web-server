@@ -46,10 +46,13 @@ while true; do
   # This waits for the root window to change size.
   xev -root -event structure | grep -m 1 "ConfigureNotify"
   # Force XFCE to refresh the workspace.
-  #xfdesktop --reload
   xfce4-panel &
-  sleep 0.5
-  xfce4-panel --quit
+  # Loop as long as pgrep returns a non-zero exit code (process not found).
+  while ! pgrep -x xfce4-panel > /dev/null; do
+    sleep 0.1 # High frequency check (100ms) to catch it quickly.
+  done
+  xfdesktop --reload
+  pkill -x xfce4-panel
 done
 EOF
 chown $1:$1 /home/$1/autoResize.sh

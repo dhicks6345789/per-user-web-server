@@ -9,7 +9,19 @@ startxfce4 &
 #until xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids >/dev/null 2>&1; do
 #    sleep 1
 #done
-sleep 2
+
+sleep 1
+# Wait for the process to exist.
+while ! pgrep -x "xfce4-panel" > /dev/null; do
+    sleep 0.5
+done
+# Wait for the panel to actually map a window to the screen.
+while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
+    sleep 0.5
+done
+sleep 1
+
+
 
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
 xfconf-query -c xfwm4 -p /general/workspace_count -s 1

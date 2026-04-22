@@ -53,9 +53,20 @@ chown $1:$1 /home/$1/autoResize.sh
 chmod u+x /home/$1/autoResize.sh
 
 
+
+sed -i '/\<\/applications\>/i \
+<applications> \
+  <application name="exampad+.exe"> \
+    <fullscreen>yes</fullscreen> \
+    <decor>no</decor> \
+    <focus>yes</focus> \
+    <layer>above</layer> \
+  </application> \
+</applications> \' /etc/xdg/openbox/rc.xml
+
+
+
 # To do: edit:
-# /etc/xdg/openbox/rc.xml
-# add exampad+.exe to applications section to make full screen.
 # Remove XFCE4 from image?
 
 

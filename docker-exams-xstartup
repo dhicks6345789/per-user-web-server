@@ -3,22 +3,22 @@ unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
 # For debugging - start a full XFCE4 desktop environment.
-#startxfce4 &
+startxfce4 &
 # For debugging - start just the XFCE4 window manager.
 #xfwm4 &
 
 #openbox-session &
 
-# Start the settings daemon (required for themes/settings).
-xfsettingsd &
-# Start the window manager.
-xfwm4 &
-# Start the desktop manager (icons/wallpaper).
-xfdesktop &
-
-
-
 bash /home/$1/autoResize.sh &
+
+# Loop as long as pgrep returns a non-zero exit code (process not found).
+while ! pgrep -x xfce4-panel > /dev/null; do
+    sleep 0.1 # High frequency check (100ms) to catch it quickly
+done
+pkill -x xfce4-panel
+xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
+
+
 
 if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   # Run the (Windows) installer.

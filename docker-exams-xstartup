@@ -5,30 +5,7 @@ unset DBUS_SESSION_BUS_ADDRESS
 # Start the XFCE4 desktop environment.
 startxfce4 &
 
-# Wait for xfce4-panel to initialize before continuing.
-#until xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids >/dev/null 2>&1; do
-#    sleep 1
-#done
 
-sleep 1
-# Wait for the process to exist.
-while ! pgrep -x "xfce4-panel" > /dev/null; do
-    sleep 0.5
-done
-# Wait for the panel to actually map a window to the screen.
-while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
-    sleep 0.5
-done
-sleep 1
-
-
-
-xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
-xfconf-query -c xfwm4 -p /general/workspace_count -s 1
-xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -r
-#xfce4-panel -r
-
-bash /home/$1/autoResize.sh &
 
 if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   # Run the ExamPad+ (Windows) installer.
@@ -41,6 +18,36 @@ if [ ! -f ".wine/drive_c/windows/Fonts/times.ttf" ]; then
 fi
 
 wine ".wine/drive_c/Program Files/ExamPad+/ExamPad+.exe"
+
+
+
+sleep 2
+# Wait for the process to exist.
+while ! pgrep -x "xfce4-panel" > /dev/null; do
+    sleep 0.5
+done
+# Wait for the panel to actually map a window to the screen.
+while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
+    sleep 0.5
+done
+sleep 2
+
+
+
+xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
+xfconf-query -c xfwm4 -p /general/workspace_count -s 1
+
+xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -r
+xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -n -t int -s 2
+
+xfconf-query -c xfce4-panel -p /panels/panel-2/plugin-ids -r
+xfconf-query -c xfce4-panel -p /panels/panel-2/autohide-behavior -n -t int -s 2
+
+xfce4-panel -r
+
+bash /home/$1/autoResize.sh &
+
+
 
 # Start a constant "null" process so the container doesn't exit.
 tail -f /dev/null

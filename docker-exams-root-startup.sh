@@ -54,6 +54,12 @@ chmod u+x /home/$1/autoResize.sh
 
 
 
+cat << EOF >> /etc/xdg/openbox/autostart
+picom --backend glx --no-fading-openclose --shadow-exclude 'class_g = "Wine"' &
+EOF
+
+
+
 sed -i '/<\/applications>/i\
   <application name="exampad+.exe">\
     <fullscreen>yes</fullscreen>\

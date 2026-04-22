@@ -30,20 +30,24 @@ done
 while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
     sleep 0.5
 done
-sleep 2
-
-
+sleep 10
 
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
 xfconf-query -c xfwm4 -p /general/workspace_count -s 1
 
+xfconf-query -c xfwm4 -p /general/use_compositing -n -t bool -s true
+
 xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -r
 xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -n -t int -s 2
 xfconf-query -c xfce4-panel -p /panels/panel-1/background-alpha -n -t int -s 0
+xfconf-query -c xfce4-panel -p /panels/panel-1/background-style -n -t int -s 1
+xfconf-query -c xfce4-panel -p /panels/panel-1/background-rgba -n -t double -s 0 -a -t double -s 0 -a -t double -s 0 -a -t double -s 0
 
 xfconf-query -c xfce4-panel -p /panels/panel-2/plugin-ids -r
 xfconf-query -c xfce4-panel -p /panels/panel-2/autohide-behavior -n -t int -s 2
 xfconf-query -c xfce4-panel -p /panels/panel-2/background-alpha -n -t int -s 0
+xfconf-query -c xfce4-panel -p /panels/panel-2/background-style -n -t int -s 1
+xfconf-query -c xfce4-panel -p /panels/panel-2/background-rgba -n -t double -s 0 -a -t double -s 0 -a -t double -s 0 -a -t double -s 0
 
 xfce4-panel -r
 

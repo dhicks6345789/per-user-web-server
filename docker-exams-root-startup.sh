@@ -54,27 +54,27 @@ chmod u+x /home/$1/autoResize.sh
 
 
 
-cat << EOF >> /etc/xdg/openbox/autostart
-picom --backend glx --no-fading-openclose --shadow-exclude 'class_g = "Wine"' &
-EOF
+#cat << EOF >> /etc/xdg/openbox/autostart
+#picom --backend glx --no-fading-openclose --shadow-exclude 'class_g = "Wine"' &
+#EOF
 
 
 
-#sed -i '/<\/applications>/i\
-#  <application name="exampad+.exe">\
-#    <fullscreen>yes</fullscreen>\
-#    <decor>no</decor>\
-#    <focus>yes</focus>\
-#    <layer>above</layer>\
-#    <position force="yes">\
-#      <x>0</x>\
-#      <y>0</y>\
-#    </position>\
-#    <size force="yes">\
-#      <width>100%</width>\
-#      <height>100%</height>\
-#    </size>\
-#  </application>' /etc/xdg/openbox/rc.xml
+sed -i '/<\/applications>/i\
+  <application name="exampad+.exe">\
+    <fullscreen>yes</fullscreen>\
+    <decor>no</decor>\
+    <focus>yes</focus>\
+    <layer>above</layer>\
+    <position force="yes">\
+      <x>0</x>\
+      <y>0</y>\
+    </position>\
+    <size force="yes">\
+      <width>100%</width>\
+      <height>100%</height>\
+    </size>\
+  </application>' /etc/xdg/openbox/rc.xml
 
 
 

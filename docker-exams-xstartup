@@ -7,10 +7,9 @@ unset DBUS_SESSION_BUS_ADDRESS
 # For debugging - start just the XFCE4 window manager.
 #xfwm4 &
 
-picom --backend glx &
 openbox-session &
 
-bash /home/$1/autoResize.sh &
+# bash /home/$1/autoResize.sh &
 
 if [ ! -d ".wine/drive_c/Program Files/ExamPad+" ]; then
   # Run the (Windows) installer.

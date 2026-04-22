@@ -3,11 +3,11 @@ unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 
 # For debugging - start a full XFCE4 desktop environment.
-#startxfce4 &
+startxfce4 &
 # For debugging - start just the XFCE4 window manager.
 #xfwm4 &
 
-openbox-session &
+#openbox-session &
 
 bash /home/$1/autoResize.sh &
 

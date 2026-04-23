@@ -52,7 +52,29 @@ xfconf-query -c xfce4-panel -p /panels/panel-2/background-alpha -n -t int -s 0
 xfconf-query -c xfce4-panel -p /panels/panel-2/background-style -n -t int -s 1
 xfconf-query -c xfce4-panel -p /panels/panel-2/background-rgba -n -t double -s 0 -a -t double -s 0 -a -t double -s 0 -a -t double -s 0
 
-xfce4-panel -r
+
+
+# Get all backdrop properties, find the 'image-style' ones, and set them to 0 (None)
+for prop in $(xfconf-query -c xfce4-desktop -l | grep "image-style"); do
+    xfconf-query -c xfce4-desktop -p "$prop" -s 0
+done
+
+# Find all 'color-style' properties and set them to 0 (Solid Color)
+for prop in $(xfconf-query -c xfce4-desktop -l | grep "color-style"); do
+    xfconf-query -c xfce4-desktop -p "$prop" -s 0
+done
+
+# Find all 'rgba1' properties and set them to black (0, 0, 0, 1)
+for prop in $(xfconf-query -c xfce4-desktop -l | grep "rgba1"); do
+    xfconf-query -c xfce4-desktop -p "$prop" -n -t double -s 0 -a -t double -s 0 -a -t double -s 0 -a -t double -s 1
+done
+
+# Force the desktop to redraw
+xfdesktop --reload
+
+
+
+#xfce4-panel -r
 
 bash /home/$1/autoResize.sh &
 

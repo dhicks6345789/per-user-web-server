@@ -54,6 +54,14 @@ chmod u+x /home/$1/autoResize.sh
 
 
 
+cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="black" />
+</svg>
+EOF
+
+
+
 #mkdir -p /etc/xdg/xfce4/kiosk
 #cat << EOF > /etc/xdg/xfce4/kiosk/kioskrc
 #[xfce4-session]

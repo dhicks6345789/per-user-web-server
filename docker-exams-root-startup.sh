@@ -42,7 +42,7 @@ chmod u+x /home/$1/.config/tigervnc/xstartup
 
 
 cat << EOF > /home/$1/autoResize.sh
-xfdesktop --reload
+#xfdesktop --reload
 while true; do
   # This waits for the root window to change size.
   xev -root -event structure | grep -m 1 "ConfigureNotify"
@@ -71,36 +71,7 @@ EOF
 
 
 
-#cat << EOF >> /etc/xdg/openbox/autostart
-#picom --backend glx --no-fading-openclose --shadow-exclude 'class_g = "Wine"' &
-#EOF
-
-
-
-sed -i '/<\/applications>/i\
-  <application name="exampad+.exe">\
-    <fullscreen>yes</fullscreen>\
-    <decor>no</decor>\
-    <focus>yes</focus>\
-    <layer>above</layer>\
-    <position force="yes">\
-      <x>0</x>\
-      <y>0</y>\
-    </position>\
-    <size force="yes">\
-      <width>100%</width>\
-      <height>100%</height>\
-    </size>\
-  </application>' /etc/xdg/openbox/rc.xml
-
-
-
-# To do: edit:
-# Remove XFCE4 from image?
-
-
-
-# Copy over the MSI installer to the user's home folder.
+# Copy over the ExamPad+ MSI installer to the user's home folder.
 cp /root/ExamPad+.msi /home/$1/ExamPad+.msi
 chown $1:$1 /home/$1/ExamPad+.msi
 

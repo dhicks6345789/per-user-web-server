@@ -3,9 +3,7 @@ FROM {{DOCKERWINE_DOCKER_IMAGE}}
 # Update apt repository lists again.
 RUN apt-get update
 
-RUN apt-get install -y openbox obconf x11-xserver-utils
-#RUN apt-get install -y picom
-RUN apt-get install -y wmctrl
+#RUN apt-get install -y openbox obconf x11-xserver-utils
 
 # Copy the (Windows) installer for ExamPad+ into the Docker image.
 COPY ExamPad+.msi /root/ExamPad+.msi

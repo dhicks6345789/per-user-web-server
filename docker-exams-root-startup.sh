@@ -90,6 +90,12 @@ cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/2520
 </svg>
 EOF
 
+cat << EOF > /usr/share/backgrounds/xfce/xfce-x.svg
+<svg width="1280" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="black" />
+</svg>
+EOF
+
 
 
 #mkdir -p /etc/xdg/xfce4/kiosk

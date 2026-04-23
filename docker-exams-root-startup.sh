@@ -54,19 +54,19 @@ chmod u+x /home/$1/autoResize.sh
 
 
 
-mkdir -p /etc/xdg/xfce4/kiosk
-cat << EOF > /etc/xdg/xfce4/kiosk/kioskrc
-[xfce4-session]
-CustomizeSettings=NONE
-Shutdown=NONE
-
-[xfce4-panel]
-Customize=NONE
-
-[xfdesktop]
-UserMenu=NONE
-CustomizeBackdrop=NONE
-EOF
+#mkdir -p /etc/xdg/xfce4/kiosk
+#cat << EOF > /etc/xdg/xfce4/kiosk/kioskrc
+#[xfce4-session]
+#CustomizeSettings=NONE
+#Shutdown=NONE
+#
+#[xfce4-panel]
+#Customize=NONE
+#
+#[xfdesktop]
+#UserMenu=NONE
+#CustomizeBackdrop=NONE
+#EOF
 
 
 

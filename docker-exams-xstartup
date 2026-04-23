@@ -49,7 +49,7 @@ xfconf-query -c xfce4-panel -p /panels/panel-2/background-alpha -n -t int -s 0 >
 xfconf-query -c xfce4-panel -p /panels/panel-2/background-style -n -t int -s 1 >> ~/xfce4Log.txt
 xfconf-query -c xfce4-panel -p /panels/panel-2/background-rgba -n -t double -s 0 -a -t double -s 0 -a -t double -s 0 -a -t double -s 0 >> ~/xfce4Log.txt
 
-xfce4-panel -r >> ~/xfce4Log.txt
+#xfce4-panel -r >> ~/xfce4Log.txt
 
 bash /home/$1/autoResize.sh >> ~/xfce4Log.txt &
 

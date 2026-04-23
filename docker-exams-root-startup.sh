@@ -54,8 +54,38 @@ chmod u+x /home/$1/autoResize.sh
 
 
 
+cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/1080x2160.svg
+<svg width="1080" height="2160" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="black" />
+</svg>
+EOF
+
+cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/1280x1024.svg
+<svg width="1280" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="black" />
+</svg>
+EOF
+
+cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/1280x800.svg.svg
+<svg width="1280" height="800" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="black" />
+</svg>
+EOF
+
 cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg
 <svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="black" />
+</svg>
+EOF
+
+cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1200.svg
+<svg width="1920" height="1200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="black" />
+</svg>
+EOF
+
+cat << EOF > /usr/share/desktop-base/active-theme/wallpaper/contents/images/2520x1080.svg
+<svg width="2520" height="1080" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="black" />
 </svg>
 EOF

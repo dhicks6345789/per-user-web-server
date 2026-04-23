@@ -54,6 +54,7 @@ chmod u+x /home/$1/autoResize.sh
 
 
 
+rm /etc/xdg/xfce4/kiosk/kioskrc
 #mkdir -p /etc/xdg/xfce4/kiosk
 #cat << EOF > /etc/xdg/xfce4/kiosk/kioskrc
 #[xfce4-session]

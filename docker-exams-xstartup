@@ -30,12 +30,11 @@ while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
     sleep 0.5
 done
 
-sleep 30
-
 
 
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0
 xfconf-query -c xfwm4 -p /general/workspace_count -s 1
+xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/image-style -n -t int -s 0
 
 xfconf-query -c xfwm4 -p /general/use_compositing -n -t bool -s true
 

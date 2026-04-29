@@ -48,8 +48,11 @@ while true; do
   # Force XFCE to refresh the workspace.
   #xfdesktop --reload
   #xfwm4 --replace &
-  CURRENT_RES=$(xrandr | grep '*' | awk '{print $1}')
-  xrandr -s "$CURRENT_RES"
+  
+  #CURRENT_RES=$(xrandr | grep '*' | awk '{print $1}')
+  #xrandr -s "$CURRENT_RES"
+  
+  wine explorer.exe /desktop=Default
 done
 EOF
 chown $1:$1 /home/$1/autoResize.sh

@@ -46,6 +46,9 @@ while true; do
   # This waits for the root window to change size.
   xev -root -event structure | grep -m 1 "ConfigureNotify"
   # Force XFCE to refresh the workspace.
+  pkill xfce4-panel
+  sleep 1
+  xfce4-panel &
   xfdesktop --reload
 done
 EOF

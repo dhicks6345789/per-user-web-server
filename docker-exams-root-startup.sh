@@ -46,8 +46,10 @@ while true; do
   # This waits for the root window to change size.
   xev -root -event structure | grep -m 1 "ConfigureNotify"
   # Force XFCE to refresh the workspace.
-  xfdesktop --reload
-  xfwm4 --replace &
+  #xfdesktop --reload
+  #xfwm4 --replace &
+  CURRENT_RES=$(xrandr | grep '*' | awk '{print $1}')
+  xrandr -s "$CURRENT_RES"
 done
 EOF
 chown $1:$1 /home/$1/autoResize.sh

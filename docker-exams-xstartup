@@ -29,8 +29,7 @@ done
 while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
     sleep 0.5
 done
-
-#sleep 30
+#sleep 1
 
 
 
@@ -71,7 +70,10 @@ done
 
 # Force the desktop to redraw
 #xfdesktop --reload
-xfce4-panel -r
+#xfce4-panel -r
+pkill xfce4-panel
+sleep 2
+xfce4-panel &
 
 bash /home/$1/autoResize.sh &
 

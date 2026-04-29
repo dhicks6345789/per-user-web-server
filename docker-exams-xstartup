@@ -30,7 +30,7 @@ while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
     sleep 0.5
 done
 
-sleep 30
+#sleep 30
 
 
 
@@ -70,10 +70,7 @@ for prop in $(xfconf-query -c xfce4-desktop -l | grep "rgba1"); do
 done
 
 # Force the desktop to redraw
-xfdesktop --reload
-
-
-
+#xfdesktop --reload
 xfce4-panel -r
 
 bash /home/$1/autoResize.sh &

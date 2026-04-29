@@ -29,7 +29,6 @@ done
 while [ -z "$(xprop -name xfce4-panel 2>/dev/null)" ]; do
     sleep 0.5
 done
-#sleep 1
 
 
 
@@ -68,9 +67,7 @@ for prop in $(xfconf-query -c xfce4-desktop -l | grep "rgba1"); do
     xfconf-query -c xfce4-desktop -p "$prop" -n -t double -s 0 -a -t double -s 0 -a -t double -s 0 -a -t double -s 1
 done
 
-# Force the desktop to redraw
-#xfdesktop --reload
-#xfce4-panel -r
+# Force the desktop to redraw.
 pkill xfce4-panel
 sleep 2
 xfce4-panel &

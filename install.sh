@@ -6,6 +6,7 @@ SERVERTITLE="Web Server"
 SSLHANDLER="pangolin"
 SERVERNAME=`dnsdomainname`
 INSTALL_PANGOLIN=false
+RCLONE_TYPE=user
 DOCKERROOT_DOCKER_IMAGE="sansay.co.uk-dockerroot:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
@@ -36,6 +37,11 @@ while test $# -gt 0; do
         -cloudflared_token)
             shift
             CLOUDFLARED_TOKEN=$1
+            shift
+            ;;
+        -rclone_type)
+            shift
+            RCLONE_TYPE=$1
             shift
             ;;
         -pangolin)
@@ -167,13 +173,17 @@ fi
 
 #cp per-user-web-server/rclone.conf /var/lib/docker-plugins/rclone/config/rclone.conf
 mkdir -p /root/.config/rclone
-cp per-user-web-server/rclone.conf /root/.config/rclone/rclone.conf
-if [ ! -f "pangolin.json" ]; then
-    echo "Missing pangolin.json - authentication credentials for rclone to connect to Google Drive. Stopping."
-    exit 1
+if [ $rclone_type = "service" ]; then
+    cp per-user-web-server/rclone.conf /root/.config/rclone/rclone.conf
+    if [ ! -f "pangolin.json" ]; then
+        echo "Missing pangolin.json - authentication credentials for rclone to connect to Google Drive. Stopping."
+        exit 1
+    fi
+    #cp pangolin.json /var/lib/docker-plugins/rclone/config/pangolin.json
+    cp pangolin.json /root/.config/rclone/pangolin.json
+else
+    echo "More probably goes here - install standard-user style rclone access."
 fi
-#cp pangolin.json /var/lib/docker-plugins/rclone/config/pangolin.json
-cp pangolin.json /root/.config/rclone/pangolin.json
 
 # 18/12/2025: The Pangolin installer seems to make use of the "add-apt-repository" command. This isn't available in Debian 13 (Trixie) as the "software-properties-common" package has been removed from the distribution.
 # What seems to work is installing "software-properties-common" from a .deb file (making sure its dependencies are installed first).

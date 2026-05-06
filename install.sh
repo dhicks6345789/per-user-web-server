@@ -126,7 +126,7 @@ if [ -z "$SERVERNAME" ]; then
     echo "Optional: SERVERTITLE: A title for the web server (e.g. \"My Company Web Server\". Defaults to \"Web Server\"." 
     echo "Optional: \"pangolin\" or \"tunnel\" as SSL Handler options. If \"tunnel\", the server will be configured assuming an SSL tunneling"
     echo "          service (Cloudflare, NGrok, etc) will be used to provide SSL ingress. If \"pangolin\", a Pangolin server will be installed"
-    echo "          and set up to auto-configure SSL. If \"none\" (the default), neither option will be configured for. Defaults to Pangolin."
+    echo "          and set up to auto-configure SSL. If \"none\", neither option will be configured for. Defaults to Pangolin."
     exit 1;
 fi
 

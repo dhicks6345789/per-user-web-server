@@ -319,7 +319,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     fi
 
     # Install the rclone Docker plugin.
-    docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
+    # docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
         
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
         echo "Installing cloudflared and Webconsole inside Docker."

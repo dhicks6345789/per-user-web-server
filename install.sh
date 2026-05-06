@@ -308,9 +308,9 @@ if [ $INSTALL_PANGOLIN = true ]; then
     wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
     # Check if Pangolin has already been installed.
     if [ ! -f "/usr/bin/docker" ]; then
-        PANGOLININSTALLED = 0
+        PANGOLININSTALLED=0
     else
-        PANGOLININSTALLED = $(docker images --format "{{.Repository}}" | grep -c pangolin)
+        PANGOLININSTALLED=$(docker images --format "{{.Repository}}" | grep -c pangolin)
     fi
     if [ "$PANGOLININSTALLED" -eq 0 ]; then
         ./installer

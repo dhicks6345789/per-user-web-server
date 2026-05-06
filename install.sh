@@ -299,12 +299,19 @@ if [ $INSTALL_PANGOLIN = true ]; then
     echo Handing over to Pangolin installation script.
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
         echo "--- Note: You have chosen to use Cloudflare for tunneling. Therefore, when asked by the Pangolin install script, you should select \"no\" when asked if you want to install Gerbil, Pangolin\'s tunneling component. ---"
+    else
+        echo "--- Note: You have chosen to install Pangolin, a component of which (Gerbil) can handle tunneling (i.e. publically exposing a service or port running behind a firewall) if wanted. ---"
+        echo "--- If this instance is running on a public web server (i.e. on a public host) you should select \"no\" when asked by the Pangolin install script if you want to install Gerbil. ---"
     fi
     
     # Get the Pangolin installer.
     wget -O installer "https://github.com/fosrl/pangolin/releases/download/1.7.3/installer_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" && chmod +x ./installer
     # Check if Pangolin has already been installed.
-    PANGOLININSTALLED = $(docker images --format "{{.Repository}}" | grep -c pangolin)
+    if ! command -v docker &> /dev/null; then
+        PANGOLININSTALLED = 0
+    else
+        PANGOLININSTALLED = $(docker images --format "{{.Repository}}" | grep -c pangolin)
+    fi
     if [ "$PANGOLININSTALLED" -eq 0 ]; then
         ./installer
     else

@@ -131,14 +131,18 @@ DOCKER_COMPOSE_EXAMS=""
 for RUN_ITEM in "${RUN_LIST[@]}"; do
     case "$RUN_ITEM" in
         "calc")
-            DOCKER_COMPOSE_CALC=$(<per-user-web-server/docker-compose-calc.yml)
+            DOCKER_COMPOSE_CALC_RAW=$(<per-user-web-server/docker-compose-calc.yml)
+            DOCKER_COMPOSE_CALC=$(printf "%q" "$DOCKER_COMPOSE_CALC_RAW")
             ;;
         "desktop")
-            DOCKER_COMPOSE_EXAMS=$(<per-user-web-server/docker-compose-exams.yml)
+            DOCKER_COMPOSE_EXAMS_RAW=$(<per-user-web-server/docker-compose-exams.yml)
+            DOCKER_COMPOSE_EXAMS=$(printf "%q" "$DOCKER_COMPOSE_EXAMS_RAW")
             ;;
         "all")
-            DOCKER_COMPOSE_CALC=$(<per-user-web-server/docker-compose-calc.yml)
-            DOCKER_COMPOSE_EXAMS=$(<per-user-web-server/docker-compose-exams.yml)
+            DOCKER_COMPOSE_CALC_RAW=$(<per-user-web-server/docker-compose-calc.yml)
+            DOCKER_COMPOSE_CALC=$(printf "%q" "$DOCKER_COMPOSE_CALC_RAW")
+            DOCKER_COMPOSE_EXAMS_RAW=$(<per-user-web-server/docker-compose-exams.yml)
+            DOCKER_COMPOSE_EXAMS=$(printf "%q" "$DOCKER_COMPOSE_EXAMS_RAW")
             ;;
     esac
 done

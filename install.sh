@@ -325,79 +325,83 @@ if [ $INSTALL_PANGOLIN = true ]; then
     # First, stop any currently-running Docker containers.
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
+
+
     # Install the rclone Docker plugin.
     # docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
+
+    # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
+    #systemctl stop webconsole
+    #systemctl disable webconsole
+
+
     
+    DOCKER_COMPOSE_TUNNEL=""
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-        echo "Installing the cloudflared Docker image (\"tunnel\")."
-
-        
-    
-        # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
-        #systemctl stop webconsole
-        #systemctl disable webconsole
-
-        if [ $BUILD_ROOT = true ]; then
-            echo "Building the root Docker image - this might take a few minutes..."
-            cp per-user-web-server/docker-root-Dockerfile .
-            docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
-            #docker rmi $DOCKERROOT_DOCKER_IMAGE
-            #docker build --no-cache -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
-        fi
-
-        if [ $BUILD_DESKTOP = true ]; then
-            echo "Building the Linux desktop Docker image."
-            cp per-user-web-server/docker-desktop-Dockerfile .
-            sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
-            docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
-            #docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
-            #docker build --no-cache -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
-        fi
-
-        if [ $BUILD_WINE = true ]; then
-            echo "Building the Linux WINE image."
-            cp per-user-web-server/docker-wine-Dockerfile .
-            sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wine-Dockerfile
-            docker build -f docker-wine-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
-        fi
-
-        if [ $BUILD_CALC = true ]; then
-            echo "Building the Linux calc image."
-            cp per-user-web-server/docker-calc-Dockerfile .
-            sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-calc-Dockerfile
-            docker build -f docker-calc-Dockerfile --progress=plain --tag=$DOCKERCALC_DOCKER_IMAGE . 2>&1
-        fi
-
-        if [ $BUILD_EXAMS = true ]; then
-            echo "Building the Linux Exams image."
-            
-            # Check we have the (Windows) ExamPad+ installer file.
-            if [ ! -f "ExamPad+.msi" ]; then
-                echo "Can't find file ExamPad+.msi - you need to download it from their website."
-                exit 1
-            fi
-            
-            cp per-user-web-server/docker-exams-Dockerfile .
-            sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-exams-Dockerfile
-            docker rmi $DOCKEREXAMS_DOCKER_IMAGE
-            docker build -f docker-exams-Dockerfile --progress=plain --tag=$DOCKEREXAMS_DOCKER_IMAGE . 2>&1
-        fi
-
-        echo "Building our custom Docker image for the web server."
-        cp per-user-web-server/docker-wwwServer-Dockerfile .
-        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
-        docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1
-
-        # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
-        cp per-user-web-server/docker-compose.yml ./docker-compose.yml
-        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
-        sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
-        sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml
-        sed -i "s/{{DOCKERCALC_DOCKER_IMAGE}}/$DOCKERCALC_DOCKER_IMAGE/g" docker-compose.yml
-        sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
-        sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
-
-        # Start up the Docker containers.
-        docker compose up -d
+        echo "We will import and use the cloudflared Docker image (\"tunnel\")."
+        DOCKER_COMPOSE_TUNNEL=$(<docker-compose-tunnel.yml)
     fi
+    
+    if [ $BUILD_ROOT = true ]; then
+        echo "Building the root Docker image - this might take a few minutes..."
+        cp per-user-web-server/docker-root-Dockerfile .
+        docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
+        #docker rmi $DOCKERROOT_DOCKER_IMAGE
+        #docker build --no-cache -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
+    fi
+
+    if [ $BUILD_DESKTOP = true ]; then
+        echo "Building the Linux desktop Docker image."
+        cp per-user-web-server/docker-desktop-Dockerfile .
+        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
+        docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+        #docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
+        #docker build --no-cache -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
+    fi
+
+    if [ $BUILD_WINE = true ]; then
+        echo "Building the Linux WINE image."
+        cp per-user-web-server/docker-wine-Dockerfile .
+        sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wine-Dockerfile
+        docker build -f docker-wine-Dockerfile --progress=plain --tag=$DOCKERWINE_DOCKER_IMAGE . 2>&1
+    fi
+
+    if [ $BUILD_CALC = true ]; then
+        echo "Building the Linux calc image."
+        cp per-user-web-server/docker-calc-Dockerfile .
+        sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-calc-Dockerfile
+        docker build -f docker-calc-Dockerfile --progress=plain --tag=$DOCKERCALC_DOCKER_IMAGE . 2>&1
+    fi
+
+    if [ $BUILD_EXAMS = true ]; then
+        echo "Building the Linux Exams image."
+        
+        # Check we have the (Windows) ExamPad+ installer file.
+        if [ ! -f "ExamPad+.msi" ]; then
+            echo "Can't find file ExamPad+.msi - you need to download it from their website."
+            exit 1
+        fi
+        
+        cp per-user-web-server/docker-exams-Dockerfile .
+        sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-exams-Dockerfile
+        docker rmi $DOCKEREXAMS_DOCKER_IMAGE
+        docker build -f docker-exams-Dockerfile --progress=plain --tag=$DOCKEREXAMS_DOCKER_IMAGE . 2>&1
+    fi
+
+    echo "Building our custom Docker image for the web server."
+    cp per-user-web-server/docker-wwwServer-Dockerfile .
+    sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
+    docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1
+
+    # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
+    cp per-user-web-server/docker-compose.yml ./docker-compose.yml
+    sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERCALC_DOCKER_IMAGE}}/$DOCKERCALC_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
+
+    # Start up the Docker containers.
+    docker compose up -d
 fi

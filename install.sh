@@ -413,21 +413,25 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
     # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
     cp per-user-web-server/docker-compose.yml ./docker-compose.yml
+    
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-        sed -i "s/{{docker-compose-tunnel.yml}}/ {' -e 'r per-user-web-server/docker-compose-tunnel.yml' -e 'd' -e '}' docker-compose.yml
+        sed -i -e '/{{docker-compose-tunnel.yml}}/r per-user-web-server/docker-compose-tunnel.yml' -e '//d' docker-compose.yml
     else
         sed -i "s/{{docker-compose-tunnel.yml}}//g" docker-compose.yml
     fi
+    
     if [ $RUN_CALC = true ]; then
-        sed -i "s/{{docker-compose-calc.yml}}/ {' -e 'r per-user-web-server/docker-compose-calc.yml' -e 'd' -e '}' docker-compose.yml
+        sed -i -e '/{{docker-compose-calc.yml}}/r per-user-web-server/docker-compose-calc.yml' -e '//d' docker-compose.yml
     else
         sed -i "s/{{docker-compose-calc.yml}}//g" docker-compose.yml
     fi
+    
     if [ $RUN_EXAMS = true ]; then
-        sed -i "s/{{docker-compose-exams.yml}}/ {' -e 'r per-user-web-server/docker-compose-exams.yml' -e 'd' -e '}' docker-compose.yml
+        sed -i -e '/{{docker-compose-exams.yml}}/r per-user-web-server/docker-compose-exams.yml' -e '//d' docker-compose.yml
     else
         sed -i "s/{{docker-compose-exams.yml}}//g" docker-compose.yml
     fi
+    
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml

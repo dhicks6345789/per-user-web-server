@@ -1,3 +1,5 @@
+  # A Cloudflare Zero-Trust tunnel. Requires an access token obtained from the Cloudflare console.
+  # Can provide both tunneling and authentication, used just as an option for tunneling here, with Pangolin used for authentication (and as an alternative for tunneling, if wanted).
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-tunnel

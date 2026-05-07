@@ -15,6 +15,7 @@ DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
 DOCKEREXAMS_DOCKER_IMAGE="sansay.co.uk-dockerexams:0.1-beta.3"
 
 BUILD_LIST=("all")
+RUN_LIST=("all")
 
 # Read user-defined command-line flags.
 while test $# -gt 0; do
@@ -78,6 +79,11 @@ while test $# -gt 0; do
             IFS=',' read -ra BUILD_LIST <<< "$1"
             shift
             ;;
+        -run)
+            shift
+            IFS=',' read -ra RUN_LIST <<< "$1"
+            shift
+            ;;
         *)
             echo "$1 is not a recognized flag."
             exit 1;
@@ -115,6 +121,24 @@ for BUILD_ITEM in "${BUILD_LIST[@]}"; do
             BUILD_WINE=true
             BUILD_CALC=true
             BUILD_EXAMS=true
+            ;;
+    esac
+done
+
+# Figure out the items we want to run.
+DOCKER_COMPOSE_CALC=""
+DOCKER_COMPOSE_EXAMS=""
+for RUN_ITEM in "${RUN_LIST[@]}"; do
+    case "$RUN_ITEM" in
+        "calc")
+            DOCKER_COMPOSE_CALC=$(<per-user-web-server/docker-compose-calc.yml)
+            ;;
+        "desktop")
+            DOCKER_COMPOSE_EXAMS=$(<per-user-web-server/docker-compose-exams.yml)
+            ;;
+        "all")
+            DOCKER_COMPOSE_CALC=$(<per-user-web-server/docker-compose-calc.yml)
+            DOCKER_COMPOSE_EXAMS=$(<per-user-web-server/docker-compose-exams.yml)
             ;;
     esac
 done
@@ -396,6 +420,8 @@ if [ $INSTALL_PANGOLIN = true ]; then
     # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
     cp per-user-web-server/docker-compose.yml ./docker-compose.yml
     sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_TUNNEL/g" docker-compose.yml
+    sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_CALC/g" docker-compose.yml
+    sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_EXAMS/g" docker-compose.yml
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml

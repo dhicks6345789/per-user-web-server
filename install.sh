@@ -339,7 +339,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     DOCKER_COMPOSE_TUNNEL=""
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
         echo "We will import and use the cloudflared Docker image (\"tunnel\")."
-        DOCKER_COMPOSE_TUNNEL=$(<docker-compose-tunnel.yml)
+        DOCKER_COMPOSE_TUNNEL=$(<per-user-web-server/docker-compose-tunnel.yml)
     fi
     
     if [ $BUILD_ROOT = true ]; then
@@ -395,6 +395,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
     # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
     cp per-user-web-server/docker-compose.yml ./docker-compose.yml
+    sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_TUNNEL/g" docker-compose.yml
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml

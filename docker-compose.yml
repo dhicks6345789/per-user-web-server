@@ -1,15 +1,7 @@
 name: pangolin
 services:
-  # A Cloudflare Zero-Trust tunnel. Requires an access token obtained from the Cloudflare console.
-  # Can provide both tunneling and authentication, used just as an option for tunneling here, with Pangolin used for authentication (and as an alternative for tunneling, if wanted).
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared-tunnel
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run --token {{CLOUDFLARED_TOKEN}}
-    networks:
-      - main
-
+  {{docker-compose-tunnel.yml}}
+  
   # Fossorial's Pangolin - can provide tunneling and authentication, basically a self-hostable version of Cloudflare Tunnels. See: https://pangolin.net
   pangolin:
     image: fosrl/pangolin:latest

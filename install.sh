@@ -320,7 +320,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
     # At this point, we (hopefully) have Docker (a container management system) installed along with a basic Pangolin setup (a container
     # each for the Traefik reverse proxy / router, the main Pangolin server and possibly the Gerbil tunneling component). We now want to add
-    # further container images, some of which are standard images (the Cloudflare "tunnel" image), others we build.
+    # further container images, some of which are standard images (the Cloudflare "tunnel" image, the Guacamole / guacd images), others we build.
 
     # First, stop any currently-running Docker containers.
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
@@ -388,7 +388,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
         docker build -f docker-exams-Dockerfile --progress=plain --tag=$DOCKEREXAMS_DOCKER_IMAGE . 2>&1
     fi
 
-    echo "Building our custom Docker image for the web server."
+    echo "Building our Docker image for the custom web server."
     cp per-user-web-server/docker-wwwServer-Dockerfile .
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
     docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1

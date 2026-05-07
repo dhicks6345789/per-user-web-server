@@ -126,23 +126,19 @@ for BUILD_ITEM in "${BUILD_LIST[@]}"; do
 done
 
 # Figure out the items we want to run.
-DOCKER_COMPOSE_CALC=""
-DOCKER_COMPOSE_EXAMS=""
+RUN_CALC=false
+RUN_EXAMS=false
 for RUN_ITEM in "${RUN_LIST[@]}"; do
     case "$RUN_ITEM" in
         "calc")
-            DOCKER_COMPOSE_CALC_RAW=$(<per-user-web-server/docker-compose-calc.yml)
-            DOCKER_COMPOSE_CALC=$(printf "%q" "$DOCKER_COMPOSE_CALC_RAW")
+            RUN_CALC=true
             ;;
         "desktop")
-            DOCKER_COMPOSE_EXAMS_RAW=$(<per-user-web-server/docker-compose-exams.yml)
-            DOCKER_COMPOSE_EXAMS=$(printf "%q" "$DOCKER_COMPOSE_EXAMS_RAW")
+            RUN_EXAMS=true
             ;;
         "all")
-            DOCKER_COMPOSE_CALC_RAW=$(<per-user-web-server/docker-compose-calc.yml)
-            DOCKER_COMPOSE_CALC=$(printf "%q" "$DOCKER_COMPOSE_CALC_RAW")
-            DOCKER_COMPOSE_EXAMS_RAW=$(<per-user-web-server/docker-compose-exams.yml)
-            DOCKER_COMPOSE_EXAMS=$(printf "%q" "$DOCKER_COMPOSE_EXAMS_RAW")
+            RUN_CALC=true
+            RUN_EXAMS=true
             ;;
     esac
 done
@@ -364,12 +360,6 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
 
     
-    DOCKER_COMPOSE_TUNNEL=""
-    if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-        echo "We will import and use the cloudflared Docker image (\"tunnel\")."
-        DOCKER_COMPOSE_TUNNEL=$(<per-user-web-server/docker-compose-tunnel.yml)
-    fi
-    
     if [ $BUILD_ROOT = true ]; then
         echo "Building the root Docker image - this might take a few minutes..."
         cp per-user-web-server/docker-root-Dockerfile .
@@ -423,13 +413,21 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
     # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
     cp per-user-web-server/docker-compose.yml ./docker-compose.yml
-    echo "SEDONE"
-    sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_TUNNEL/g" docker-compose.yml
-    echo "SEDTWO"
-    sed -i "s/{{docker-compose-calc.yml}}/$DOCKER_COMPOSE_CALC/g" docker-compose.yml
-    echo "SEDTHREE"
-    sed -i "s/{{docker-compose-exams.yml}}/$DOCKER_COMPOSE_EXAMS/g" docker-compose.yml
-    echo "SEDFOUR"
+    if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
+        sed -i "s/{{docker-compose-tunnel.yml}}/ {' -e 'r per-user-web-server/docker-compose-tunnel.yml' -e 'd' -e '}' docker-compose.yml
+    else
+        sed -i "s/{{docker-compose-tunnel.yml}}//g" docker-compose.yml
+    fi
+    if [ $RUN_CALC = true ]; then
+        sed -i "s/{{docker-compose-calc.yml}}/ {' -e 'r per-user-web-server/docker-compose-calc.yml' -e 'd' -e '}' docker-compose.yml
+    else
+        sed -i "s/{{docker-compose-calc.yml}}//g" docker-compose.yml
+    fi
+    if [ $RUN_EXAMS = true ]; then
+        sed -i "s/{{docker-compose-exams.yml}}/ {' -e 'r per-user-web-server/docker-compose-exams.yml' -e 'd' -e '}' docker-compose.yml
+    else
+        sed -i "s/{{docker-compose-exams.yml}}//g" docker-compose.yml
+    fi
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml

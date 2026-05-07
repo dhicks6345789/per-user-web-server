@@ -294,7 +294,7 @@ if [ $INSTALL_PANGOLIN = false ]; then
     fi
 fi
 
-# Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication).
+# Install Pangolin (reverse proxy server that handles SSL tunneling and user authentication) and, therefore, Docker.
 if [ $INSTALL_PANGOLIN = true ]; then
     echo Handing over to Pangolin installation script.
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
@@ -318,15 +318,20 @@ if [ $INSTALL_PANGOLIN = true ]; then
         echo "no\n" | ./installer
     fi
 
+    # At this point, we (hopefully) have Docker (a container management system) installed along with a basic Pangolin setup (a container
+    # each for the Traefik reverse proxy / router, the main Pangolin server and possibly the Gerbil tunneling component). We now want to add
+    # further container images, some of which are standard images (the Cloudflare "tunnel" image), others we build.
+
+    # First, stop any currently-running Docker containers.
+    docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+
     # Install the rclone Docker plugin.
     # docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
-        
+    
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then
-        echo "Installing cloudflared and Webconsole inside Docker."
+        echo "Installing the cloudflared Docker image (\"tunnel\")."
 
-        # Stop any running Docker containers.
-        # docker compose down
-        docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+        
     
         # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
         #systemctl stop webconsole

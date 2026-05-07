@@ -420,8 +420,8 @@ if [ $INSTALL_PANGOLIN = true ]; then
     # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
     cp per-user-web-server/docker-compose.yml ./docker-compose.yml
     sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_TUNNEL/g" docker-compose.yml
-    sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_CALC/g" docker-compose.yml
-    sed -i "s/{{docker-compose-tunnel.yml}}/$DOCKER_COMPOSE_EXAMS/g" docker-compose.yml
+    sed -i "s/{{docker-compose-calc.yml}}/$DOCKER_COMPOSE_CALC/g" docker-compose.yml
+    sed -i "s/{{docker-compose-exams.yml}}/$DOCKER_COMPOSE_EXAMS/g" docker-compose.yml
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml

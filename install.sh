@@ -98,6 +98,7 @@ BUILD_ROOT=false
 BUILD_DESKTOP=false
 BUILD_WINE=false
 BUILD_CALC=false
+BUILD_EXAMS=false
 for BUILD_ITEM in "${BUILD_LIST[@]}"; do
     case "$BUILD_ITEM" in
         "root")

@@ -392,8 +392,6 @@ if [ $INSTALL_PANGOLIN = true ]; then
         docker build -f docker-calc-Dockerfile --progress=plain --tag=$DOCKERCALC_DOCKER_IMAGE . 2>&1
     fi
 
-    echo "Build exams?"
-    echo "$BUILD_EXAMS"
     if [ $BUILD_EXAMS = true ]; then
         echo "Building the Linux Exams image."
         

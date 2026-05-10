@@ -339,6 +339,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     fi
     if [ "$PANGOLININSTALLED" -eq 0 ]; then
         ./installer
+        exit 0
     else
         echo "no\n" | ./installer
     fi

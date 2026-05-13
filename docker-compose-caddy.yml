@@ -1,17 +1,13 @@
   # The Caddy web server - a production-ready web server that automatically handles HTTPS.
   caddy:
-    image: caddy:2-alpine
+    image: caddy:latest
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp" # Required for HTTP/3
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./site:/srv
-      - caddy_data:/data
-      - caddy_config:/config
-
-volumes:
-  caddy_data:
-  caddy_config:
+      - /opt/caddy:/etc/caddy
+      - /home/d.b.hicks/www:/srv
+      - /opt/caddy/data:/data
+      - /opt/caddy/config:/config

@@ -2,4 +2,8 @@ http://example.com {
     # The main website.
     root * /srv
     file_server
+
+    log {
+        output file /data/access.log
+    }
 }

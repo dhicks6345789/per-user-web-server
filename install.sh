@@ -339,6 +339,8 @@ if [ $INSTALL_PANGOLIN = true ]; then
     fi
     if [ "$PANGOLININSTALLED" -eq 0 ]; then
         ./installer
+        echo "Pangolin installer finished - exiting Per-User-Web-Server install script while you complete the initial Pangolin setup."
+        echo "Run this installer again to complete."
         exit 0
     else
         echo "no\n" | ./installer

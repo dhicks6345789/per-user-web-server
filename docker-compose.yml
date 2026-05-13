@@ -83,7 +83,9 @@ services:
 
   {{docker-compose-exams.yml}}
   
-  # Our own custom Go web server.
+  # Our own custom Go web server. This basic server serves user websites directly from the "www" folder of their home folder. Although basic, it does include support for CGI.
+  # This web server sits behind the Pangolin proxy, so only authenticated users can see other users' websites - handy for a private-ish community setup (a school or business).
+  # Intended as a simple mechanism to get users started with being able to create a website. For a production ready web server, install the Caddy webserver vias the install script flag ("-run caddy").
   wwwserver:
     image: {{DOCKERWWWSERVER_DOCKER_IMAGE}}
     command: /usr/local/bin/wwwServer
@@ -100,6 +102,8 @@ services:
       ## We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
       #- /var/log/apache2/access.log:/var/log/apache2/access.log
       #- /var/log/apache2/error.log:/var/log/apache2/error.log
+
+  {{docker-compose-caddy.yml}}
 
 # We have to create an explicitly named network, otheriwse automatic DNS resolution doesn't work with the default network when new containers are added via "docker run".
 networks:

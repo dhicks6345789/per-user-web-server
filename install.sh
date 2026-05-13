@@ -423,8 +423,8 @@ if [ $INSTALL_PANGOLIN = true ]; then
     if [ $RUN_CADDY = true ]; then
         if [ ! -f "/opt/caddy/Caddyfile" ]; then
             sudo mkdir -p /opt/caddy
-            sudo mkdir -p /opt/caddy
-            sudo mkdir -p /opt/caddy
+            sudo mkdir -p /opt/caddy/data
+            sudo mkdir -p /opt/caddy/config
             cp per-user-web-server/Caddyfile /opt/caddy/Caddyfile
         fi
     fi

@@ -3,14 +3,14 @@
     image: caddy:latest
     container_name: caddy
     restart: unless-stopped
-    ports:
+    #ports:
       #- "80:80"
       #- "443:443"
       #- "443:443/udp" # Required for HTTP/3
-      8080
-      8443
     volumes:
       - /opt/caddy:/etc/caddy
       - /home/d.b.hicks/www:/srv
       - /opt/caddy/data:/data
       - /opt/caddy/config:/config
+    networks:
+      - main

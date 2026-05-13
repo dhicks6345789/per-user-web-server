@@ -1,0 +1,5 @@
+example.com {
+    # Point to your static files.
+    root * /srv
+    file_server
+}

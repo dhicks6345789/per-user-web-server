@@ -1,5 +1,5 @@
-example.com {
-    # Point to your static files.
+http://example.com {
+    # The main website.
     root * /srv
     file_server
 }

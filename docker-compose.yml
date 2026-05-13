@@ -4,11 +4,15 @@ services:
   
   # Fossorial's Pangolin - can provide tunneling and authentication, basically a self-hostable version of Cloudflare Tunnels. See: https://pangolin.net
   pangolin:
-    image: fosrl/pangolin:latest
+    image: docker.io/fosrl/pangolin:1.18.3
     container_name: pangolin
     restart: unless-stopped
-    networks:
-      - main
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 256m
     volumes:
       - /opt/pangolin/config:/app/config
     healthcheck:
@@ -16,24 +20,30 @@ services:
       interval: "10s"
       timeout: "10s"
       retries: 15
+    networks:
+      - main
   
   # Part of Fossorial's containerised Pangolin setup. A reverse proxy.
   traefik:
-    image: traefik:latest
+    image: docker.io/traefik:v3.6
     container_name: traefik
     restart: unless-stopped
-
+    
+    ports:
+      - 443:443
+      - 80:80
+      
     depends_on:
       pangolin:
         condition: service_healthy
     command:
       - --configFile=/etc/traefik/traefik_config.yml
+    volumes:
+      - /opt/pangolin/config/traefik:/etc/traefik:ro # Volume to store the Traefik configuration
+      - /opt/pangolin/config/letsencrypt:/letsencrypt # Volume to store the Let's Encrypt certificates
+      - /opt/pangolin/config/traefik/logs:/var/log/traefik # Volume to store Traefik logs
     networks:
       - main
-    volumes:
-      - /opt/traefik/config:/etc/traefik:ro # Volume to store the Traefik configuration
-      - /opt/letsencrypt/config:/letsencrypt # Volume to store the Let's Encrypt certificates
-      - /opt/traefik/logs:/var/log/traefik # Volume to store Traefik logs
   
   # Guacd - The Apache Guacamole (web-based remote desktop) proxy daemon.
   # Note the lack of a database container instance, generally included in the standard containerised Guacamole setup.

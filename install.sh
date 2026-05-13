@@ -129,6 +129,7 @@ done
 # Figure out the items we want to run.
 RUN_CALC=false
 RUN_EXAMS=false
+RUN_CADDY=false
 for RUN_ITEM in "${RUN_LIST[@]}"; do
     case "$RUN_ITEM" in
         "calc")
@@ -137,9 +138,13 @@ for RUN_ITEM in "${RUN_LIST[@]}"; do
         "desktop")
             RUN_EXAMS=true
             ;;
+        "caddy")
+            RUN_CADDY=true
+            ;;
         "all")
             RUN_CALC=true
             RUN_EXAMS=true
+            RUN_CADDY=true
             ;;
     esac
 done
@@ -434,6 +439,12 @@ if [ $INSTALL_PANGOLIN = true ]; then
         sed -i -e '/{{docker-compose-exams.yml}}/r per-user-web-server/docker-compose-exams.yml' -e '//d' docker-compose.yml
     else
         sed -i "s/{{docker-compose-exams.yml}}//g" docker-compose.yml
+    fi
+
+    if [ $RUN_CADDY = true ]; then
+        sed -i -e '/{{docker-compose-caddy.yml}}/r per-user-web-server/docker-compose-caddy.yml' -e '//d' docker-compose.yml
+    else
+        sed -i "s/{{docker-compose-caddy.yml}}//g" docker-compose.yml
     fi
     
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml

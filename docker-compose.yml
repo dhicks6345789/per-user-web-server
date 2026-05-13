@@ -31,9 +31,9 @@ services:
     networks:
       - main
     volumes:
-      - ./config/traefik:/etc/traefik:ro # Volume to store the Traefik configuration
-      - ./config/letsencrypt:/letsencrypt # Volume to store the Let's Encrypt certificates
-      - ./config/traefik/logs:/var/log/traefik # Volume to store Traefik logs
+      - /opt/traefik/config:/etc/traefik:ro # Volume to store the Traefik configuration
+      - /opt/letsencrypt/config:/letsencrypt # Volume to store the Let's Encrypt certificates
+      - /opt/traefik/logs:/var/log/traefik # Volume to store Traefik logs
   
   # Guacd - The Apache Guacamole (web-based remote desktop) proxy daemon.
   # Note the lack of a database container instance, generally included in the standard containerised Guacamole setup.

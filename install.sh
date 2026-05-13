@@ -420,6 +420,15 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
     docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1
 
+    if [ $RUN_CADDY = true ]; then
+        if [ ! -f "/opt/caddy/Caddyfile" ]; then
+            sudo mkdir -p /opt/caddy
+            sudo mkdir -p /opt/caddy
+            sudo mkdir -p /opt/caddy
+            cp per-user-web-server/Caddyfile /opt/caddy/Caddyfile
+        fi
+    fi
+
     # Replace the Docker Compose setup provided by the Pangolin install script, use ours with values inserted.
     cp per-user-web-server/docker-compose.yml ./docker-compose.yml
     

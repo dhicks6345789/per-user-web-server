@@ -4,7 +4,7 @@
     container_name: caddy
     restart: unless-stopped
     expose:
-      - 80
+      - "80"
     #ports:
       #- "80:80"
       #- "443:443"

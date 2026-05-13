@@ -1,3 +1,4 @@
+  # The Caddy web server - a production-ready web server that automatically handles HTTPS.
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped

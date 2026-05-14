@@ -1,9 +1,29 @@
-http://example.com {
+http://example.com, www.example.com {
     # The main website.
     root * /srv
     file_server
 
     log {
         output file /data/access.log
+    }
+}
+
+users.example.com {
+    # Match the /username pattern.
+    handle_path /* {
+        # Extract the username from the path into a variable.
+        vars username {path.0}
+        
+        # Set the root to that user's specific www folder.
+        root * /home/{vars.username}/www
+        
+        # Serve the files.
+        file_server browse
+    }
+
+    # Handle the main site root here.
+    handle {
+        root * /var/www/html
+        file_server
     }
 }

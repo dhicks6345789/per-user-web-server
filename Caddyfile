@@ -4,6 +4,7 @@ http://example.com, www.example.com {
     root * /srv
     file_server
 
+    # Keep logs. Caddy should be smart enough to automatically rotate logs.
     log {
         output file /data/access.log
     }

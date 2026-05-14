@@ -1,3 +1,4 @@
+# Handle the main website.
 http://example.com, www.example.com {
     # The main website.
     root * /srv
@@ -8,6 +9,7 @@ http://example.com, www.example.com {
     }
 }
 
+# If you want to have Caddy handle serving individual user websites, then this section might work.
 users.example.com {
     # Match the /username pattern.
     handle_path /* {
@@ -21,7 +23,7 @@ users.example.com {
         file_server browse
     }
 
-    # Handle the main site root here.
+    # Handle the "users" site root here - serve the Start Menu index page.
     handle {
         root * /var/www/html
         file_server

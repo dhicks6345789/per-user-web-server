@@ -1,5 +1,5 @@
-# Use the latest Debian base image, the slim version as we just want a minimal container that can run a small GO application.
-FROM debian:latest-slim
+# This container just needs to run our own custom Go application, so the minimal Alpine image should do nicely.
+FROM alpine:latest
 
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive

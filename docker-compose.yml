@@ -55,7 +55,7 @@ services:
     networks:
       - main
   
-  # Guacamole Client - The Guacamole web interface for the "desktop" image.
+  # Guacamole Client - The Guacamole web interface, served at the "/desktop" endpoint.
   desktop:
     image: guacamole/guacamole:latest
     container_name: desktop
@@ -78,6 +78,15 @@ services:
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
+
+  # The rclone GUI interface, served at the "/rclone" endpoint. Our own custom router application routes requests to "/rclone" to the rclone GUI instance running on the appropriate user's desktop container.
+  rclone:
+    image: {{DOCKERRCLONEGUI_DOCKER_IMAGE}}
+    command: /usr/local/bin/rclonegui
+    container_name: rclonegui
+    restart: unless-stopped
+    networks:
+      - main
 
   {{docker-compose-calc.yml}}
 

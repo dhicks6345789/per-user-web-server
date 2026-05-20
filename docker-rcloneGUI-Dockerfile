@@ -1,0 +1,3 @@
+FROM {{DOCKERROOT_DOCKER_IMAGE}}
+COPY per-user-web-server/rcloneGUI/rcloneGUI /usr/local/bin/rcloneGUI
+EXPOSE 8080

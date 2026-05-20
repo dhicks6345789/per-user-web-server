@@ -1,5 +1,6 @@
 # Use the latest Debian base image. This is the base image for our images that provide user desktop
-# interfaces, so we're using the full-feature version rather than an optomised "slim" image.
+# interfaces, complete with all the tools a developer might need / want, so we're using the
+# full-feature version rather than an optomised "slim" image.
 FROM debian:latest
 
 # Prevent interactive prompts during installation

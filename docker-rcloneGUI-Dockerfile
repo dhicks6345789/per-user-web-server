@@ -1,11 +1,5 @@
 # This container just needs to run our own custom Go application, so the minimal Alpine image should do nicely.
 FROM alpine:latest
 
-# Prevent interactive prompts during installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Get updated installation repository lists.
-RUN apt-get update
-
 COPY per-user-web-server/rcloneGUI/rcloneGUI /usr/local/bin/rcloneGUI
 EXPOSE 8080

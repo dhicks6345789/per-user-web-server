@@ -1,5 +1,5 @@
-# Use the latest Debian base image.
-FROM debian:latest
+# Use the latest Debian base image, the slim version as we just want a minimal container that can run a small GO application.
+FROM debian:latest-slim
 
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive

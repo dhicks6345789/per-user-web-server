@@ -5,14 +5,13 @@
 package main
 
 import (
-	//"os"
+	"os"
 	//"io"
 	"fmt"
 	"log"
 	//"bytes"
 	//"strings"
-	//"net/http"
-	//"net/http/cgi"
+	"net/http"
 	"path/filepath"
 )
 

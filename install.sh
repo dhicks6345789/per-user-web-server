@@ -10,7 +10,7 @@ RCLONE_TYPE=user
 DOCKERROOT_DOCKER_IMAGE="sansay.co.uk-dockerroot:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
-DOCKERRCLONEGUI_DOCKER_IMAGE="sansay.co.uk-dockerrcloneGUI:0.1-beta.3"
+DOCKERRCLONEGUI_DOCKER_IMAGE="sansay.co.uk-dockerrclonegui:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
 DOCKEREXAMS_DOCKER_IMAGE="sansay.co.uk-dockerexams:0.1-beta.3"
@@ -433,7 +433,6 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
     echo "Building our Docker image for the custom rclone GUI router."
     cp per-user-web-server/docker-rcloneGUI-Dockerfile .
-    sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-rcloneGUI-Dockerfile
     docker build -f docker-rcloneGUI-Dockerfile --progress=plain --tag=$DOCKERRCLONEGUI_DOCKER_IMAGE . 2>&1
 
     if [ $RUN_CADDY = true ]; then

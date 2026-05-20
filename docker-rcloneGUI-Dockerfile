@@ -2,4 +2,5 @@
 FROM alpine:latest
 
 COPY per-user-web-server/rcloneGUI/rcloneGUI /usr/local/bin/rcloneGUI
+RUN ls -la /usr/local/bin
 EXPOSE 8080

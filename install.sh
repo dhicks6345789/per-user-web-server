@@ -10,6 +10,7 @@ RCLONE_TYPE=user
 DOCKERROOT_DOCKER_IMAGE="sansay.co.uk-dockerroot:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
+DOCKERRCLONEGUI_DOCKER_IMAGE="sansay.co.uk-dockerrcloneGUI:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
 DOCKEREXAMS_DOCKER_IMAGE="sansay.co.uk-dockerexams:0.1-beta.3"
@@ -281,6 +282,16 @@ if [ ! -f "per-user-web-server/www/wwwServer" ]; then
     exit 1
 fi
 
+echo Building the Go rclone GUI router.
+cd per-user-web-server/rcloneGUI
+bash build.sh
+cd ..
+cd ..
+if [ ! -f "per-user-web-server/rcloneGUI/rcloneGUI" ]; then
+    echo "Problem building the Go rclone GUI router server - stopping."
+    exit 1
+fi
+
 echo Building the custom Java authentication plugin for Guacamole...
 rm per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar
 cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..
@@ -420,6 +431,11 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
     docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1
 
+    echo "Building our Docker image for the custom rclone GUI router."
+    cp per-user-web-server/docker-rcloneGUI-Dockerfile .
+    sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-rcloneGUI-Dockerfile
+    docker build -f docker-rcloneGUI-Dockerfile --progress=plain --tag=$DOCKERRCLONEGUI_DOCKER_IMAGE . 2>&1
+
     if [ $RUN_CADDY = true ]; then
         if [ ! -f "/opt/caddy/Caddyfile" ]; then
             sudo mkdir -p /opt/caddy
@@ -461,6 +477,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERCALC_DOCKER_IMAGE}}/$DOCKERCALC_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERRCLONEGUI_DOCKER_IMAGE}}/$DOCKERRCLONEGUI_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
     # Start up the Docker containers.

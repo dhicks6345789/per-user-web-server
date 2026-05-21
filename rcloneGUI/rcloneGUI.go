@@ -81,19 +81,17 @@ func fileExists(thePath string) bool {
 func main() {	
 	// Handle all HTTP request URLs.
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		requestPath := filepath.Clean(r.URL.Path)
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
-
-		// A message for the user / logs.
-		log.Print("rcloneGUI, request: " + requestPath + ", " + username)
 
 		proxy, exists := rcloneProxies.get(username)
 		if exists == false {
 			rcloneProxies.set(username, "http://desktop-" + username + ":8080")
 			proxy, exists = rcloneProxies.get(username)
 		}
-		log.Print(proxy)
+		
+		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
+		proxy.ServeHTTP(w, r)
 	})
 
 	// Execution starts here.

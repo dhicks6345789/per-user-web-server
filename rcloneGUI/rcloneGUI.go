@@ -30,13 +30,15 @@ func fileExists(thePath string) bool {
 func main() {	
 	// Handle all HTTP request URLs.
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// HTTP_AUTH_HEADER: Remote-User
 		requestPath := filepath.Clean(r.URL.Path)
-		fullPath := filepath.Join(rootPath, requestPath)
-
-		fmt.Fprint(w, "Hello, World!")
+		// Get the Remote-User value passed in (from Pangolin) via the HTTP header.
+		remoteUser := r.Header.Get("Remote-User")
+		
+		fmt.Fprint(w, "Hello: " + remoteUser)
 
 		// A message for the user / logs.
-		log.Print("rcloneGUI, request: " + requestPath + ", serving: " + fullPath)
+		log.Print("rcloneGUI, request: " + requestPath)
 	})
 
 	// Execution starts here.

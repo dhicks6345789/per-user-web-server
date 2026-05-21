@@ -33,7 +33,7 @@ func main() {
 		// HTTP_AUTH_HEADER: Remote-User
 		requestPath := filepath.Clean(r.URL.Path)
 		// Get the Remote-User value passed in (from Pangolin) via the HTTP header.
-		userName := strings.Split(r.Header.Get("Remote-User", "@")[0]
+		userName := strings.Split(r.Header.Get("Remote-User", "@"))[0]
 		
 		fmt.Fprint(w, "Hello: " + userName)
 

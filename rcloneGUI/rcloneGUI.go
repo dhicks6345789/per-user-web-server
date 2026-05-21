@@ -83,11 +83,15 @@ func main() {
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 
+		// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
 		proxy, exists := rcloneProxies.get(username)
 		if exists == false {
 			rcloneProxies.set(username, "http://desktop-" + username + ":8090")
 			proxy, exists = rcloneProxies.get(username)
 		}
+
+		// Rewrite the URL to remove the "/rclone" prefix.
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
 		
 		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
 		proxy.ServeHTTP(w, r)

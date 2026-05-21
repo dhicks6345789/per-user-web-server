@@ -22,7 +22,7 @@ fi
 #--pass string            Password for RC authentication
 #--user string            User name for RC authentication
 
-rclone rcd --rc-web-gui --rc-addr 0.0.0.0:8090 --rc-web-gui-no-open-browser --rc-no-auth --rc-baseurl /rclone
+rclone rcd --rc-web-gui --rc-addr 0.0.0.0:8090 --rc-web-gui-no-open-browser --rc-no-auth --rc-baseurl /rclone &
 
 
 

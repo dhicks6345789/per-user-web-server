@@ -86,7 +86,7 @@ func main() {
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 
 		// A message for the user / logs.
-		log.Print("rcloneGUI, request: " + requestPath)
+		log.Print("rcloneGUI, request: " + requestPath + ", " + username)
 	})
 
 	// Execution starts here.

@@ -62,7 +62,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		originalDirector(req)
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
-		req.Host = rcloneTarget.Host
+		req.Host = targetURL.Host
 
 		// Optional: If rclone has basic auth enabled, inject it here 
 		// so your users don't have to type it.

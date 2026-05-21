@@ -55,7 +55,20 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 	// Create the reverse proxy instance
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	
+	// Customize the proxy's director to handle headers correctly.
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		
+		// Ensure the host header matches the target so Rclone doesn't reject it.
+		req.Host = rcloneTarget.Host
 
+		// Optional: If rclone has basic auth enabled, inject it here 
+		// so your users don't have to type it.
+		req.SetBasicAuth("d.b.hicks", "123456")
+	}
+	
 	pr.mu.Lock() // Block readers and other writers.
 	defer pr.mu.Unlock()
 	

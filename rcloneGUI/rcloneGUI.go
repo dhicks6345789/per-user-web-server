@@ -13,7 +13,6 @@ import (
 	"net/url"
 	"net/http"
 	"net/http/httputil"
-	"path/filepath"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.

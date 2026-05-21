@@ -61,7 +61,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	defer pr.mu.Unlock()
 	
 	pr.proxies[key] = proxy
-	return proxy
+	return nil
 }
 
 // Global instance
@@ -90,7 +90,8 @@ func main() {
 
 		proxy, exists := rcloneProxies.get(username)
 		if exists == false {
-			proxy = rcloneProxies.set(username, "http://desktop-" + username + ":8080")
+			rcloneProxies.set(username, "http://desktop-" + username + ":8080")
+			proxy, exists = rcloneProxies.get(username)
 		}
 		log.Print(proxy)
 	})

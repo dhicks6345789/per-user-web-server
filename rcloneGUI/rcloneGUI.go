@@ -57,11 +57,11 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	// Create the reverse proxy instance
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
-	pr.mu.Lock()         // Block readers and other writers
+	pr.mu.Lock() // Block readers and other writers.
 	defer pr.mu.Unlock()
 	
 	pr.proxies[key] = proxy
-	return nil
+	return proxy
 }
 
 // Global instance
@@ -89,7 +89,9 @@ func main() {
 		log.Print("rcloneGUI, request: " + requestPath + ", " + username)
 
 		proxy, exists := rcloneProxies.get(username)
-		log.Print(exists)
+		if exists == false {
+			proxy = rcloneProxies.set(username, "http://desktop-" + username + ":8080")
+		}
 		log.Print(proxy)
 	})
 

@@ -12,6 +12,11 @@ RUN apt-get update
 # Install some basic utilities.
 RUN apt-get install -y curl sudo wget nano procps unzip p7zip
 
+# Install rclone, a tool for handling cloud / remote file systems. Debian does include a packaged version of rclone,
+# but as of May 2026 that version is older than the one we want to use - we want a version with the built-in GUI capability.
+# Therefore, we install using rclone's own install script rather than via apt.
+RUN curl https://downloads.rclone.org/install.sh | bash
+
 # Install a Python development environment.
 RUN apt-get install -y python3 python3-pip python3-venv
 

@@ -85,7 +85,7 @@ func main() {
 
 		proxy, exists := rcloneProxies.get(username)
 		if exists == false {
-			rcloneProxies.set(username, "http://desktop-" + username + ":8080")
+			rcloneProxies.set(username, "http://desktop-" + username + ":8090")
 			proxy, exists = rcloneProxies.get(username)
 		}
 		

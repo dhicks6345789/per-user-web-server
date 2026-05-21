@@ -18,13 +18,7 @@ fi
 # A separate container provides a per-user proxy for that GUI interface, so users can connect to the rclone GUI via the Pangolin gateway.
 # We use "0.0.0.0" as the IP address so the rclone application binds to the local network interface and allows connections from other
 # machines (in this case, our rclone proxy container) - if we used "localhost" or "127.0.0.1" only local connections will be accepted.
-#rclone gui --addr 0.0.0.0:8090 --no-open-browser --no-auth &
-#--pass string            Password for RC authentication
-#--user string            User name for RC authentication
-
-rclone rcd --rc-web-gui --rc-addr 0.0.0.0:8090 --rc-web-gui-no-open-browser --rc-no-auth --rc-baseurl /rclone &
-
-
+rclone rcd --rc-web-gui --rc-addr 0.0.0.0:8090 --rc-web-gui-no-open-browser --rc-no-auth --rc-user-from-header string &
 
 echo "Starting VNC server, password $4 on display number $5."
 tigervncserver -fg -localhost no -geometry 1280x720 :$5

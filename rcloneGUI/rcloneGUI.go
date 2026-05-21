@@ -93,6 +93,7 @@ func main() {
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
 		
 		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
+		log.Printf("Headers: %v", r.Header)
 		proxy.ServeHTTP(w, r)
 	})
 	

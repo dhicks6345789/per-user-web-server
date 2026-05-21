@@ -87,13 +87,6 @@ func main() {
 
 		// A message for the user / logs.
 		log.Print("rcloneGUI, request: " + requestPath)
-		
-		targetURL, err := url.Parse("http://desktop-" + username + ":8080")
-		if err != nil {
-			log.Fatalf("Failed to parse target URL: %v", err)
-		}
-
-		
 	})
 
 	// Execution starts here.

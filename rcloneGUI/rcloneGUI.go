@@ -87,6 +87,10 @@ func main() {
 
 		// A message for the user / logs.
 		log.Print("rcloneGUI, request: " + requestPath + ", " + username)
+
+		proxy, exists := rcloneProxies.get(username)
+		log.Print(exists)
+		log.Print(proxy)
 	})
 
 	// Execution starts here.

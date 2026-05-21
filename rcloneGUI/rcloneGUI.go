@@ -77,9 +77,8 @@ func fileExists(thePath string) bool {
 	return true
 }
 
-func main() {	
-	// Handle all HTTP request URLs.
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+func main() {
+	rcloneHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 
@@ -91,12 +90,14 @@ func main() {
 		}
 
 		// Rewrite the URL to remove the "/rclone" prefix.
-		//r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
 		
 		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
 		proxy.ServeHTTP(w, r)
 	})
-
+	
+	http.Handle("/rclone/", http.StripPrefix("/rclone", rcloneHandler))
+	
 	// Execution starts here.
 	log.Println("rcloneGUI starting on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

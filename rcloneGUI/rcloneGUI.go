@@ -40,7 +40,7 @@ func main() {
 	})
 
 	// Execution starts here.
-	log.Println("wwwServer starting on :8080...")
+	log.Println("rcloneGUI starting on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}

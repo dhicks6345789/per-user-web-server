@@ -55,6 +55,16 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 	// Create the reverse proxy instance
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+
+	// To do: write this bit in Go. Call the session manager on the host to make sure there's a desktop instance running for the particular user.
+	// Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
+	Bananas
+ 	//HttpClient sessionManagerClient = HttpClient.newHttpClient();
+    //HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username + "&image=" + "desktop")).build();
+    //try {
+      //HttpResponse<String> sessionManagerResponse = sessionManagerClient.send(sessionManagerRequest, HttpResponse.BodyHandlers.ofString());
+      //logger.info("Session Manager responded: " + sessionManagerResponse.body());
+
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := proxy.Director

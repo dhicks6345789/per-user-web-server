@@ -82,8 +82,7 @@ services:
   # The rclone GUI interface, served at the "/rclone" endpoint. Our own custom router application routes requests to "/rclone" to the rclone GUI instance running on the appropriate user's desktop container.
   rclone:
     image: {{DOCKERRCLONEGUI_DOCKER_IMAGE}}
-    #command: /usr/local/bin/rcloneGUI
-    command: ls -la /usr/local/bin
+    command: /usr/local/bin/rcloneGUI
     container_name: rclonegui
     restart: unless-stopped
     networks:

@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"log"
 	//"bytes"
-	//"strings"
+	"strings"
 	"net/http"
 	"path/filepath"
 )
@@ -33,9 +33,9 @@ func main() {
 		// HTTP_AUTH_HEADER: Remote-User
 		requestPath := filepath.Clean(r.URL.Path)
 		// Get the Remote-User value passed in (from Pangolin) via the HTTP header.
-		remoteUser := r.Header.Get("Remote-User")
+		userName := strings.Split(r.Header.Get("Remote-User", "@")[0]
 		
-		fmt.Fprint(w, "Hello: " + remoteUser)
+		fmt.Fprint(w, "Hello: " + userName)
 
 		// A message for the user / logs.
 		log.Print("rcloneGUI, request: " + requestPath)

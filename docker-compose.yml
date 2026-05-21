@@ -85,6 +85,8 @@ services:
     command: /usr/local/bin/rcloneGUI
     container_name: rclonegui
     restart: unless-stopped
+    expose:
+      - "8090"
     networks:
       - main
 

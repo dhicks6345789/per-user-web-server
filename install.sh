@@ -383,9 +383,8 @@ if [ $INSTALL_PANGOLIN = true ]; then
     if [ $BUILD_ROOT = true ]; then
         echo "Building the root Docker image - this might take a few minutes..."
         cp per-user-web-server/docker-root-Dockerfile .
+        docker rmi $DOCKERROOT_DOCKER_IMAGE
         docker build -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
-        #docker rmi $DOCKERROOT_DOCKER_IMAGE
-        #docker build --no-cache -f docker-root-Dockerfile --progress=plain --tag=$DOCKERROOT_DOCKER_IMAGE . 2>&1
     fi
 
     if [ $BUILD_DESKTOP = true ]; then
@@ -394,7 +393,6 @@ if [ $INSTALL_PANGOLIN = true ]; then
         sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-desktop-Dockerfile
         docker rmi $DOCKERDESKTOP_DOCKER_IMAGE
         docker build -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
-        #docker build --no-cache -f docker-desktop-Dockerfile --progress=plain --tag=$DOCKERDESKTOP_DOCKER_IMAGE . 2>&1
     fi
 
     if [ $BUILD_WINE = true ]; then

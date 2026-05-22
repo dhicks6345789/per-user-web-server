@@ -228,6 +228,7 @@ func main() {
 				fmt.Println("umountOutput: " + mkdirOutput)
 			}
 			rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/" + username + "/Documents")
+			// Pause to make sure(ish) the mount operation is complete. Could maybe replace with a check to "df -h" to loop until the path is mounted.
 			time.Sleep(2 * time.Second)
 			if rcloneMountOutput != "" {
 				fmt.Println("rcloneMountOutput: " + rcloneMountOutput)

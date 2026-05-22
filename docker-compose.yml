@@ -89,6 +89,8 @@ services:
       - "8090"
     networks:
       - main
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   {{docker-compose-calc.yml}}
 

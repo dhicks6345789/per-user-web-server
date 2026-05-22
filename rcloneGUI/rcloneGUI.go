@@ -79,7 +79,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	req, err := http.NewRequest("POST", APIURL, strings.NewReader(encodedData))
 	if err != nil {
 		log.Printf("Error creating request: %v\n", err)
-		return
+		return nil
 	}
 
 	// Set the correct Content-Type header.
@@ -89,7 +89,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Error sending request: %v\n", err)
-		return
+		return nil
 	}
 	defer resp.Body.Close()
 
@@ -97,7 +97,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error reading response: %v\n", err)
-		return
+		return nil
 	}
 
 	log.Printf("Status: %s\n", resp.Status)

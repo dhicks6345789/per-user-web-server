@@ -6,9 +6,11 @@ package main
 
 import (
 	"os"
+	"io"
 	"fmt"
 	"log"
 	"sync"
+	"time"
 	"strings"
 	"net/url"
 	"net/http"
@@ -58,13 +60,48 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 	// To do: write this bit in Go. Call the session manager on the host to make sure there's a desktop instance running for the particular user.
 	// Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
-	Bananas
- 	//HttpClient sessionManagerClient = HttpClient.newHttpClient();
-    //HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username + "&image=" + "desktop")).build();
-    //try {
-      //HttpResponse<String> sessionManagerResponse = sessionManagerClient.send(sessionManagerRequest, HttpResponse.BodyHandlers.ofString());
-      //logger.info("Session Manager responded: " + sessionManagerResponse.body());
+	APIURL := "http://host.docker.internal:8091/connectOrStartSession"
+	
+	// Define our form data to pass via POST to the sessionManager server, using url.Values.
+	data := url.Values{}
+	data.Set("username", key)
+	data.Set("image", "desktop")
 
+	// Encode the data into "bar=baz&foo=qux" format.
+	encodedData := data.Encode()
+
+	// Create a client with a timeout.
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// Create the POST request using strings.NewReader
+	req, err := http.NewRequest("POST", APIURL, strings.NewReader(encodedData))
+	if err != nil {
+		log.Printf("Error creating request: %v\n", err)
+		return
+	}
+
+	// Set the correct Content-Type header.
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Execute the request.
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Error sending request: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read the response.
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Error reading response: %v\n", err)
+		return
+	}
+
+	log.Printf("Status: %s\n", resp.Status)
+	log.Printf("Response Body:\n%s\n", string(body))
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := proxy.Director

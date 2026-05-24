@@ -74,7 +74,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	}
 
 	// Set the correct Content-Type header.
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	sessionManagerRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	// Execute the (POST) request.
 	sessionManagerResponse, err := sessionManagerClient.Do(sessionManagerRequest)
@@ -82,13 +82,13 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		log.Printf("Error sending request: %v\n", err)
 		return nil
 	}
-	defer resp.Body.Close()
+	defer sessionManagerResponse.Body.Close()
 	
 	// The response should be a string in JSON format, {"port":"..", "password":"..."}, decode that string...
-	var sessionManagerData map[string]any
-	json.NewDecoder(sessionManagerResponse.Body).Decode(&sessionManagerData)
+	var responseData map[string]any
+	json.NewDecoder(sessionManagerRespons.Body).Decode(&responseData)
 	// ...and access the data by key (requires type assertion).
-	password := genericData["password"].(string)
+	password := responseData["password"].(string)
 	log.Printf("Password: " + password)
 
 

@@ -112,6 +112,8 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 	// Extract strings using .Get().
 	password := formData.Get("password")
+	log.Printf("Body: " + string(body))
+	log.Printf("Password: " + password)
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := proxy.Director

@@ -6,7 +6,6 @@ package main
 
 import (
 	"os"
-	"io"
 	"fmt"
 	"log"
 	"sync"
@@ -78,7 +77,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	// Execute the (POST) request.
-	sessionManagerResponse, err := client.Do(sessionManagerRequest)
+	sessionManagerResponse, err := sessionManagerClient.Do(sessionManagerRequest)
 	if err != nil {
 		log.Printf("Error sending request: %v\n", err)
 		return nil

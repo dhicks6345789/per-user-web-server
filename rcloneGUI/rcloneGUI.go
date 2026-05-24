@@ -102,15 +102,9 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 	log.Printf("Status: %s\n", resp.Status)
 	log.Printf("Response Body:\n%s\n", string(body))
-	
-	// Read the entire response body into a byte slice
-	bodyBytes, err := io.ReadAll(body)
-	if err != nil {
-		return nil
-	}
 
 	// Parse the raw string into a url.Values map.
-	formData, err := url.ParseQuery(string(bodyBytes))
+	formData, err := url.ParseQuery(string(body))
 	if err != nil {
 		fmt.Printf("Error parsing form data: %v\n", err)
 		return nil

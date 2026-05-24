@@ -51,33 +51,24 @@ func (pr *ProxyRegistry) get(key string) (*httputil.ReverseProxy, bool) {
 
 // Set adds or updates a proxy in the global dictionary.
 func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
-	targetURL, err := url.Parse(targetURLStr)
-	if err != nil {
-		return fmt.Errorf("invalid target URL %s: %w", targetURLStr, err)
-	}
+	// Before we can create / update a new Proxy object, we need to call the Session Manager process on the host to get the password for the proxy to forward to rclone on the user desktop instance container.
+	// So, we do an API call (via a HTTP POST request) the session manager on the host. That will make sure there's a desktop instance (with rclone) running for the particular user, and will return the password
+	// to use to connect to it.
+	// To do: Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
+	// Define our form data to pass via POST to the sessionManager server, using url.Values...
+	sessionManagerData := url.Values{}
+	sessionManagerData.Set("username", key)
+	sessionManagerData.Set("image", "desktop")
+	// ...and encode that data into a string in "bar=baz&foo=qux" format.
+	sessionManagerEncodedData := sessionManagerData.Encode()
 
-	// Create the reverse proxy instance
-	proxy := httputil.NewSingleHostReverseProxy(targetURL)
-
-	// To do: write this bit in Go. Call the session manager on the host to make sure there's a desktop instance running for the particular user.
-	// Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
-	APIURL := "http://host.docker.internal:8091/connectOrStartSession"
-	
-	// Define our form data to pass via POST to the sessionManager server, using url.Values.
-	data := url.Values{}
-	data.Set("username", key)
-	data.Set("image", "desktop")
-
-	// Encode the data into "bar=baz&foo=qux" format.
-	encodedData := data.Encode()
-
-	// Create a client with a timeout.
-	client := &http.Client{
+	// Create a client to call the session manager, with a timeout.
+	sessionManagerClient := &http.Client{
 		Timeout: 10 * time.Second,
 	}
 
-	// Create the POST request using strings.NewReader
-	req, err := http.NewRequest("POST", APIURL, strings.NewReader(encodedData))
+	// Create the POST request using strings.NewReader.
+	sessionManagerRequest, err := http.NewRequest("POST", "http://host.docker.internal:8091/connectOrStartSession", strings.NewReader(sessionManagerEncodedData))
 	if err != nil {
 		log.Printf("Error creating request: %v\n", err)
 		return nil
@@ -86,43 +77,43 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	// Set the correct Content-Type header.
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	// Execute the request.
-	resp, err := client.Do(req)
+	// Execute the (POST) request.
+	sessionManagerResponse, err := client.Do(sessionManagerRequest)
 	if err != nil {
 		log.Printf("Error sending request: %v\n", err)
 		return nil
 	}
 	defer resp.Body.Close()
-
-	// Read the response.
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Error reading response: %v\n", err)
-		return nil
-	}
-
-	log.Printf("Status: %s\n", resp.Status)
-	log.Printf("Response Body:\n%s\n", string(body))
 	
-	var genericData map[string]any
-	json.NewDecoder(resp.Body).Decode(&genericData)
-	
-	// Access data by key (requires type assertion).
+	// The response should be a string in JSON format, {"port":"..", "password":"..."}, decode that string...
+	var sessionManagerData map[string]any
+	json.NewDecoder(sessionManagerResponse.Body).Decode(&sessionManagerData)
+	// ...and access the data by key (requires type assertion).
 	password := genericData["password"].(string)
 	log.Printf("Password: " + password)
+
+
+	
+	// Now we have the password to use when we create the new Proxy object. First we have to create a URL...
+	proxyTargetURL, err := url.Parse(targetURLStr)
+	if err != nil {
+		return fmt.Errorf("invalid target URL %s: %w", targetURLStr, err)
+	}
+	// ...then we can create a new reverse proxy instance to that URL.
+	rcloneProxy := httputil.NewSingleHostReverseProxy(proxyTargetURL)
 	
 	// Customize the proxy's director to handle headers correctly.
-	originalDirector := proxy.Director
-	proxy.Director = func(req *http.Request) {
+	originalDirector := rcloneProxy.Director
+	rcloneProxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
 		req.Host = targetURL.Host
 
-		// Optional: If rclone has basic auth enabled, inject it here 
-		// so your users don't have to type it.
-		req.SetBasicAuth(key, password)
+		// rclone uses basic authentication, so here we can inject the username and password required by rclone
+		// so access is seemless for our (already authenticated) users.
 		log.Printf("Basic auth: %s %s", key, password)
+		req.SetBasicAuth(key, password)
 	}
 	
 	pr.mu.Lock() // Block readers and other writers.
@@ -132,7 +123,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	return nil
 }
 
-// Global instance
+// A global instance of the proxy registry to store multiple proxies to user rclone instances.
 var rcloneProxies = newProxyRegistry()
 
 

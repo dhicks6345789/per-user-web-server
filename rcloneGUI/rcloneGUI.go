@@ -99,6 +99,9 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	}
 	// ...then we can create a new reverse proxy instance to that URL.
 	rcloneProxy := httputil.NewSingleHostReverseProxy(proxyTargetURL)
+
+	// Calculate the login token (Base64 of username:password) to pass in to rclone to avoid the user having to login again.
+	rcloneToken := base64.StdEncoding.EncodeToString([]byte(key + ":" + password))
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := rcloneProxy.Director
@@ -111,6 +114,13 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		// rclone uses basic authentication, so here we can inject the username and password required by rclone
 		// so access is seemless for our (already authenticated) users.
 		req.SetBasicAuth(key, password)
+		
+		// Modify the incoming query parameters...
+		query := req.URL.Query()
+		// ...inject the login_token rclone expects...
+		query.Set("login_token", rcloneToken)
+		// ...and encode the parameters back into the request URL.
+		req.URL.RawQuery = query.Encode()
 	}
 	
 	pr.mu.Lock() // Block readers and other writers.

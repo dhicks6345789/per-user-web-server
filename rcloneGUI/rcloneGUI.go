@@ -107,7 +107,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		originalDirector(req)
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
-		req.Host = targetURL.Host
+		req.Host = proxyTargetURL.Host
 
 		// rclone uses basic authentication, so here we can inject the username and password required by rclone
 		// so access is seemless for our (already authenticated) users.
@@ -118,7 +118,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	pr.mu.Lock() // Block readers and other writers.
 	defer pr.mu.Unlock()
 	
-	pr.proxies[key] = proxy
+	pr.proxies[key] = rcloneProxy
 	return nil
 }
 

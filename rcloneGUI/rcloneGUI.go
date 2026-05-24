@@ -124,6 +124,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		// Optional: If rclone has basic auth enabled, inject it here 
 		// so your users don't have to type it.
 		req.SetBasicAuth(key, password)
+		log.Printf("Basic auth: %s %s", key, password)
 	}
 	
 	pr.mu.Lock() // Block readers and other writers.
@@ -163,7 +164,6 @@ func main() {
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
 		
 		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
-		log.Printf("Headers: %v", r.Header)
 		proxy.ServeHTTP(w, r)
 	})
 	

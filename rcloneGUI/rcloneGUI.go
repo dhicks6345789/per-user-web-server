@@ -89,7 +89,6 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	json.NewDecoder(sessionManagerResponse.Body).Decode(&responseData)
 	// ...and access the data by key (requires type assertion).
 	password := responseData["password"].(string)
-	log.Printf("Password: " + password)
 
 
 	
@@ -111,7 +110,6 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 		// rclone uses basic authentication, so here we can inject the username and password required by rclone
 		// so access is seemless for our (already authenticated) users.
-		log.Printf("Basic auth: %s %s", key, password)
 		req.SetBasicAuth(key, password)
 	}
 	

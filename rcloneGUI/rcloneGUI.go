@@ -11,11 +11,11 @@ import (
 	"log"
 	"sync"
 	"time"
-	"json"
 	"strings"
 	"net/url"
 	"net/http"
 	"net/http/httputil"
+	"encoding/json"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.

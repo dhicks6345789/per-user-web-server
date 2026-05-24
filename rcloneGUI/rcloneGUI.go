@@ -103,18 +103,13 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	log.Printf("Status: %s\n", resp.Status)
 	log.Printf("Response Body:\n%s\n", string(body))
 
-	// Parse the raw string into a url.Values map.
-	formData, err := url.ParseQuery(string(body))
-	if err != nil {
-		fmt.Printf("Error parsing form data: %v\n", err)
-		return nil
-	}
 
-	// Extract strings using .Get().
-	password := formData.Get("password")
-	log.Printf("Body: " + string(body))
+	var genericData map[string]any
+	json.NewDecoder(resp.Body).Decode(&genericData)
+	
+	// Access data by key (requires type assertion).
+	password := genericData["password"].(string)
 	log.Printf("Password: " + password)
-	log.Printf(formData)
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := proxy.Director

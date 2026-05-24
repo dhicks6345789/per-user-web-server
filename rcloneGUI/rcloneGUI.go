@@ -106,14 +106,14 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	// Read the entire response body into a byte slice
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
-		return
+		return nil
 	}
 
 	// Parse the raw string into a url.Values map.
 	formData, err := url.ParseQuery(string(bodyBytes))
 	if err != nil {
 		fmt.Printf("Error parsing form data: %v\n", err)
-		return
+		return nil
 	}
 
 	// Extract strings using .Get().

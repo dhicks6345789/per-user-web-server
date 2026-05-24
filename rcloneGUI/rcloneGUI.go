@@ -86,7 +86,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	
 	// The response should be a string in JSON format, {"port":"..", "password":"..."}, decode that string...
 	var responseData map[string]any
-	json.NewDecoder(sessionManagerRespons.Body).Decode(&responseData)
+	json.NewDecoder(sessionManagerResponse.Body).Decode(&responseData)
 	// ...and access the data by key (requires type assertion).
 	password := responseData["password"].(string)
 	log.Printf("Password: " + password)

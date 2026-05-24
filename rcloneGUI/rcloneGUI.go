@@ -11,6 +11,7 @@ import (
 	"log"
 	"sync"
 	"time"
+	"json"
 	"strings"
 	"net/url"
 	"net/http"
@@ -102,8 +103,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 	log.Printf("Status: %s\n", resp.Status)
 	log.Printf("Response Body:\n%s\n", string(body))
-
-
+	
 	var genericData map[string]any
 	json.NewDecoder(resp.Body).Decode(&genericData)
 	

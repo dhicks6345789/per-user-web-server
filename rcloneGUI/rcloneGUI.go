@@ -114,7 +114,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		req.SetBasicAuth(key, password)
 
 		//req.Header.Set(password, key)
-		req.Header[password] = key
+		req.Header[password] = []string{key}
 		
 		// Modify the incoming query parameters...
 		//query := req.URL.Query()

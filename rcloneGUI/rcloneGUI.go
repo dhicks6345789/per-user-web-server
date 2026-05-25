@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"encoding/json"
-	"encoding/base64"
+	//"encoding/base64"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.

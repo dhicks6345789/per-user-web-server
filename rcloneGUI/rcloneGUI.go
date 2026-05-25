@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"encoding/json"
+	"encoding/base64"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
@@ -30,33 +31,34 @@ const rootPath = "/var/www"
 type ProxyRegistry struct {
 	mu sync.RWMutex
 	proxies map[string]*httputil.ReverseProxy
+	passwords map[string]string
 }
 
 // NewProxyRegistry initializes the registry
 func newProxyRegistry() *ProxyRegistry {
 	return &ProxyRegistry{
 		proxies: make(map[string]*httputil.ReverseProxy),
+		passwords: make(map[string]string),
 	}
 }
 
-// Get looks up a proxy by its target key.
-func (pr *ProxyRegistry) get(key string) (*httputil.ReverseProxy, bool) {
+// Get looks up a proxy by its target username.
+func (pr *ProxyRegistry) get(username string) (*httputil.ReverseProxy, bool) {
 	pr.mu.RLock() // Allow multiple readers simultaneously.
 	defer pr.mu.RUnlock()
 	
-	proxy, exists := pr.proxies[key]
-	return proxy, exists
+	proxy, exists := pr.proxies[username]
+	password := pr.passwords[username]
+	return proxy, password, exists
 }
 
-// Set adds or updates a proxy in the global dictionary.
-func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
-	// Before we can create / update a new Proxy object, we need to call the Session Manager process on the host to get the password for the proxy to forward to rclone on the user desktop instance container.
-	// So, we do an API call (via a HTTP POST request) the session manager on the host. That will make sure there's a desktop instance (with rclone) running for the particular user, and will return the password
-	// to use to connect to it.
-	// To do: Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
+// Call the connectOrStartSession endpoint on the host's Session Manager to ensure that a "desktop" instance (which runs the rclone GUI server) is running for this user. That endpoint returns the user's generated password
+// which we can use for connections.
+// To do: Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
+func connectOrStartSession(username string) (string) {
 	// Define our form data to pass via POST to the sessionManager server, using url.Values...
 	sessionManagerData := url.Values{}
-	sessionManagerData.Set("username", key)
+	sessionManagerData.Set("username", username)
 	sessionManagerData.Set("image", "desktop")
 	// ...and encode that data into a string in "bar=baz&foo=qux" format.
 	sessionManagerEncodedData := sessionManagerData.Encode()
@@ -90,8 +92,11 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	// ...and access the data by key (requires type assertion).
 	password := responseData["password"].(string)
 
+	return password
+}
 
-	
+// Adds or updates a proxy in the global dictionary.
+func (pr *ProxyRegistry) set(username string, password string, targetURLStr string) error {
 	// Now we have the password to use when we create the new Proxy object. First we have to create a URL...
 	proxyTargetURL, err := url.Parse(targetURLStr)
 	if err != nil {
@@ -99,10 +104,6 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	}
 	// ...then we can create a new reverse proxy instance to that URL.
 	rcloneProxy := httputil.NewSingleHostReverseProxy(proxyTargetURL)
-
-	// Calculate the login token (Base64 of username:password) to pass in to rclone to avoid the user having to login again.
-	//rcloneToken := base64.StdEncoding.EncodeToString([]byte(key + ":" + password))
-	//https://users.knightsbridgeschool.com/rclone/?login_token=rcloneToken
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := rcloneProxy.Director
@@ -111,7 +112,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		
 		// rclone can use basic authentication, so here we can inject the username and password required by rclone
 		// so access is seemless for our (already authenticated) users.
-		req.SetBasicAuth(key, password)
+		req.SetBasicAuth(username, password)
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
 		req.Host = proxyTargetURL.Host
@@ -120,7 +121,8 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	pr.mu.Lock() // Block readers and other writers.
 	defer pr.mu.Unlock()
 	
-	pr.proxies[key] = rcloneProxy
+	pr.proxies[username] = rcloneProxy
+	pr.passwords[username] = password
 	return nil
 }
 
@@ -144,14 +146,23 @@ func main() {
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 		
 		// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
-		proxy, exists := rcloneProxies.get(username)
+		proxy, password, exists := rcloneProxies.get(username)
 		if exists == false {
-			rcloneProxies.set(username, "http://desktop-" + username + ":8090")
-			proxy, exists = rcloneProxies.get(username)
+			// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
+			password = connectOrStartSession(username)
+
+			// Create a new proxy object to connect with.
+			rcloneProxies.set(username, password, "http://desktop-" + username + ":8090")
+			proxy, password, exists = rcloneProxies.get(username)
+
+			// Calculate the login token (Base64 of username:password) to pass in to rclone to avoid the user having to login again.
+			rcloneToken := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 		}
 		
 		// Rewrite the URL to remove the "/rclone" prefix.
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
+		
+		//https://users.knightsbridgeschool.com/rclone/?login_token=rcloneToken
 		
 		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
 		proxy.ServeHTTP(w, r)

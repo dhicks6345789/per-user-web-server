@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"encoding/json"
-	//"encoding/base64"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
@@ -103,28 +102,16 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 
 	// Calculate the login token (Base64 of username:password) to pass in to rclone to avoid the user having to login again.
 	//rcloneToken := base64.StdEncoding.EncodeToString([]byte(key + ":" + password))
+	//https://users.knightsbridgeschool.com/rclone/?login_token=rcloneToken
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := rcloneProxy.Director
 	rcloneProxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		
-		// rclone uses basic authentication, so here we can inject the username and password required by rclone
+		// rclone can use basic authentication, so here we can inject the username and password required by rclone
 		// so access is seemless for our (already authenticated) users.
 		req.SetBasicAuth(key, password)
-
-		//req.Header.Set(password, key)
-		//req.Header[password] = []string{key}
-		
-		// Modify the incoming query parameters...
-		//query := req.URL.Query()
-		// ...inject the login_token rclone expects...
-		//query.Set("login_token", rcloneToken)
-		// ...and encode the parameters back into the request URL.
-		//req.URL.RawQuery = query.Encode()
-		
-    	// Inject the standard HTTP Authorization header
-    	//req.Header.Set("Authorization", "Basic " + rcloneToken)
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
 		req.Host = proxyTargetURL.Host

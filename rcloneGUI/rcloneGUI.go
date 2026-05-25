@@ -154,9 +154,6 @@ func main() {
 			// Create a new proxy object to connect with.
 			rcloneProxies.set(username, password, "http://desktop-" + username + ":8090")
 			proxy, password, exists = rcloneProxies.get(username)
-
-			// Calculate the login token (Base64 of username:password) to pass in to rclone to avoid the user having to login.
-			rcloneToken := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 		}
 		
 		// Rewrite the URL to remove the "/rclone" prefix.
@@ -164,7 +161,7 @@ func main() {
 		
 		// Redirect the "/" URL to include the (Base64-ed "username:password") login token so the user is logged straight in rather than being shown the "login" screen.
 		if r.URL.Path == "/" {
-			http.Redirect(w, r, "/?login_token="+rcloneToken, http.StatusSeeOther)
+			http.Redirect(w, r, "/?login_token=" + base64.StdEncoding.EncodeToString([]byte(username + ":" + password)), http.StatusSeeOther)
 			return
 		}
 		

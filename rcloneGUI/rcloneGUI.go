@@ -114,7 +114,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		req.SetBasicAuth(key, password)
 
 		//req.Header.Set(password, key)
-		req.Header[password] = []string{key}
+		//req.Header[password] = []string{key}
 		
 		// Modify the incoming query parameters...
 		//query := req.URL.Query()
@@ -124,10 +124,10 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		//req.URL.RawQuery = query.Encode()
 		
     	// Inject the standard HTTP Authorization header
-    	req.Header.Set("Authorization", "Basic " + rcloneToken)
+    	//req.Header.Set("Authorization", "Basic " + rcloneToken)
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
-		req.Host = proxyTargetURL.Host		
+		req.Host = proxyTargetURL.Host
 	}
 	
 	pr.mu.Lock() // Block readers and other writers.

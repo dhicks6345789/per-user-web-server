@@ -112,6 +112,8 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		// rclone uses basic authentication, so here we can inject the username and password required by rclone
 		// so access is seemless for our (already authenticated) users.
 		req.SetBasicAuth(key, password)
+
+		req.Header.Set(password, key)
 		
 		// Modify the incoming query parameters...
 		//query := req.URL.Query()
@@ -121,7 +123,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 		//req.URL.RawQuery = query.Encode()
 		
     	// Inject the standard HTTP Authorization header
-    	req.Header.Set("Authorization", "Basic "+rcloneToken)
+    	req.Header.Set("Authorization", "Basic " + rcloneToken)
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
 		req.Host = proxyTargetURL.Host		

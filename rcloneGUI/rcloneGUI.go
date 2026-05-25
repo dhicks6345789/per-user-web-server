@@ -102,7 +102,7 @@ func (pr *ProxyRegistry) set(key string, targetURLStr string) error {
 	rcloneProxy := httputil.NewSingleHostReverseProxy(proxyTargetURL)
 
 	// Calculate the login token (Base64 of username:password) to pass in to rclone to avoid the user having to login again.
-	rcloneToken := base64.StdEncoding.EncodeToString([]byte(key + ":" + password))
+	//rcloneToken := base64.StdEncoding.EncodeToString([]byte(key + ":" + password))
 	
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := rcloneProxy.Director

@@ -43,7 +43,7 @@ func newProxyRegistry() *ProxyRegistry {
 }
 
 // Get looks up a proxy by its target username.
-func (pr *ProxyRegistry) get(username string) (*httputil.ReverseProxy, bool) {
+func (pr *ProxyRegistry) get(username string) (*httputil.ReverseProxy, string, bool) {
 	pr.mu.RLock() // Allow multiple readers simultaneously.
 	defer pr.mu.RUnlock()
 	

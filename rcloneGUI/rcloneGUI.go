@@ -162,7 +162,7 @@ func main() {
 		// Redirect the "/" URL to include the (Base64-ed "username:password") login token so the user is logged straight in rather than being shown the "login" screen.
 		if r.URL.Path == "/" {
 			log.Printf("Redirecting request: %s %s", r.Method, r.URL.Path)
-			http.Redirect(w, r, "/?login_token=" + base64.StdEncoding.EncodeToString([]byte(username + ":" + password)), http.StatusSeeOther)
+			http.Redirect(w, r, "/rclone/?login_token=" + base64.StdEncoding.EncodeToString([]byte(username + ":" + password)), http.StatusSeeOther)
 			return
 		}
 		

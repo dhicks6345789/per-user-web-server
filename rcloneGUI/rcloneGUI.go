@@ -72,7 +72,7 @@ func connectOrStartSession(username string) (string) {
 	sessionManagerRequest, err := http.NewRequest("POST", "http://host.docker.internal:8091/connectOrStartSession", strings.NewReader(sessionManagerEncodedData))
 	if err != nil {
 		log.Printf("Error creating request: %v\n", err)
-		return nil
+		return ""
 	}
 
 	// Set the correct Content-Type header.
@@ -82,7 +82,7 @@ func connectOrStartSession(username string) (string) {
 	sessionManagerResponse, err := sessionManagerClient.Do(sessionManagerRequest)
 	if err != nil {
 		log.Printf("Error sending request: %v\n", err)
-		return nil
+		return ""
 	}
 	defer sessionManagerResponse.Body.Close()
 	

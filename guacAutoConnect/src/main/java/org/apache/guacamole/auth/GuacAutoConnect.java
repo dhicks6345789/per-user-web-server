@@ -91,14 +91,18 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
       
         // Create a new configuration object to return to Guacamole. This will contain details for the one connection to the user's indidvidual remote desktop.
         GuacamoleConfiguration guacConfig = new GuacamoleConfiguration();
-    
+
         // Set protocol and connection parameters.
-        guacConfig.setProtocol("vnc");
-        guacConfig.setParameter("resize-method", "display-update");
+        guacConfig.setProtocol(connectionType);
         guacConfig.setParameter("hostname", imageName + "-" + username);
-        guacConfig.setParameter("port", "5901");
         guacConfig.setParameter("username", username);
         guacConfig.setParameter("password", VNCPassword);
+        if (connectionType = "vnc") {
+          guacConfig.setParameter("resize-method", "display-update");
+          guacConfig.setParameter("port", "5901");
+        } else {
+          guacConfig.setParameter("port", "22");
+        }
         guacConfigs.put(imageName + ": " + username, guacConfig);
       }
     } catch (java.io.IOException | java.lang.InterruptedException e) {

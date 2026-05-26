@@ -9,6 +9,9 @@ RUN apt-get install -y xfce4 xfce4-goodies tigervnc-standalone-server tigervnc-c
 # Expose VNC port for VNC display ":1".
 EXPOSE 5901
 
+# Add an SSH server and expose the standard SSH port (22).
+RUN apt-get install -y openssh-server
+EXPOSE 22
 
 # Install the "locales" package and set up the environment to use UK UTF-8 encoding.
 RUN apt-get install -y locales

@@ -137,7 +137,7 @@ for RUN_ITEM in "${RUN_LIST[@]}"; do
         "calc")
             RUN_CALC=true
             ;;
-        "desktop")
+        "exams")
             RUN_EXAMS=true
             ;;
         "caddy")

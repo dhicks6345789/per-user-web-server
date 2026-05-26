@@ -62,6 +62,12 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     // Figure out the endpoint this authentication provider is sitting at, which will tell us the name of the Docker image to load.
     HttpServletRequest request = credentials.getRequest();
     String imageName = request.getRequestURI().split("/")[1].toLowerCase();
+
+    String connectionType = "vnc";
+    if (imageName == "ssh") {
+      imageName = "desktop";
+      connectionType = "ssh";
+    }
     
     // Output a log message. We simply write to STDOUT, where the output can be displayed by Docker.
     logger.info("User " + username + " connected to Guacamole at \"/" + imageName + "\" - contacting Session Manager for session details.");

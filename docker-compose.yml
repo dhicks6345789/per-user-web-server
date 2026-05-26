@@ -78,7 +78,13 @@ services:
     volumes:
       # /etc/guacamole is where the custom Java extension needs to be placed.
       - /etc/guacamole:/etc/guacamole
+  
+  {{docker-compose-ssh.yml}}
+  
+  {{docker-compose-calc.yml}}
 
+  {{docker-compose-exams.yml}}
+  
   # The rclone GUI interface, served at the "/rclone" endpoint. Our own custom router application routes requests to "/rclone" to the rclone GUI instance running on the appropriate user's desktop container.
   rclone:
     image: {{DOCKERRCLONEGUI_DOCKER_IMAGE}}
@@ -91,10 +97,6 @@ services:
       - main
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-  {{docker-compose-calc.yml}}
-
-  {{docker-compose-exams.yml}}
   
   # Our own custom Go web server. This basic server serves user websites directly from the "www" folder of their home folder. Although basic, it does include support for CGI.
   # This web server sits behind the Pangolin proxy, so only authenticated users can see other users' websites - handy for a private-ish community setup (a school or business).

@@ -228,10 +228,20 @@ func main() {
 				fmt.Println("umountOutput: " + mkdirOutput)
 			}
 			rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/" + username + "/Documents")
-			// Pause to make sure(ish) the mount operation is complete. Could maybe replace with a check to "df -h" to loop until the path is mounted.
-			time.Sleep(2 * time.Second)
 			if rcloneMountOutput != "" {
 				fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
+			}
+
+			homeFolderMounted = false
+			for homeFolderMounted == false {
+				// Run "df -h" to see if the user's home folder is mounted okay.
+				for lineIndex, line := range strings.Split(runShellCommand("df", "-h")) {
+					if strings.Contains(line, "/home/" + username + "/Documents") {
+						homeFolderMounted = true
+					}
+				}
+				// Pause to make sure(ish) the mount operation is complete.
+				time.Sleep(1 * time.Second)
 			}
 			
 			/*
@@ -353,9 +363,6 @@ func main() {
 				http.Error(httpResponse, "Error getting reader from container, " + logScannerErr.Error(), http.StatusInternalServerError)
 				return
 			}
-
-			// Sleep for a final 2 seconds, to allow the rclone connection to be ready.
-			time.Sleep(2 * time.Second)
 		}
 
 		// If we've got to this point, we should have a running container with a VNC session started up on a known port and with a known password.

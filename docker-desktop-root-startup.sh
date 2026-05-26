@@ -52,6 +52,11 @@ chmod u+x /home/$1/.config/tigervnc/xstartup
 
 
 
+# Start the SSH service.
+service ssh start
+
+
+
 # Set up and run the user startup script, as the user.
 cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
 chown $1:$1 /home/$1/startup.sh

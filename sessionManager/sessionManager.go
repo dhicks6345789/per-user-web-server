@@ -235,7 +235,7 @@ func main() {
 			homeFolderMounted := false
 			for homeFolderMounted == false {
 				// Run "df -h" to see if the user's home folder is mounted okay.
-				for _, line := range strings.Split(runShellCommand("df", "-h")) {
+				for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
 					if strings.Contains(line, "/home/" + username + "/Documents") {
 						homeFolderMounted = true
 					}

@@ -131,6 +131,7 @@ done
 RUN_CALC=false
 RUN_EXAMS=false
 RUN_CADDY=false
+RUN_SSH=false
 for RUN_ITEM in "${RUN_LIST[@]}"; do
     case "$RUN_ITEM" in
         "calc")
@@ -142,10 +143,14 @@ for RUN_ITEM in "${RUN_LIST[@]}"; do
         "caddy")
             RUN_CADDY=true
             ;;
+        "ssh")
+            RUN_SSH=true
+            ;;
         "all")
             RUN_CALC=true
             RUN_EXAMS=true
             RUN_CADDY=true
+            RUN_SSH=true
             ;;
     esac
 done
@@ -467,6 +472,12 @@ if [ $INSTALL_PANGOLIN = true ]; then
         sed -i -e '/{{docker-compose-caddy.yml}}/r per-user-web-server/docker-compose-caddy.yml' -e '//d' docker-compose.yml
     else
         sed -i "s/{{docker-compose-caddy.yml}}//g" docker-compose.yml
+    fi
+
+    if [ $RUN_SSH = true ]; then
+        sed -i -e '/{{docker-compose-ssh.yml}}/r per-user-web-server/docker-compose-ssh.yml' -e '//d' docker-compose.yml
+    else
+        sed -i "s/{{docker-compose-ssh.yml}}//g" docker-compose.yml
     fi
     
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-compose.yml

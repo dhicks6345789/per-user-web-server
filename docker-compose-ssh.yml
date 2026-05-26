@@ -1,5 +1,5 @@
 # Guacamole Client - The Guacamole web interface for the "ssh" connection. Note that this is the same image as the "desktop" connection, just a different connection method.
-  exams:
+  ssh:
     image: guacamole/guacamole:latest
     container_name: ssh
     restart: unless-stopped

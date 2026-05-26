@@ -232,7 +232,7 @@ func main() {
 				fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
 			}
 
-			homeFolderMounted = false
+			homeFolderMounted := false
 			for homeFolderMounted == false {
 				// Run "df -h" to see if the user's home folder is mounted okay.
 				for lineIndex, line := range strings.Split(runShellCommand("df", "-h")) {

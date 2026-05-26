@@ -353,6 +353,9 @@ func main() {
 				http.Error(httpResponse, "Error getting reader from container, " + logScannerErr.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			// Sleep for a final 2 seconds, to allow the rclone connection to be ready.
+			time.Sleep(2 * time.Second)
 		}
 
 		// If we've got to this point, we should have a running container with a VNC session started up on a known port and with a known password.

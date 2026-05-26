@@ -235,11 +235,12 @@ func main() {
 			homeFolderMounted := false
 			for homeFolderMounted == false {
 				// Run "df -h" to see if the user's home folder is mounted okay.
-				for lineIndex, line := range strings.Split(runShellCommand("df", "-h")) {
+				for _, line := range strings.Split(runShellCommand("df", "-h")) {
 					if strings.Contains(line, "/home/" + username + "/Documents") {
 						homeFolderMounted = true
 					}
 				}
+				fmt.Println("Waiting for rclone mount to complete...")
 				// Pause to make sure(ish) the mount operation is complete.
 				time.Sleep(1 * time.Second)
 			}

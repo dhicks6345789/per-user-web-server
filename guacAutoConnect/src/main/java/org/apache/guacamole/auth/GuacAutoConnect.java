@@ -64,7 +64,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     String imageName = request.getRequestURI().split("/")[1].toLowerCase();
 
     String connectionType = "vnc";
-    if (imageName == "ssh") {
+    if (imageName.equals("ssh")) {
       logger.info("SSH connection requested.");
       imageName = "desktop";
       connectionType = "ssh";

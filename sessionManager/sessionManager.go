@@ -286,25 +286,6 @@ func main() {
 					// Set up mount points in the container. Confusingly, these mount points, in /home/username, will be created before the actual user inside the container.
 					// Therefore, there is a startup script (that runs as root) inside the container that sets up the named user, matching UIDs with the host.
 					Mounts: []mount.Mount{
-						/*
-						// Use the rclone Docker plugin to mount the user's Google Drive home folder as their "Documents" folder in their new desktop container.
-						// Note, February 2026: on a reboot of the host server, the rclone plugin seems to fail to start, stopping operation of the remote desktop container.
-						// My guess is that this is something to do with cached state data for the plugin. Disabled for now as I don't understand what the problem is.
-						mount.Mount{
-							Type: mount.TypeVolume,
-							Target: "/home/" + username + "/Documents",
-							VolumeOptions: &mount.VolumeOptions{
-								DriverConfig: &mount.Driver{
-									Name: "rclone",
-									Options: map[string]string{
-										"remote": "gdrive:",
-										"allow_other": "true",
-										"vfs-cache-mode": "full",
-										"drive-impersonate": username + "@knightsbridgeschool.com",
-									},
-								},
-							},
-						},*/
 						// We mount the host's user's home folder into the container. We have to match up the UIDs for the host and containers, hence us having to pass in the
 						// host user's UID to the container's startup script.
 						mount.Mount{
@@ -314,11 +295,18 @@ func main() {
 							ReadOnly: false,
 						},
 						// We mount the host www folder into the container. This is separate from the user's main home folder, we have a (custom) web server in a separate container
-						// that 
+						// that serves user websites. This means a user doesn't have to have an active desktop session running for their website files to be served.
 						mount.Mount{
 							Type: mount.TypeBind,
 							Source: "/var/www/" + username,
 							Target: "/home/" + username + "/www",
+							ReadOnly: false,
+						},
+						// We mount the host /etc/webconsole/tasks folder into the container. This lets the user create and edit Web Console Tasks.
+						mount.Mount{
+							Type: mount.TypeBind,
+							Source: "/etc/webconsole/tasks",
+							Target: "/home/" + username + "/webconsole",
 							ReadOnly: false,
 						},
 					},

@@ -5,14 +5,14 @@
     restart: unless-stopped
     expose:
       - "80"
-    #ports:
-      #- "80:80"
-      #- "443:443"
-      #- "443:443/udp" # Required for HTTP/3
     volumes:
       - /opt/caddy:/etc/caddy
-      - /home/d.b.hicks/www:/srv
       - /opt/caddy/data:/data
       - /opt/caddy/config:/config
+      # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      # The individual users' web folders.
+      - /var/www:/var/www
     networks:
       - main

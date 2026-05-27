@@ -101,7 +101,7 @@ services:
   # Our own Web Console server.
   webconsole:
     image: {{DOCKERWEBCONSOLE_DOCKER_IMAGE}}
-    command: /usr/local/bin/webconsole
+    command: /usr/local/bin/webconsole --localOnly false --port 8080
     container_name: webconsole
     restart: unless-stopped
     networks:

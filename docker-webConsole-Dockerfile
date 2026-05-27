@@ -1,4 +1,3 @@
 FROM {{DOCKERROOT_DOCKER_IMAGE}}
-#COPY per-user-web-server/www/wwwServer /usr/local/bin/wwwServer
-#COPY webconsole
-EXPOSE 8080
+COPY web-console/webconsole /usr/local/bin/webconsole
+EXPOSE 8090

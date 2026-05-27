@@ -101,18 +101,14 @@ services:
   # Our own Web Console server.
   webconsole:
     image: {{DOCKERWEBCONSOLE_DOCKER_IMAGE}}
-    #command: /usr/local/bin/webconsole --localOnly false --port 8080
-    command: tail -f /dev/null
+    command: /usr/local/bin/webconsole --start --localOnly false --port 8080
     container_name: webconsole
     restart: unless-stopped
     networks:
       - main
-    #volumes:
-      # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
-      #- /etc/passwd:/etc/passwd:ro
-      #- /etc/group:/etc/group:ro
-      # The individual users' web folders.
-      #- /var/www:/var/www
+    volumes:
+      # Mount Web Console's working folder to hold Tasks.
+      - /etc/webconsole:/etc/webconsole
   
   # Our own custom Go web server. This basic server serves user websites directly from the "www" folder of their home folder. Although basic, it does include support for CGI.
   # This web server sits behind the Pangolin proxy, so only authenticated users can see other users' websites - handy for a private-ish community setup (a school or business).

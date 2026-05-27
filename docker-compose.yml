@@ -106,7 +106,7 @@ services:
     restart: unless-stopped
     networks:
       - main
-    volumes:
+    #volumes:
       # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
       #- /etc/passwd:/etc/passwd:ro
       #- /etc/group:/etc/group:ro

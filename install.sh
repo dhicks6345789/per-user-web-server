@@ -236,7 +236,7 @@ if [ $debianversion = "trixie" ]; then
     apt --fix-broken install -y
 fi
 
-# Make sure Go (programming language, used by Web Console) is installed.
+# Make sure Go (programming language, used by several components) is installed.
 if [ ! -f "/usr/bin/go" ]; then
     if [ $debianversion = "bookworm" ]; then
         cp per-user-web-server/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources

@@ -490,6 +490,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERDESKTOP_DOCKER_IMAGE}}/$DOCKERDESKTOP_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWINE_DOCKER_IMAGE}}/$DOCKERWINE_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERCALC_DOCKER_IMAGE}}/$DOCKERCALC_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERWEBCONSOLE_DOCKER_IMAGE}}/$DOCKERWEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERRCLONEGUI_DOCKER_IMAGE}}/$DOCKERRCLONEGUI_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml

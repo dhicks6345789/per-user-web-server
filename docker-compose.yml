@@ -107,6 +107,9 @@ services:
     networks:
       - main
     volumes:
+      # We share the list of users and groups (read only) with the web server container so that Task execute permissions can work properly.
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
       # Mount Web Console's working folder to hold Tasks.
       - /etc/webconsole:/etc/webconsole
   
@@ -121,7 +124,7 @@ services:
     networks:
       - main
     volumes:
-      # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.
+      # We share the list of users and groups (read only) with the web server container so that CGI execute permissions can work properly.
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
       # The individual users' web folders.

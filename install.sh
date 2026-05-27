@@ -10,6 +10,7 @@ RCLONE_TYPE=user
 DOCKERROOT_DOCKER_IMAGE="sansay.co.uk-dockerroot:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
+DOCKERWEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-dockerwebconsole:0.1-beta.3"
 DOCKERRCLONEGUI_DOCKER_IMAGE="sansay.co.uk-dockerrclonegui:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
@@ -433,6 +434,11 @@ if [ $INSTALL_PANGOLIN = true ]; then
     cp per-user-web-server/docker-wwwServer-Dockerfile .
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
     docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1
+
+    echo "Building our Docker image for Web Console."
+    cp per-user-web-server/docker-webConsole-Dockerfile .
+    sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-webConsole-Dockerfile
+    docker build -f docker-webConsole-Dockerfile --progress=plain --tag=$DOCKERWEBCONSOLE_DOCKER_IMAGE . 2>&1
 
     echo "Building our Docker image for the custom rclone GUI router."
     cp per-user-web-server/docker-rcloneGUI-Dockerfile .

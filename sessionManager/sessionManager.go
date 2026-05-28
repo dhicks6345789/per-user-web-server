@@ -206,8 +206,8 @@ func main() {
 			// First, make sure those folders exist, and that they are owned by the matching user and have
 			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folders.
 			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0700)
-			if userWWWDirErr != nil {
-				http.Error(httpResponse, "Error creating directory: " + userWWWDirErr.Error(), http.StatusInternalServerError)
+			if userDirErr != nil {
+				http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			userChownErr := os.Chown("/var/www/" + username, userUID, userGID)
@@ -215,12 +215,12 @@ func main() {
 				http.Error(httpResponse, "Error assigning directory /var/www" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return
 			}
-			userTasksDirErr := os.MkdirAll("/etc/webconsole/tasks/" + username, 0700)
+			userDirErr = os.MkdirAll("/etc/webconsole/tasks/" + username, 0700)
 			if userTasksDirErr != nil {
-				http.Error(httpResponse, "Error creating directory: " + userTasksDirErr.Error(), http.StatusInternalServerError)
+				http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
 				return
 			}
-			userChownErr := os.Chown("/etc/webconsole/tasks/" + username, userUID, userGID)
+			userChownErr = os.Chown("/etc/webconsole/tasks/" + username, userUID, userGID)
 			if userChownErr != nil {
 				http.Error(httpResponse, "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return

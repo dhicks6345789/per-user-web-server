@@ -216,7 +216,7 @@ func main() {
 				return
 			}
 			userDirErr = os.MkdirAll("/etc/webconsole/tasks/" + username, 0700)
-			if userTasksDirErr != nil {
+			if userDirErr != nil {
 				http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
 				return
 			}

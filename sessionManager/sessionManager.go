@@ -205,7 +205,7 @@ func main() {
 			// We're about to create a container that mounts the user's /var/www/username and /etc/webconsole/tasks/username folders.
 			// First, make sure those folders exist, and that they are owned by the matching user and have
 			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folders.
-			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0700)
+			userDirErr := os.MkdirAll("/var/www/" + username, 0700)
 			if userDirErr != nil {
 				http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
 				return

@@ -263,6 +263,9 @@ cd web-console
 git pull
 bash build.sh -install
 cd ..
+if [ ! -f "web-console/webconsole" ]; then
+    exit 1
+fi
 
 echo Copying over Webconsole config and Tasks...
 cp per-user-web-server/webconsole-config.csv /etc/webconsole/config.csv
@@ -374,17 +377,6 @@ if [ $INSTALL_PANGOLIN = true ]; then
 
     # First, stop any currently-running Docker containers.
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
-
-
-
-    # Install the rclone Docker plugin.
-    # docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
-
-    # Stop the standard Webconsole service from running - we want to use the version running inside Docker.
-    #systemctl stop webconsole
-    #systemctl disable webconsole
-
-
     
     if [ $BUILD_ROOT = true ]; then
         echo "Building the root Docker image - this might take a few minutes..."

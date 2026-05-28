@@ -202,9 +202,9 @@ func main() {
 				return
 			}
 			
-			// We're about to create a container that mounts the user's /var/www/username folder.
-			// First, make sure that folder exists, and that it is owned by the matching user and has
-			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folder via CGI scripts.
+			// We're about to create a container that mounts the user's /var/www/username and /etc/webconsole/tasks/username folders.
+			// First, make sure those folders exist, and that they are owned by the matching user and have
+			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folders.
 			userWWWDirErr := os.MkdirAll("/var/www/" + username, 0700)
 			if userWWWDirErr != nil {
 				http.Error(httpResponse, "Error creating directory: " + userWWWDirErr.Error(), http.StatusInternalServerError)
@@ -213,6 +213,16 @@ func main() {
 			userChownErr := os.Chown("/var/www/" + username, userUID, userGID)
 			if userChownErr != nil {
 				http.Error(httpResponse, "Error assigning directory /var/www" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			userTasksDirErr := os.MkdirAll("/etc/webconsole/tasks/" + username, 0700)
+			if userTasksDirErr != nil {
+				http.Error(httpResponse, "Error creating directory: " + userTasksDirErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			userChownErr := os.Chown("/etc/webconsole/tasks/" + username, userUID, userGID)
+			if userChownErr != nil {
+				http.Error(httpResponse, "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			
@@ -305,7 +315,7 @@ func main() {
 						// We mount the host /etc/webconsole/tasks folder into the container. This lets the user create and edit Web Console Tasks.
 						mount.Mount{
 							Type: mount.TypeBind,
-							Source: "/etc/webconsole/tasks",
+							Source: "/etc/webconsole/tasks/" + username,
 							Target: "/home/" + username + "/webconsole",
 							ReadOnly: false,
 						},

@@ -250,7 +250,7 @@ func main() {
 						homeFolderMounted = true
 					}
 				}
-				fmt.Println("Waiting for rclone mount to complete...")
+				fmt.Println("Waiting for rclone mount Documents to complete...")
 				// Pause to make sure(ish) the mount operation is complete.
 				time.Sleep(1 * time.Second)
 			}
@@ -260,25 +260,37 @@ func main() {
 			checkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "ls", "gdrive:Classroom")
 			if checkdirOutput != "" {
 				if !strings.contains(checkdirOutput, "Failed to ls") {
-					// Mount (using rclone) /home/username/Documents to the user's Google Drive.
-					umountOutput := runShellCommand("umount", "/home/" + username + "/Documents")
+					// Make sure the user has a "Classroom" folder in their home folder.
+					userDirErr := os.MkdirAll("/home/" + username + "/Classroom", 0700)
+					if userDirErr != nil {
+						http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
+						return
+					}
+					userChownErr := os.Chown("/home/" + username + "/Classroom", userUID, userGID)
+					if userChownErr != nil {
+						http.Error(httpResponse, "Error assigning directory /home/" + username + "/Classroom to user: " + userChownErr.Error(), http.StatusInternalServerError)
+						return
+					}
+					
+					// Mount (using rclone) /home/username/Classroom to the user's Google Drive.
+					umountOutput := runShellCommand("umount", "/home/" + username + "/Classroom")
 					if umountOutput != "" {
 						fmt.Println("umountOutput: " + mkdirOutput)
 					}
-					rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/" + username + "/Documents")
+					rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Classroom", "/home/" + username + "/Classroom")
 					if rcloneMountOutput != "" {
 						fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
 					}
 		
-					homeFolderMounted := false
-					for homeFolderMounted == false {
-						// Run "df -h" to see if the user's home folder is mounted okay.
+					classroomFolderMounted := false
+					for classroomFolderMounted == false {
+						// Run "df -h" to see if the user's Classroom folder is mounted okay.
 						for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
-							if strings.Contains(line, "/home/" + username + "/Documents") {
-								homeFolderMounted = true
+							if strings.Contains(line, "/home/" + username + "/Classroom") {
+								classroomFolderMounted = true
 							}
 						}
-						fmt.Println("Waiting for rclone mount to complete...")
+						fmt.Println("Waiting for rclone mount Classroom to complete...")
 						// Pause to make sure(ish) the mount operation is complete.
 						time.Sleep(1 * time.Second)
 					}

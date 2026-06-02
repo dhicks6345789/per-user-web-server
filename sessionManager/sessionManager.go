@@ -255,6 +255,36 @@ func main() {
 				time.Sleep(1 * time.Second)
 			}
 			
+			// Check if the user has a "Classroom" folder in their Google Drive root, if so mount it as the user's "Classroom" folder inside their desktop environment so they
+			// have access to resources shared from Google Classrooms.
+			checkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "ls", "gdrive:Classroom")
+			if checkdirOutput != "" {
+				if !strings.contains(checkdirOutput, "Failed to ls") {
+					// Mount (using rclone) /home/username/Documents to the user's Google Drive.
+					umountOutput := runShellCommand("umount", "/home/" + username + "/Documents")
+					if umountOutput != "" {
+						fmt.Println("umountOutput: " + mkdirOutput)
+					}
+					rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/" + username + "/Documents")
+					if rcloneMountOutput != "" {
+						fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
+					}
+		
+					homeFolderMounted := false
+					for homeFolderMounted == false {
+						// Run "df -h" to see if the user's home folder is mounted okay.
+						for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
+							if strings.Contains(line, "/home/" + username + "/Documents") {
+								homeFolderMounted = true
+							}
+						}
+						fmt.Println("Waiting for rclone mount to complete...")
+						// Pause to make sure(ish) the mount operation is complete.
+						time.Sleep(1 * time.Second)
+					}
+				}
+			}
+			
 			/*
 			// Two variables used below in the VNC-for-debugging purposes.
 			hostPort, _ := network.ParsePort("5901/tcp")

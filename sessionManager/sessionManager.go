@@ -259,7 +259,7 @@ func main() {
 			// have access to resources shared from Google Classrooms.
 			checkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "ls", "gdrive:Classroom")
 			if checkdirOutput != "" {
-				if !strings.contains(checkdirOutput, "Failed to ls") {
+				if !strings.Contains(checkdirOutput, "Failed to ls") {
 					// Make sure the user has a "Classroom" folder in their home folder.
 					userDirErr := os.MkdirAll("/home/" + username + "/Classroom", 0700)
 					if userDirErr != nil {

@@ -255,6 +255,7 @@ func main() {
 				time.Sleep(1 * time.Second)
 			}
 			
+			/*
 			// Check if the user has a "Classroom" folder in their Google Drive root, if so mount it as the user's "Classroom" folder inside their desktop environment so they
 			// have access to resources shared from Google Classrooms.
 			checkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "ls", "gdrive:Classroom")
@@ -296,6 +297,7 @@ func main() {
 					}
 				}
 			}
+			*/
 			
 			/*
 			// Two variables used below in the VNC-for-debugging purposes.

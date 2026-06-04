@@ -37,6 +37,12 @@ func main() {
 			fullPath = "/var/www/index.html"
 		}
 
+		// We want to exlude some special files from being served so the user can place them in their "www" folder but not have to worrry about hiding them.
+		if strings.HasSuffix(requestPath, "rclone.conf") {
+			http.Error(w, "Forbidden: You do not have permission to access this resource", http.StatusForbidden)
+			return
+		}
+
 		// Check if the requested path exists on the file system - it might be a file or a folder.
 		requestStatInfo, requestStatErr := os.Stat(fullPath)
 		if os.IsNotExist(requestStatErr) {

@@ -7,41 +7,34 @@ If you are installing this project it's assumed you are probably a system admini
 
 This project was created to set up a work environment suitible for beginner software developers and people wanting to do some software development but who aren't employed as full-time developers. It aims to provide a broad, if basic, set of tools (several different programming languages, libraries, IDEs and various utilities). Created with senior school pupils in mind (13 years or so and onwards, working on exams), it should also be suitible for users in a small business or a team in a larger company who want an environment that lets them learn and experiment with an environment that already has most of their required tools installed and provides some shortcuts and guardrails to help them along. This probably isn't the environment to create a public, widely-used application from, but it should make a good place to host in-house applications written for your school, company or team.
 
-### Hardware
-As of writing (June 2026), a suitible hosted virtual machine from a public provider is available for under $5 a month, possibly even for free. The system should install and run on a basic VM with 2GB of RAM and 80GB of disk space, you will need to scale up processor / RAM / disk space depending on usage.
+### User Directory
+Designed with education / corporate usage in mind, ths project is based around the [Pangolin](https://pangolin.net/) project, which provides identity management and request routing. Pangolin can utilise your existing identity provider (often Google (Workspace) or Microsoft (Office 365) for a school or corporation), with no need to have a separatly maintained set of users or passwords. Other user identity options are available, including ones managed directly by Pangolin for stand-alone systems that don't require a 3rd party identity provider.
 
+### Hardware / Virtual Machine Resources
+You should probably run this script on a pysical server or virtual machine (VM) dedicated to running this service, something that is backed up / able to be restored to a known-working checkpoint. Running the installation on an existing machine with other services installed might give unpredictable results, although if you know what you're doing it is just a (hopefully well-commented) Bash script and you can check through it to see exactly what is being done and how that might intefere with your current setup.
 
+The hardware / VM used for this server can be quite small, at least initially. A suggested reasonable minimum might be 4 GB of RAM and 80 GB of storage - as of writing (June 2026), a suitible hosted virtual machine from a public provider is available for around £5 a month.
 
+if you're using a hosting provider like AWS then their smallest available VM might be okay - for something like AWS, you might be able to manage with the resources available in the free pricing tier. Exactly how much RAM / CPU / storage you are going to need will depend on how many users you have and how much they'll be using the server, but you can probably set up a minimal test server initially and test it as a single user, then add more RAM / CPU / storage to it later.
 
-
-
-
-#### Linux Distribution
-This project has been tested on a Debian 13 "Trixie" server (August 2025) running on (virtual) AMD64 hardware. Other versions of Debian (the previous version 12, "Bookworm", in particular) will probably work okay, as would similar versions of Ubuntu. Other Linux distributions shouldn't be that difficult to adjust for if needed, as should the ARM version of Debian (for the Raspberry Pi and similar hardware - both WebConsole and Pangolin have binaries available for ARM hardware). Adjusting this project directly for a Windows (or MacOS) install might not be possible as Pangolin seems to be a Linux-only project, but using a different tunneling / authentication provider such as [Cloudflare Zero-Trust Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) should work.
+### Operating System
+This project has been tested on a Debian 13 "Trixie" server (August 2025) running on (virtual) AMD64 hardware. Other versions of Debian (the previous version 12, "Bookworm", in particular) will probably work okay, as would similar versions of Ubuntu. Other Linux distributions shouldn't be that difficult to adjust for if needed, as should the ARM version of Debian (for the Raspberry Pi and similar hardware). Adjusting this project directly for a Windows (or MacOS) install might not be possible as Pangolin seems to be a Linux-only project, but using a different tunneling / authentication provider such as [Cloudflare Zero-Trust Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) should work.
 
 The custom authentication / connection plugin written as part of this project for Guacamole simply returns details of a VNC remote desktop connection, so additional remote desktop connections (VNC, RDP or SSH) to other devices in your organisation should be possible to add if wanted. This could include things like RDP connections to a Windows Remote Desktop Services session, or an RDP connection to an individual Windows desktop machine. You could also add VNC connections to indiviual Raspberry Pi (or similar) devices, so for instance an educational institution could assign a Raspberry Pi per pupil and have them connect (using their standard school login) via web-based remote desktop, as a handy way to handle the logistics of getting a whole class logged in to devices, and also to allow for home access.
 
-#### VM Resources
-You should probably run this script on a virtual machine (VM) dedicated to running this service, something that is backed up / able to be restored to a known-working checkpoint. Running this script on an existing machine with other services installed might give unpredictable results, although if you know what you're doing it is just a (hopefully well-commented) Bash script and you can check through it to see exactly what is being done and how that might intefere with your current setup.
-
-The VM used for this server can probably be quite small, at least initially. A suggested reasonable minimum might be 4 GB of RAM and 40 GB of storage, if you're using a hosting provider like AWS then their smallest available VM might be okay - for something like AWS, you might be able to manage with the resources available in the free pricing tier. Exactly how much RAM / CPU / storage you are going to need will depend on how many users you have and how much they'll be using the server, but you can probably set up a minimal test server initially and test it as a single user, then add more RAM / CPU / storage to it later.
-
-#### Domain / DNS
+### Domain / DNS
 You will need the ability to set up [sub-domains](https://en.wikipedia.org/wiki/Subdomain) to point it at your server. Generally, this means having access to the DNS configuration for your domain name. You will want two sub-domains - one for the Pangolin server, handling authentication, (e.g. pangolin.example.com) and one for the user environment server (e.g. users.example.com).
 
-You can set the project's own internal web server up as your domain's default web server, i.e. at "www.example.com". This project uses its own simple Go-based webserver to serve files and CGI scripts to internal users. There is also an instance of the [Caddy](https://caddyserver.com/) web server that is more suitible to production websites.
+You can set the project's own internal web server up as your domain's default web server, i.e. at "www.example.com". This project uses its own simple Go-based webserver to serve files and CGI scripts to internal users. There is also an instance of the [Caddy](https://caddyserver.com/) web server that is more suitible for production websites.
 
-#### Tunneling
+### Tunneling
 The Pangolin server handles authentication and routing of reqeusts to the correct handler. It can also handle tunneling connections, so the Pangolin server can be on a publically-accesible server whilest the web server can be behind a firewall. Alternativly, you can used your preffered tunneling solution (e.g. Cloudflare Tunnels) to make netwok services available, with Pangolin being used just for authentication and routing.
 
-### Users
-You will need some way of getting a list of users in CSV format onto the server. That can be a one-off operation, manually edited to add / remove users, but some way of getting a list of users from your system updated at least daily would probably be best. If you are in a school, this list will probably be from your school's Management Information System (MIS) or from Google Workspace / Microsoft 365. Some example scripts are included to help with that process.
-
-### Components Installed
+## Components Installed
 This project is mostly just an installation script, along with some template config files and some helper scripts, it pulls in and sets up resources from a number of other projects. Starting with a basic Debian install, you should (hopefully) end up with:
 - A [Docker](https://www.docker.com) installation. Pangolin, in particular, is designed to work as a number of components inside separate Docker containers, so the rest of the services tend to follow.
 - A [Pangolin](https://github.com/fosrl/pangolin) server. This handles secure HTTPS connections to the server and provides authentication services for your users. By default, your users (and only your users) will have read access to any of the sites hosted by this server - each user can only change their own site, they can view everyone else's, but the general public cannot see any of the sites. This is intended to be ideal for schools and similar places to give pupils a mechanism to have their own website but keep control of how the content they produce is accessed. You can, of course, modify the default configuration after installation to make certain sites public, if you wish, or further limit access.
-- A web server. It proved to be simpler to simply write a basic web server in Go to fit the structure of the project rather than try and use an existing web server. Go has a very capable built-in web server library, so rather than writing a web server "from scratch" this is more like adding a bit of project-specific logic to an already existing product. This web server serves basic HTML / Javascript / CSS / etc files. It can also serve CGI scripts, so if wanted you users can build applications using CGI.
+- A web server, serving basic static HTML / Javascript / CSS / etc files. It can also serve CGI scripts, so if wanted you users can build applications using CGI.
 - A custom proxy server for proxying endpoints to per-user instances:
   - The GUI interface for rclone
   - WebConsole?

@@ -1,7 +1,20 @@
 # Installation
 
 ## Prerequisites
-If you're using this project it's assumed you are probably a system administrator of some sort (maybe working for a school or other learning establishment, or maybe a small-scale hosting provider) wanting to set up a web server / development environment for your users. This project is not something you'll want to run on your desktop machine, you'll be wanting at least a basic, publicly-accessible server, either hosted on your own hardware or by a cloud hosting provider of some sort. As of writing (February 2026), a suitible hosted virtual machine from a public provider is available for under $5 a month, possibly even for free.
+
+### Typical Usage / Working Environment
+If you are installing this project it's assumed you are probably a system administrator of some sort, dealing with setting up devices and services for other users. This project is not something you'll want to run on a desktop machine, you'll be wanting at least a basic, publicly-accessible server, either hosted on your own hardware or by a cloud hosting provider of some sort.
+
+This project was created to set up a work environment suitible for beginner software developers and people wanting to do some software development but who aren't employed as full-time developers. It aims to provide a broad, if basic, set of tools (several different programming languages, libraries, IDEs and various utilities). Created with senior school pupils in mind (13 years or so and onwards, working on exams), it should also be suitible for users in a small business or a team in a larger company who want an environment that lets them learn and experiment with an environment that already has most of their required tools installed and provides some shortcuts and guardrails to help them along. This probably isn't the environment to create a public, widely-used application from, but it should make a good place to host in-house applications written for your school, company or team.
+
+### Hardware
+As of writing (June 2026), a suitible hosted virtual machine from a public provider is available for under $5 a month, possibly even for free. The system should install and run on a basic VM with 2GB of RAM and 80GB of disk space, you will need to scale up processor / RAM / disk space depending on usage.
+
+
+
+
+
+
 
 #### Linux Distribution
 This project has been tested on a Debian 13 "Trixie" server (August 2025) running on (virtual) AMD64 hardware. Other versions of Debian (the previous version 12, "Bookworm", in particular) will probably work okay, as would similar versions of Ubuntu. Other Linux distributions shouldn't be that difficult to adjust for if needed, as should the ARM version of Debian (for the Raspberry Pi and similar hardware - both WebConsole and Pangolin have binaries available for ARM hardware). Adjusting this project directly for a Windows (or MacOS) install might not be possible as Pangolin seems to be a Linux-only project, but using a different tunneling / authentication provider such as [Cloudflare Zero-Trust Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) should work.

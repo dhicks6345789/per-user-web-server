@@ -10,6 +10,8 @@ This project was created to set up a work environment suitible for beginner soft
 ### User Directory
 Designed with education / corporate usage in mind, ths project is based around the [Pangolin](https://pangolin.net/) project, which provides identity management and request routing. Pangolin can utilise your existing identity provider (often Google (Workspace) or Microsoft (Office 365) for a school or corporation), with no need to have a separatly maintained set of users or passwords. Other user identity options are available, including ones managed directly by Pangolin for stand-alone systems that don't require a 3rd party identity provider.
 
+To set up authentication integration with systems like Google Workspace or Microsoft 365 you will need suitible admin permissions (or help from whoever has that) to add the appropriate settings to your organisation's admin console.
+
 ### Hardware / Virtual Machine Resources
 You should probably run this script on a pysical server or virtual machine (VM) dedicated to running this service, something that is backed up / able to be restored to a known-working checkpoint. Running the installation on an existing machine with other services installed might give unpredictable results, although if you know what you're doing it is just a (hopefully well-commented) Bash script and you can check through it to see exactly what is being done and how that might intefere with your current setup.
 

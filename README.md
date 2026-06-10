@@ -15,10 +15,13 @@ When installation is complete, you should have a server that your set of users c
 - User logins can utilise standard OAuth (login-with-Google / Microsoft / etc) providers, so no separate accounts / password to setup or maintain.
   - User logins can be obfuscated before being passed to user-created applications, useful for schools if allowing access by parents to pupil-created applications.
 - A selection of programming languages, libraries, IDEs, tools and utilities installed in a ready-to-use setup, including:
-  - Python, with common libraries (Pandas, NumPy, Jinja2, OpenCV, Pillow).
+  - Python, with common libraries (Pandas, NumPy, Jinja2, OpenCV, Pillow) and IDE (Idle).
   - Go, with common libraries
   - PHP
-  - The Hugo static site generation tool.
+  - Node.js
+  - The Hugo static site generation tool
+  - The VS Code IDE
+  - Gemini AI client
 - A built-in web server, able to handle basic static files and CGI scripts, for internal sites and tools.
 - Configuration and setup of components installed is modifiable, so admins can select which items get installed.
 - Self-hostable - an open source project, this project can be installed in your organisation with no ongoing fees.

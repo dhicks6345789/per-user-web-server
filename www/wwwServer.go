@@ -95,7 +95,7 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 	handler := &cgi.Handler{
 		// All scripts run under "sudo" so we can change the username they run as.
 		Path:   "/usr/bin/sudo",
-		Args:   []string{"-u", username, path},
+		Args:   []string{"--preserve-env", "-u", username, path},
 		Dir:    filepath.Dir(path),
 		Env:    []string{
 			"PATH=/usr/local/bin:/usr/bin:/bin",

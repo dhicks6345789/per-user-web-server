@@ -96,7 +96,13 @@ func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.File
 		Path:   "/usr/bin/sudo",
 		Args:   []string{"-u", username, path},
 		Dir:    filepath.Dir(path),
-		Env:    []string{"PATH=/usr/local/bin:/usr/bin:/bin"},
+		Env:    []string{
+			"PATH=/usr/local/bin:/usr/bin:/bin",
+			// We have to explicity add these headers back in so CGI scripts know how to process the request (GET or POST).
+			"REQUEST_METHOD=" + r.Method,
+			"CONTENT_TYPE=" + r.Header.Get("Content-Type"),
+			"CONTENT_LENGTH=" + strconv.FormatInt(r.ContentLength, 10),
+		},
 		// We both capture any error output to display to the user and write it to stderr as normal so it appears in the logs.
 		Stderr: io.MultiWriter(&errBuf, os.Stderr),
 	}

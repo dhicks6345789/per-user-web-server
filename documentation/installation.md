@@ -27,7 +27,7 @@ The custom authentication / connection plugin written as part of this project fo
 ### Domain / DNS
 You will need the ability to set up [sub-domains](https://en.wikipedia.org/wiki/Subdomain) to point it at your server. Generally, this means having access to the DNS configuration for your domain name. You will want two sub-domains - one for the Pangolin server, handling authentication, (e.g. pangolin.example.com) and one for the user environment server (e.g. users.example.com).
 
-You can set the project's own internal web server up as your domain's default web server, i.e. at "www.example.com". This project uses its own simple Go-based webserver to serve files and CGI scripts to internal users. There is also an instance of the [Caddy](https://caddyserver.com/) web server that is more suitible for production websites.
+Although you can set the project's own internal web server up as your domain's default web server, i.e. at "www.example.com", this is a basic Go-based webserver that can serve files and CGI scripts - it's probably not best for a high-traffic public website. There is also an instance of the [Caddy](https://caddyserver.com/) web server that is more suitible for production websites.
 
 ### Tunneling
 The Pangolin server handles authentication and routing of reqeusts to the correct handler. It can also handle tunneling connections, so the Pangolin server can be on a publically-accesible server whilest the web server can be behind a firewall. Alternativly, you can used your preffered tunneling solution (e.g. Cloudflare Tunnels) to make netwok services available, with Pangolin being used just for authentication and routing.

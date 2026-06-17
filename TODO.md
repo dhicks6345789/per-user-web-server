@@ -6,29 +6,13 @@ Schools / education establishments are an intended target market, therefore the 
 
 ---
 
-
 ## To-Do
-- [ ] Implement user authentication tokens - [ ] Fix memory leak in database connection pool (Issue #42)
-- [ ] Write unit tests for the payment gateway
-
-## Backlog
-
-### High Priority
-- [ ] Upgrade React to the latest major version
-- [ ] Refactor the legacy billing service
-
-### Medium Priority
-- [ ] Improve API documentation for endpoints
-- [ ] Optimize image assets for faster loading times
-
-### Low Priority / Nice-to-Have
-- [ ] Add dark mode support to the UI
-- [ ] Explore migrating from REST to GraphQL
+- [ ] User instance culling / suspension to free up resources.
 
 ---
 
 ## Done
 ### Version 1.0.0
-- [x] /ssh endpoint for SSH-only access to the same desktop instance as the /desktop endpoint.
-- [x] /desktop endpoint for web-based (Guacamole) remote desktop (VNC) access to 
-- [ ] Go-based control plane to handle on-demand startup of individual, per-user desktops
+- [x] /ssh endpoint for web-based (Guacamole) command-line-only (SSH) access to individual user environments.
+- [x] /desktop endpoint for web-based (Guacamole) remote desktop (VNC) access to individual user environments.
+- [x] Go-based control plane to handle on-demand startup of individual, per-user containerised Linux environments.

@@ -20,6 +20,7 @@ Schools / education establishments are an intended target market (along with sma
 ## Potential Additional Endpoints
 - [ ] /wiki - a local, multi-user, editable wiki for internal school / company use. Wiki.js?
 - [ ] /app/username/portnum - route through to a user's environment where they can be running a Go / Flask / whatever application
+- [ ] /docs, maybe integrate the [Euro Office](https://github.com/Euro-Office) editors?
 
 ## Potential Sub-Projects
 - [ ] An example Golang app repository, set up to produce a single executable (for multiple platforms) containing backend server, frontend HTML / Javascript user interface and OpenAPI documentation. Add suitible structure for AI assistance so someone can start staright away modifying single back-end .go file and one front-end file to create app with AI help.
@@ -33,3 +34,4 @@ Schools / education establishments are an intended target market (along with sma
 - [x] /ssh endpoint for web-based (Guacamole) command-line-only (SSH) access to individual user environments.
 - [x] /desktop endpoint for web-based (Guacamole) remote desktop (VNC) access to individual user environments.
 - [x] Go-based control plane to handle on-demand startup of individual, per-user containerised Linux environments.
+- [x] Install process that starts from Pangolin's install script, installing Docker and Pangolin components, then adding more containers and services.

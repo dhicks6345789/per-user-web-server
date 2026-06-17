@@ -7,6 +7,10 @@ Schools / education establishments are an intended target market, therefore the 
 ---
 
 ## To-Do
+- [ ] /webconsole endpoint should route to individual user's environment with a running instance of WebConsole.
+- [ ] Start menu - served at users.example.com, needs to be populated with icons on first row pointing at per-user endpoints. Other sections can be general items to act as a handy general start menu for users.
+- [ ] Possibly add a separate start menu at public.example.com, constructed from the Caddy config file(?).
+- [ ] Customise the Start toolbar on XFCE4 desktop to add browser, IDEs, etc.
 - [ ] User instance culling / suspension to free up resources - maybe see example Go project (URL?...)
 - [ ] Persistant SSH session? VNC is currently persistant (I think?), SSH opens a new session even if Guacamole disconnects for a few seconds.
 - [ ] Shared VNC / SSH sessions?
@@ -14,11 +18,13 @@ Schools / education establishments are an intended target market, therefore the 
 
 ## Potential Additional Endpoints
 - [ ] /wiki - a local, multi-user, editable wiki for internal school / company use. Wiki.js?
+- [ ] /app/username/portnum - route through to a user's environment where they can be running a Go / Flask / whatever application
 
 ---
 
 ## Done
 ### Version 0.1.0
+- [x] Web server at /username that serves the contents of user's ~/www folder. Small custom Go application that serves static files and CGI scripts from a separate (shared) container with same base image as the individual user image, just without the GUI desktop or VNC. Usernames are matched with the base system, CGI scripts run (using sudo) as the user whos home folder they are stored in.
 - [x] /ssh endpoint for web-based (Guacamole) command-line-only (SSH) access to individual user environments.
 - [x] /desktop endpoint for web-based (Guacamole) remote desktop (VNC) access to individual user environments.
 - [x] Go-based control plane to handle on-demand startup of individual, per-user containerised Linux environments.

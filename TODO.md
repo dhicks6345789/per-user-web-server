@@ -2,7 +2,7 @@
 
 Construct a development environment suitible for beginner, non-profesional developers, accesible via a web browser and using existing corporate / school authentication.
 
-Schools / education establishments are an intended target market, therefore the environment should be suitible for use by school-aged pupils and interact with / utilise systems typically used by such establishments, with environment isolation between users, good support for network / internet filtering, etc.
+Schools / education establishments are an intended target market (along with small businesses and corporate departments / teams), therefore the environment should be suitible for use by school-aged pupils and interact with / utilise systems typically used by such establishments, with environment isolation between users, good support for network / internet filtering, general guardrails for the development environment, etc.
 
 ---
 
@@ -12,13 +12,17 @@ Schools / education establishments are an intended target market, therefore the 
 - [ ] Possibly add a separate start menu at public.example.com, constructed from the Caddy config file(?).
 - [ ] Customise the Start toolbar on XFCE4 desktop to add browser, IDEs, etc.
 - [ ] User instance culling / suspension to free up resources - maybe see example Go project (URL?...)
-- [ ] Persistant SSH session? VNC is currently persistant (I think?), SSH opens a new session even if Guacamole disconnects for a few seconds.
+- [ ] Persistant SSH sessions? VNC is currently persistant (I think?), SSH opens a new session even if Guacamole disconnects for a few seconds.
 - [ ] Shared VNC / SSH sessions?
 - [ ] Does audio work on remote desktop? Does it need Audiomass installed?
 
 ## Potential Additional Endpoints
 - [ ] /wiki - a local, multi-user, editable wiki for internal school / company use. Wiki.js?
 - [ ] /app/username/portnum - route through to a user's environment where they can be running a Go / Flask / whatever application
+
+## Potential Sub-Projects
+- [ ] An example Golang app repository, set up to produce a single executable (for multiple platforms) containing backend server, frontend HTML / Javascript user interface and OpenAPI documentation. Add suitible structure for AI assistance so someone can start staright away modifying single back-end .go file and one front-end file to create app with AI help.
+- [ ] As Go project above, but for Python Flask.
 
 ---
 

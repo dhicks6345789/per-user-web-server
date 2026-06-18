@@ -2,9 +2,9 @@
 Configure a Debian Linux installation as a development and hosting environment for your users. Give each user a development environment with tools ready for them to start learning and developing useful stuff with, but with enough security and guardrails built-in to let them experiment safely. BY default, websites and applications are limited to other users, although items can be made public if wished by the administrator.
 
 ## Features
-- Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including AI coding tools (if wanted).
+- Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including (optionally) AI coding tools.
 - Integrates with [Pangolin](https://github.com/fosrl/pangolin) to handle authentication, including OAuth (login-with-Google / Microsoft / etc) providers, so no separate accounts / password to setup or maintain.
-- Can integrate with cloud storage (Google Drive, Microsoft OneDrive, etc), mou8nting each user's cloud storage area as a local file system accesible via standard desktop and command-line tools.
+- Can integrate with cloud storage (Google Drive, Microsoft OneDrive, etc), mounting each user's cloud storage area as a local file system accesible via standard desktop and command-line tools.
 - User logins can be obfuscated before being passed to user-created applications, useful for schools if allowing access by parents to pupil-created applications.
 - A selection of programming languages, libraries, IDEs, tools and utilities installed in a ready-to-use setup, including:
   - Python, with common libraries (Pandas, NumPy, Jinja2, OpenCV, Pillow) and IDE (Idle).

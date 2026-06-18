@@ -21,7 +21,7 @@ This project is intended to provide both a solid foundation for an environment w
   - The [Hugo](https://gohugo.io/) static site generation tool
   - The [VS Code](https://code.visualstudio.com/) and [Thonny](https://thonny.org/) IDEs.
   - Gemini AI client
-- A built-in web server, able to handle basic static files and CGI scripts, for internal sites and tools. Each user has a "www" folder they can publish materials / applications to.
+- A built-in web server, able to handle basic static files and CGI scripts, for internal sites and tools. Each user has a "www" folder they can publish materials / applications to. Users can also host applications on network ports using common web application frameworks (Python's Flask, Node.js, Go applications, etc), with a custom reverse proxy to allow access, and an instance of the [Caddy](https://caddyserver.com/) web server for sites / applications the system administrator wishes to make available to the public.
 - Configuration and setup of components installed is modifiable, so admins can select which items get installed.
 - Self-hostable - an open source project, this project can be installed in your organisation with no setup or ongoing fees.
 

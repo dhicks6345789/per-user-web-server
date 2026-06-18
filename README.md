@@ -29,5 +29,7 @@ After installation, you should basically have a freshly-installed Pangolin setup
 ## Contributing
 Please contact via Github if you are interested in contributing. Suggestions for additional web-based packages to put behind an endpoint are always welcome, as are test sites.
 
+This project is mainly an almagamation of various others, and as such uses quite a wide range of languages and tools. Java (with the Mavan build tool) is used to build a custom extension for Guacamole, whereas the main control application that handles the user container lifecycle is written is Go, as is the custom proxy functionality and the internal webserver. Otherwise, the project is largly config files and Bash scripts.
+
 ## License
 This project is distributed under a permissive [Apache Version 2.0 license](LICENSE) - you can use this project and any modifications you make for commercial purposes, you are free to add to, change, or delete parts of the code and you can distribute the original code or your modified version.

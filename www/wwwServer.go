@@ -18,9 +18,8 @@ import (
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
 const rootPath = "/var/www"
-
 // The Javascript cache folder. Used to hold local copies of various Javascript libraries that we can then serve locally .
-const JSCacheDir = "/var/cache/wwwServer/js/"
+const JSCachePath = "/var/cache/wwwServer/js"
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {
@@ -35,8 +34,14 @@ func main() {
 	// Handle all HTTP request URLs.
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		requestPath := filepath.Clean(r.URL.Path)
-		fullPath := filepath.Join(rootPath, requestPath)
 
+		// Serve files from the "/var/www" folder, where the individual user files are...
+		fullPath := filepath.Join(rootPath, requestPath)
+		// ...except for the "js/" endpoint, which we serve from our JS cache folder.
+		if strings.HasPrefix(requestPath, "js/") {
+			fullPath := filepath.Join(JSCachePath, requestPath)
+		}
+		
 		// If the user asks for the root path, we return the special index file with string substitutions.
 		if requestPath == "" || requestPath == "/" {
 			fullPath = "/var/www/index.html"
@@ -79,7 +84,7 @@ func main() {
 	})
 
 	// Execution starts here. First, make sure our local cache folder to serve various JavaScript libraries is set up.
-	if err := setupJSCacheDir(); err != nil {
+	if err := setupJSCachePath(); err != nil {
 		log.Fatal(err)
 	}
 	
@@ -93,9 +98,9 @@ func main() {
 func setupJSCacheDir() error {
 	// 1. Check if folder exists, if not, create it
 	// os.ModePerm gives standard 0777 permissions (modified by umask)
-	if _, err := os.Stat(JSCacheDir); os.IsNotExist(err) {
-		fmt.Printf("Directory %s does not exist. Creating it...\n", JSCacheDir)
-		err := os.MkdirAll(JSCacheDir, 0755)
+	if _, err := os.Stat(JSCachePath); os.IsNotExist(err) {
+		fmt.Printf("Directory %s does not exist. Creating it...\n", JSCachePath)
+		err := os.MkdirAll(JSCachePath, 0755)
 		if err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
 		}
@@ -111,7 +116,7 @@ func setupJSCacheDir() error {
 
 	// 3. Loop through and download each file if it doesn't already exist
 	for fileName, url := range filesToDownload {
-		filePath := filepath.Join(JSCacheDir, fileName)
+		filePath := filepath.Join(JSCachePath, fileName)
 
 		// Skip downloading if the file is already there.
 		if _, err := os.Stat(filePath); err == nil {

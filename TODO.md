@@ -23,6 +23,8 @@ Schools / education establishments are an intended target market (along with sma
 - [ ] Shared VNC / SSH sessions?
 - [ ] Make Pangolin optional - some users might want to use Cloudflare, etc, as their identity provider.
 - [ ] Does audio work on remote desktop? Does it need Audiomass installed?
+- [ ] Cotainers - possibly use "rootless Docker" mode to run user containers, then "root" inside containers gets mapped to standard user in bind-mount folders.
+- [ ] Session Manager - possibly rename to Control Plane, as that seems to be the term used elsewhere and sounds way snazzier.
 
 ## Potential Additional Endpoints
 - [ ] /wiki - a local, multi-user, editable wiki for internal school / company use. Wiki.js?

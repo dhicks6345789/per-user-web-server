@@ -21,7 +21,7 @@ Configure a Debian Linux installation as a development and hosting environment f
 ## Installation
 This project is basically an installation script that you run on a Debian Linux machine (physical or virtual) that installs a number of open-source projects and then adds some configuration and additional code to integrate those projects together.
 
-For details on installation, see the [installation documentation](documentation/installation.md).
+For details, see the [installation documentation](documentation/installation.md).
 
 ## Usage
 After installation, you should basically have a freshly-installed Pangolin setup with some additional components and Docker containers added. You will need to walk through the initial Pangolin setup and configure a few settings before it is ready to use.
@@ -29,7 +29,9 @@ After installation, you should basically have a freshly-installed Pangolin setup
 ## Contributing
 Please contact via Github if you are interested in contributing. Suggestions for additional web-based packages to put behind an endpoint are always welcome, as are test sites.
 
-This project is mainly an almagamation of various others, and as such uses quite a wide range of languages and tools. Java (with the Mavan build tool) is used to build a custom extension for Guacamole, whereas the main control application that handles the user container lifecycle is written is Go, as is the custom proxy functionality and the internal webserver. Otherwise, the project is largly config files and Bash scripts.
+This project is mainly an almagamation of various others, and as such uses quite a wide range of languages and tools. Java (with the Mavan build tool) is used to build a custom extension for Guacamole, whereas the main control application that handles the user container lifecycle is written is Go, as is the custom proxy functionality and the internal webserver. Otherwise, the project is largly a collection of config files and Bash scripts.
+
+Code and config files specific to this project tend, so far, to be written mostly by hand, with some AI assistance to figure out some of the deeper technical aspects. There might be more agenticly-generated code added in the future, but as a general rule any additions should be reviewed and understood as part of the project as a whole by a human, we will tend not to accept large blocks of agenticly-generated code or documentation. Of course, other projects included or used by this one might be mostly / entirely written by AI. There is a basic [agents](AGENTS.md) file included is this repository.
 
 ## License
 This project is distributed under a permissive [Apache Version 2.0 license](LICENSE) - you can use this project and any modifications you make for commercial purposes, you are free to add to, change, or delete parts of the code and you can distribute the original code or your modified version.

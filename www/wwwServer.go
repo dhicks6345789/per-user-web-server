@@ -84,7 +84,7 @@ func main() {
 	})
 
 	// Execution starts here. First, make sure our local cache folder to serve various JavaScript libraries is set up.
-	if err := setupJSCachePath(); err != nil {
+	if err := setupJSCacheDir(); err != nil {
 		log.Fatal(err)
 	}
 	

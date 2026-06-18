@@ -6,6 +6,7 @@ package main
 import (
 	"os"
 	"io"
+	"fmt"
 	"log"
 	"bytes"
 	"strings"
@@ -17,6 +18,9 @@ import (
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
 const rootPath = "/var/www"
+
+// The Javascript cache folder. Used to hold local copies of various Javascript libraries that we can then serve locally .
+const JSCacheDir := "/var/cache/wwwServer/js/"
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {
@@ -74,11 +78,79 @@ func main() {
 		http.ServeFile(w, r, fullPath)
 	})
 
-	// Execution starts here.
-	log.Println("wwwServer starting on :8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	// Execution starts here. First, make sure our local cache folder to serve various JavaScript libraries is set up.
+	if err := setupJSCacheDir(); err != nil {
 		log.Fatal(err)
 	}
+	
+	log.Println("wwwServer starting on :8080...")
+	if err = http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// Make sure the local JS cache dir exists and populate it with the Javascript libraries we want to serve locally.
+func setupJSCacheDir() error {
+	// 1. Check if folder exists, if not, create it
+	// os.ModePerm gives standard 0777 permissions (modified by umask)
+	if _, err := os.Stat(JSCacheDir); os.IsNotExist(err) {
+		fmt.Printf("Directory %s does not exist. Creating it...\n", JSCacheDir)
+		err := os.MkdirAll(JSCacheDir, 0755)
+		if err != nil {
+			return fmt.Errorf("failed to create directory: %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("error checking directory: %w", err)
+	}
+
+	// 2. Define the files to download (Official production builds via Unpkg CDN)
+	filesToDownload := map[string]string{
+		"react.production.min.js":     "https://unpkg.com/react@18/umd/react.production.min.js",
+		"react-dom.production.min.js": "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
+	}
+
+	// 3. Loop through and download each file if it doesn't already exist
+	for fileName, url := range filesToDownload {
+		filePath := filepath.Join(JSCacheDir, fileName)
+
+		// Skip downloading if the file is already there.
+		if _, err := os.Stat(filePath); err == nil {
+			log.Println("File " + filename + " already exists. Skipping download.")
+			continue
+		}
+		
+		err := downloadFile(filePath, url)
+		if err != nil {
+			return fmt.Errorf("Failed to download %s: %w", fileName, err)
+		}
+	}
+
+	return nil
+}
+
+// Fetches a URL and writes it directly to the specified local path.
+func downloadFile(filepath string, url string) error {
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	// Create the local file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
 
 // The function that handles CGI scripts.

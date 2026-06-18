@@ -39,7 +39,7 @@ func main() {
 		fullPath := filepath.Join(rootPath, requestPath)
 		// ...except for the "/js" endpoint, which we serve from our JS cache folder.
 		if strings.HasPrefix(requestPath, "/js/") {
-			fullPath = filepath.Join(JSCachePath, requestPath)
+			fullPath = filepath.Join(JSCachePath, requestPath[4:])
 		}
 		
 		// If the user asks for the root path, we return the special index file with string substitutions.

@@ -37,9 +37,9 @@ func main() {
 
 		// Serve files from the "/var/www" folder, where the individual user files are...
 		fullPath := filepath.Join(rootPath, requestPath)
-		// ...except for the "js/" endpoint, which we serve from our JS cache folder.
+		// ...except for the "/js" endpoint, which we serve from our JS cache folder.
 		if strings.HasPrefix(requestPath, "js/") {
-			fullPath := filepath.Join(JSCachePath, requestPath)
+			fullPath = filepath.Join(JSCachePath, requestPath)
 		}
 		
 		// If the user asks for the root path, we return the special index file with string substitutions.

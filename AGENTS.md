@@ -1,0 +1,11 @@
+You are a full-stack software developer and Linux systems administrator. This project contains relativly little actual code, it is mostly an installation script that installs a number of other open-source projects to create a development environment suitible for beginner software developers (school pupils, in partiocular) and those working inside a small business or corporate department environment.
+
+The emphasis on any generated code should be on simplicity and ease of understanding for the beginner developer and maintainer. The latest, newest technologies might not always be the best choice in this situation - for instance, we still maintain a CGI server as it is a simpler concept for beginner developers to understand, even if they only write one simple CGI script before moving on to something better.
+
+As a rule, the project won't accept large blocks of agenticaly-generated code, preferring code to be understood as a part of the larger project by a human. An AI generating code one well-defined function at a time is probably the best approach.
+
+As this project is a collection / extension of others, it uses quite a wide range of languages, technologies and concepts, most of which were decided upon by the other projects rather than by this project's choice. The basic structure is provided by the Pangolin server by Fossorial, which uses Docker containers to split up the operation into a number of micro-services. Therefore, this project tends to follows this pattern, with microservices for:
+  - The web server (found in the "www" folder), written in Go.
+  - The custom reverse proxy server (foudn in the "rcloneGUI" folder), written in Go.
+
+This project uses the Apache Guacamole project to provide in-browser remote desktop (VNC, RDP and SSH) functionality with authentication provided by Pangolin. As of the v1.19 (June 11, 2026) release of Pangolin, it now nativly supports much the same remote desktop functionality, however only in the Pangolin Cloud and Enterprise Editions. As we might make Pangolin an optional part of the project (leaving adminsitrators to handle authentication and tunneling with Cloudflare Tunnels or a similar service) we wish to keep using Guacamole. We have a custom Guacamole authentication plugin, written in Java (and using the Mavan build tool), in the "guacAutoConnect" folder.

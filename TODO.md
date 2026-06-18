@@ -12,6 +12,7 @@ Schools / education establishments are an intended target market (along with sma
   - [ ] Might want to add auto-mount of added rclone remotes. Would mean watching central rclone.config directory for user changes, then running mount operation on trigger.
 - [ ] rclone user area mount (at least with tested Google Drive connection) has a refresh issue. Might need a (cache size / timing?) setting tweaked. "rclone copy ..." doesn't seem to have this problem.
 - [ ] /webconsole endpoint should route to individual user's environment with a running instance of WebConsole.
+  - [ ] WebConsole should run in each user context, needs some example new item scripts to add new Flask project, new Go project, etc.
 - [ ] Start menu - served at users.example.com, needs to be populated with icons on first row pointing at per-user endpoints. Other sections can be general items to act as a handy general start menu for users.
 - [ ] Loading spinner for desktop / ssh connection - initial connection can take 30(?) seconds, needs some progress indication.
 - [ ] Possibly add a separate start menu at public.example.com, constructed from the Caddy config file(?).

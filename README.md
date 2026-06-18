@@ -6,7 +6,7 @@ Configures a Debian Linux installation as a development and hosting environment 
 ## Rationale
 The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a reasonable knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, may then go on to specialist university courses to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting), non-specialists very much have a role in tasks and projects that involve some level of software development.
 
-This project is intended to provide both a solid foundation for an environment where school-aged learners can experiment and learn, and is designed to fit in with the kidn of systems and processes used in a typical school environment, and for where those same people who, when they start a job or their own business, need an environment that provides useful tools for day-to-day use.
+This project is intended to provide both a solid foundation for an environment where school-aged learners can experiment and learn, and is designed to fit in with the kind of systems and processes used in a typical school environment, and for where those same people who, when they start a job or their own business, need an environment that provides useful tools for day-to-day use.
 
 ## Features
 - Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including (optionally) AI coding tools.

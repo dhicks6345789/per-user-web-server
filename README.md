@@ -26,19 +26,19 @@ This project is intended to provide both a solid foundation for an environment w
 - Self-hostable - an open source project, this project can be installed in your organisation with no setup or ongoing fees.
 
 ## Installation
-**Quick start:** install a fresh Debian server, either a VM or physical server, install Git (not typically installed by default on Debian):
+**Quick start:** install a fresh Debian server, either a VM or physical server, install Git (not typically installed by default on Debian)...:
 
 ```
 apt-get install -y git
 ```
 
-Clone the repository:
+...clone the repository...:
 
 ```
 git clone https://github.com/dhicks6345789/per-user-web-server.git
 ```
 
-And run the installer:
+...and run the installer:
 
 ```
 bash per-user-web-server/install.sh -pangolin

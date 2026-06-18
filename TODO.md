@@ -21,6 +21,7 @@ Schools / education establishments are an intended target market (along with sma
 - [ ] User instance culling / suspension to free up resources - maybe see example Go project (URL?...)
 - [ ] Persistant SSH sessions? VNC is currently persistant (I think?), SSH opens a new session even if Guacamole disconnects for a few seconds.
 - [ ] Shared VNC / SSH sessions?
+- [ ] Make Pangolin optional - some users might want to use Cloudflare, etc, as their identity provider.
 - [ ] Does audio work on remote desktop? Does it need Audiomass installed?
 
 ## Potential Additional Endpoints

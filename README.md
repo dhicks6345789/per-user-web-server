@@ -4,7 +4,9 @@ Host individual pupil / employee web development projects on a school (or small 
 Configures a Debian Linux installation as a development and hosting environment for your users. Give each user a development environment with tools ready for them to start learning and developing useful stuff with, but with enough security and guardrails built-in to let them experiment safely. BY default, websites and applications are limited to other users in your organisation, although items can be made public if approved by the administrator.
 
 ## Rationale
-The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a reasonable knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, may then go on to specialist university courses to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting), non-specialists very much have a role in tasks and projects that involve some level of software development. This project is intended to provide both a solid foundation for an environment where school-aged learners can experiment and learn, and for where those same peope, when they start a job or their own business, have an environment that provides useful tools for day-to-day use.
+The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a reasonable knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, may then go on to specialist university courses to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting), non-specialists very much have a role in tasks and projects that involve some level of software development.
+
+This project is intended to provide both a solid foundation for an environment where school-aged learners can experiment and learn, and is designed to fit in with the kidn of systems and processes used in a typical school environment, and for where those same people who, when they start a job or their own business, need an environment that provides useful tools for day-to-day use.
 
 ## Features
 - Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including (optionally) AI coding tools.
@@ -24,9 +26,16 @@ The UK's general Information & Communications Technology ("ICT") school syllabus
 - Self-hostable - an open source project, this project can be installed in your organisation with no setup or ongoing fees.
 
 ## Installation
+Quick start: install a fresh Debian server, either a VM or physical server, and run:
+
+'''
+git clone https://github.com/dhicks6345789/per-user-web-server.git
+bash per-user-web-server/install.sh -pangolin
+'''
+
 This project is basically an installation script that you run on a Debian Linux machine (physical or virtual) that installs a number of open-source projects and then adds some configuration and additional code to integrate those projects together.
 
-For details, see the [installation documentation](documentation/installation.md).
+For moredetailed instructions, see the [installation documentation](documentation/installation.md).
 
 ## Usage
 After installation, you should basically have a freshly-installed Pangolin setup with some additional components and Docker containers added. You will need to walk through the initial Pangolin setup and configure a few settings before it is ready to use.

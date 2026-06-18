@@ -21,6 +21,12 @@ const rootPath = "/var/www"
 // The Javascript cache folder. Used to hold local copies of various Javascript libraries that we can then serve locally .
 const JSCachePath = "/var/cache/wwwServer/js"
 
+// Define the Javascript files to download so they can be served locally.
+const JSFilesToCache := map[string]string {
+	"react.production.min.js":"https://unpkg.com/react@18/umd/react.production.min.js",
+	"react-dom.production.min.js":"https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
+}
+
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {
 	_, pathErr := os.Stat(thePath)
@@ -110,14 +116,8 @@ func setupJSCacheDir() error {
 		return fmt.Errorf("error checking directory: %w", err)
 	}
 
-	// 2. Define the files to download (Official production builds via Unpkg CDN)
-	filesToDownload := map[string]string{
-		"react.production.min.js":     "https://unpkg.com/react@18/umd/react.production.min.js",
-		"react-dom.production.min.js": "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-	}
-
 	// 3. Loop through and download each file if it doesn't already exist
-	for fileName, url := range filesToDownload {
+	for fileName, url := range JSFilesToCache {
 		filePath := filepath.Join(JSCachePath, fileName)
 
 		// Skip downloading if the file is already there.

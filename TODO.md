@@ -1,6 +1,6 @@
 # Project Roadmap & TODO
 
-Construct a development environment suitible for beginner, non-profesional developers, accesible via a web browser and using existing corporate / school authentication.
+Construct a development environment suitible for beginner, non-profesional developers, accesible via a web browser and using existing corporate / school authentication mechanisms.
 
 Schools / education establishments are an intended target market (along with small businesses and corporate departments / teams), therefore the environment should be suitible for use by school-aged pupils and interact with / utilise systems typically used by such establishments, with environment isolation between users, good support for network / internet filtering, general guardrails for the development environment, etc.
 
@@ -31,7 +31,7 @@ Schools / education establishments are an intended target market (along with sma
 
 ## Potential Sub-Projects
 - [ ] An example Golang app repository, set up to produce a single executable (for multiple platforms) containing backend server, frontend HTML / Javascript user interface and OpenAPI documentation. Add suitible structure for AI assistance so someone can start staright away modifying single back-end .go file and one front-end file to create app with AI help.
-- [ ] As Go project above, but for Python Flask.
+- [ ] As Go project above, but for Python's Flask web framework.
 
 ---
 

@@ -28,10 +28,10 @@ This project is intended to provide both a solid foundation for an environment w
 ## Installation
 Quick start: install a fresh Debian server, either a VM or physical server, and run:
 
-'''
+```
 git clone https://github.com/dhicks6345789/per-user-web-server.git
 bash per-user-web-server/install.sh -pangolin
-'''
+```
 
 This project is basically an installation script that you run on a Debian Linux machine (physical or virtual) that installs a number of open-source projects and then adds some configuration and additional code to integrate those projects together.
 

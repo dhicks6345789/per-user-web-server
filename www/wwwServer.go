@@ -20,7 +20,7 @@ import (
 const rootPath = "/var/www"
 
 // The Javascript cache folder. Used to hold local copies of various Javascript libraries that we can then serve locally .
-const JSCacheDir := "/var/cache/wwwServer/js/"
+const JSCacheDir = "/var/cache/wwwServer/js/"
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {

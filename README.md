@@ -1,5 +1,10 @@
 # Per-User Web Server
-Configure a Debian Linux installation as a development and hosting environment for your users. Give each user a development environment with tools ready for them to start learning and developing useful stuff with, but with enough security and guardrails built-in to let them experiment safely. BY default, websites and applications are limited to other users, although items can be made public if wished by the administrator.
+Host individual pupil / employee web development projects on a school (or small business / corporate department) shared server
+
+Configures a Debian Linux installation as a development and hosting environment for your users. Give each user a development environment with tools ready for them to start learning and developing useful stuff with, but with enough security and guardrails built-in to let them experiment safely. BY default, websites and applications are limited to other users in your organisation, although items can be made public if approved by the administrator.
+
+## Rationale
+The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a reasonable knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, then go on to speacilaist university courses to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting)
 
 ## Features
 - Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including (optionally) AI coding tools.

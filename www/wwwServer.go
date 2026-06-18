@@ -47,20 +47,7 @@ func main() {
 			fullPath = "/var/www/index.html"
 		}
 
-		// We want to exlude some special files from being served so the user can place them in their "www" folder but not have to worrry about hiding them.
-		if strings.HasSuffix(requestPath, "rclone.conf") {
-			http.Error(w, "Forbidden: You do not have permission to access this resource", http.StatusForbidden)
-			return
-		}
-
-		// Check if the requested path exists on the file system - it might be a file or a folder.
-		requestStatInfo, requestStatErr := os.Stat(fullPath)
-		if os.IsNotExist(requestStatErr) {
-			http.NotFound(w, r)
-			return
-		}
-
-		// If the user has requested a directory, serve any default "index" filesthat might be present there, in order of precident.
+		// If the user has requested a directory, serve any default "index" files that might be present there, in order of precident.
 		if requestStatInfo.IsDir() {
 			if fileExists(fullPath + "/" + "index.html") {
 				fullPath = fullPath + "/" + "index.html"
@@ -70,6 +57,21 @@ func main() {
 			requestStatInfo, _ = os.Stat(fullPath)
 		}
 
+		// We want to exlude some special files from being served so the user can place them in their "www" folder but not have to worrry about hiding them.
+		if strings.HasSuffix(requestPath, "rclone.conf") {
+			http.Error(w, "Forbidden: You do not have permission to access this resource", http.StatusForbidden)
+			log.Print("wwwServer, request: " + requestPath + " - file is in special excluded list.")
+			return
+		}
+
+		// Check if the requested path exists on the file system - it might be a file or a folder.
+		requestStatInfo, requestStatErr := os.Stat(fullPath)
+		if os.IsNotExist(requestStatErr) {
+			http.NotFound(w, r)
+			log.Print("wwwServer, request: " + requestPath + ", not found: " + fullPath)
+			return
+		}
+		
 		// A message for the user / logs.
 		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
 

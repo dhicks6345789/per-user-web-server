@@ -22,7 +22,8 @@ const rootPath = "/var/www"
 const JSCachePath = "/var/cache/wwwServer/js"
 
 // Define the Javascript files to download so they can be served locally.
-JSFilesToCache := map[string]string {
+// 1. Defined at the global/package level for easy configuration
+var JSFilesToCache := map[string]string {
 	"react.production.min.js":"https://unpkg.com/react@18/umd/react.production.min.js",
 	"react-dom.production.min.js":"https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
 }

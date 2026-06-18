@@ -4,7 +4,7 @@ Host individual pupil / employee web development projects on a school (or small 
 Configures a Debian Linux installation as a development and hosting environment for your users. Give each user a development environment with tools ready for them to start learning and developing useful stuff with, but with enough security and guardrails built-in to let them experiment safely. BY default, websites and applications are limited to other users in your organisation, although items can be made public if approved by the administrator.
 
 ## Rationale
-The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a reasonable knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, then go on to speacilaist university courses to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting)
+The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a reasonable knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, may then go on to specialist university courses to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting), non-specialists very much have a role in tasks and projects that involve some level of software development. This project is intended to provide both a solid foundation for an environment where school-aged learners can experiment and learn, and for where those same peope, when they start a job or their own business, have an environment that provides useful tools for day-to-day use.
 
 ## Features
 - Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including (optionally) AI coding tools.
@@ -12,12 +12,12 @@ The UK's general Information & Communications Technology ("ICT") school syllabus
 - Integrates with cloud storage (Google Drive, Microsoft OneDrive, etc), [mounting](https://rclone.org/commands/rclone_mount/) each user's cloud storage area as a local file system accesible via standard desktop and command-line tools.
 - User logins can be obfuscated before being passed to user-created applications, useful for schools if allowing access by parents to pupil-created applications.
 - A selection of programming languages, libraries, IDEs, tools and utilities installed in a ready-to-use setup, including:
-  - [Python](https://www.python.org/), with common libraries (Pandas, NumPy, Jinja2, OpenCV, Pillow) and IDE ([Idle](https://en.wikipedia.org/wiki/IDLE)).
+  - [Python](https://www.python.org/), with common libraries ([Pandas](https://pandas.pydata.org/) for data handling, [NumPy](https://numpy.org/) for scientific / mathematical computing, [Jinja2](https://pypi.org/project/Jinja2/) templates, [OpenCV](https://pypi.org/project/opencv-python/) for computer vision, [Pillow](https://pillow.readthedocs.io/en/stable/) for image handling) and IDE ([Idle](https://en.wikipedia.org/wiki/IDLE)).
   - [Go](https://go.dev/), with common libraries
   - [PHP](https://www.php.net/)
   - [Node.js](https://nodejs.org/en)
   - The [Hugo](https://gohugo.io/) static site generation tool
-  - The [VS Code](https://code.visualstudio.com/) IDE
+  - The [VS Code](https://code.visualstudio.com/) and [Thonny](https://thonny.org/) IDEs.
   - Gemini AI client
 - A built-in web server, able to handle basic static files and CGI scripts, for internal sites and tools. Each user has a "www" folder they can publish materials / applications to.
 - Configuration and setup of components installed is modifiable, so admins can select which items get installed.

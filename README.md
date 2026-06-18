@@ -4,15 +4,15 @@ Configure a Debian Linux installation as a development and hosting environment f
 ## Features
 - Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including (optionally) AI coding tools.
 - Integrates with [Pangolin](https://github.com/fosrl/pangolin) to handle authentication, including OAuth (login-with-Google / Microsoft / etc) providers, so no separate accounts / password to setup or maintain.
-- Can integrate with cloud storage (Google Drive, Microsoft OneDrive, etc), mounting each user's cloud storage area as a local file system accesible via standard desktop and command-line tools.
+- Integrates with cloud storage (Google Drive, Microsoft OneDrive, etc), [mounting](https://rclone.org/commands/rclone_mount/) each user's cloud storage area as a local file system accesible via standard desktop and command-line tools.
 - User logins can be obfuscated before being passed to user-created applications, useful for schools if allowing access by parents to pupil-created applications.
 - A selection of programming languages, libraries, IDEs, tools and utilities installed in a ready-to-use setup, including:
-  - Python, with common libraries (Pandas, NumPy, Jinja2, OpenCV, Pillow) and IDE (Idle).
-  - Go, with common libraries
-  - PHP
-  - Node.js
-  - The Hugo static site generation tool
-  - The VS Code IDE
+  - [Python](https://www.python.org/), with common libraries (Pandas, NumPy, Jinja2, OpenCV, Pillow) and IDE ([Idle](https://en.wikipedia.org/wiki/IDLE)).
+  - [Go](https://go.dev/), with common libraries
+  - [PHP](https://www.php.net/)
+  - [Node.js](https://nodejs.org/en)
+  - The [Hugo](https://gohugo.io/) static site generation tool
+  - The [VS Code](https://code.visualstudio.com/) IDE
   - Gemini AI client
 - A built-in web server, able to handle basic static files and CGI scripts, for internal sites and tools. Each user has a "www" folder they can publish materials / applications to.
 - Configuration and setup of components installed is modifiable, so admins can select which items get installed.

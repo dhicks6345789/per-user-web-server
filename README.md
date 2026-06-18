@@ -25,3 +25,9 @@ For details on installation, see the [installation documentation](documentation/
 
 ## Usage
 After installation, you should basically have a freshly-installed Pangolin setup with some additional components and Docker containers added. You will need to walk through the initial Pangolin setup and configure a few settings before it is ready to use.
+
+## Contributing
+Please contact via Github if you are interested in contributing. Suggestions for additional web-based packages to put behind an endpoint are always welcome, as are test sites.
+
+## License
+This project is distributed under a permissive [Apache Version 2.0 license](LICENSE) - you can use this project and any modifications you make for commercial purposes, you are free to add to, change, or delete parts of the code and you can distribute the original code or your modified version.

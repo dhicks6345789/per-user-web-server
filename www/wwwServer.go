@@ -115,7 +115,7 @@ func setupJSCacheDir() error {
 
 		// Skip downloading if the file is already there.
 		if _, err := os.Stat(filePath); err == nil {
-			log.Println("File " + filename + " already exists. Skipping download.")
+			log.Println("File " + filePath + " already exists. Skipping download.")
 			continue
 		}
 		

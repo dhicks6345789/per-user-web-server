@@ -7,7 +7,9 @@ Schools / education establishments are an intended target market (along with sma
 ---
 
 ## To-Do
-- [ ] /rclone endpoint works to redirect web interface, but needs to be able to redirect separate port (consistant port number?) to receive OAuth data. Might need custom-compiled version of rclone (which we already have, just needs adding in).
+- [ ] /rclone endpoint:
+  - [ ] Works to redirect web interface, but needs to be able to redirect separate port (consistant port number?) to receive OAuth data. Might need custom-compiled version of rclone (which we already have, just needs adding in). Might need rcloneGUI proxy re-working into more general-pupose proxy tool (for webconsole and user app access)
+  - [ ] Might want to add auto-mount of added rclone remotes. Would mean watching central rclone.config directory for user changes, then running mount operation on trigger.
 - [ ] /webconsole endpoint should route to individual user's environment with a running instance of WebConsole.
 - [ ] Start menu - served at users.example.com, needs to be populated with icons on first row pointing at per-user endpoints. Other sections can be general items to act as a handy general start menu for users.
 - [ ] Loading spinner for desktop / ssh connection - initial connection can take 30(?) seconds, needs some progress indication.

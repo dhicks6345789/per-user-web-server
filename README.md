@@ -46,10 +46,10 @@ bash per-user-web-server/install.sh -pangolin
 
 This project is basically an installation script that you run on a Debian Linux machine (physical or virtual) that installs a number of open-source projects and then adds some configuration and additional code to integrate those projects together.
 
-For moredetailed instructions, see the [installation documentation](documentation/installation.md).
+For more detailed instructions, see the [installation documentation](documentation/installation.md).
 
 ## Usage
-After installation, you should basically have a freshly-installed Pangolin setup with some additional components and Docker containers added. You will need to walk through the initial Pangolin setup and configure a few settings before it is ready to use.
+After installation, you should basically have a freshly-installed Docker setup. If you are using Pangolin you will need to walk through its initial setup and configure a few settings before it is ready to use, if you are using a different tunneling / authetication provider there might be other configuration details.
 
 ## Contributing
 Please contact via Github if you are interested in contributing. Suggestions for additional web-based packages to put behind an endpoint are always welcome, as are test sites.

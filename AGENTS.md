@@ -6,6 +6,6 @@ As a rule, the project won't accept large blocks of agenticaly-generated code, p
 
 As this project is a collection / extension of others, it uses quite a wide range of languages, technologies and concepts, most of which were decided upon by the other projects rather than by this project's choice. The basic structure is provided by the Pangolin server by Fossorial, which uses Docker containers to split up the operation into a number of micro-services. Therefore, this project tends to follows this pattern, with microservices for:
   - The web server (found in the "www" folder), written in Go.
-  - The custom reverse proxy server (foudn in the "rcloneGUI" folder), written in Go.
+  - The custom reverse proxy server (found in the "rcloneGUI" folder), written in Go.
 
 This project uses the Apache Guacamole project to provide in-browser remote desktop (VNC, RDP and SSH) functionality with authentication provided by Pangolin. As of the v1.19 (June 11, 2026) release of Pangolin, it now nativly supports much the same remote desktop functionality, however only in the Pangolin Cloud and Enterprise Editions. As we might make Pangolin an optional part of the project (leaving adminsitrators to handle authentication and tunneling with Cloudflare Tunnels or a similar service) we wish to keep using Guacamole. We have a custom Guacamole authentication plugin, written in Java (and using the Mavan build tool), in the "guacAutoConnect" folder.

@@ -7,11 +7,12 @@ Schools / education establishments are an intended target market (along with sma
 ---
 
 ## To-Do
+- [ ] Obsfucate usernames / email addresses when passed through via headers, to aid with data protection / safeguarding in school environments.
 - [ ] /rclone endpoint:
   - [ ] Works to redirect web interface, but needs to be able to redirect separate port (consistant port number?) to receive OAuth data. Might need custom-compiled version of rclone (which we already have, just needs adding in). Might need rcloneGUI proxy re-working into more general-pupose proxy tool (for webconsole and user app access)
   - [ ] Might want to add auto-mount of added rclone remotes. Would mean watching central rclone.config directory for user changes, then running mount operation on trigger.
-- [ ] Obsfucate usernames / email addresses when passed through via headers, to aid with data protection / safeguarding in school environments.
 - [ ] rclone user area mount (at least with tested Google Drive connection) has a refresh issue. Might need a (cache size / timing?) setting tweaked. "rclone copy ..." doesn't seem to have this problem.
+- [ ] User app publishing - need a proxy that can handle redirection of requests for user's self-published apps to particular ports. Might be best to rename rcloneGUI to be a more general reverse proxy so this function and others can be added.
 - [ ] /webconsole endpoint should route to individual user's environment with a running instance of WebConsole.
   - [ ] WebConsole should run in each user context, needs some example new item scripts to add new Flask project, new Go project, etc.
 - [ ] Start menu - served at users.example.com, needs to be populated with icons on first row pointing at per-user endpoints. Other sections can be general items to act as a handy general start menu for users.

@@ -52,7 +52,7 @@ For more detailed instructions, see the [installation documentation](documentati
 After installation, you should have a freshly-installed Docker setup. If you are using Pangolin you will need to walk through its initial setup and configure a few settings before it is ready to use, if you are using a different tunneling / authetication provider there might be other configuration details.
 
 ## Contributing
-Please contact via Github if you are interested in contributing. Suggestions for additional web-based packages to put behind an endpoint are always welcome, as are test sites. Have a look at the [To-Do](TODO.md) document to get a general feel for the priorities of what the project needs.
+Please contact via Github if you are interested in contributing. Suggestions for additional web-based packages to put behind an endpoint are always welcome, as are test sites. This project is in-use in a (UK) school environment, so any contributions will need to take in to account usage within that environment and stability for working installations. Have a look at the [To-Do](TODO.md) document to get a general feel for the current priorities for development.
 
 This project is mainly an almagamation of various others, and as such uses quite a wide range of languages and tools. Java (with the Mavan build tool) is used to build a custom extension for Guacamole, whereas the main control application that handles the user container lifecycle is written is Go, as is the custom proxy functionality and the internal webserver. Otherwise, the project is largly a collection of config files and Bash scripts.
 

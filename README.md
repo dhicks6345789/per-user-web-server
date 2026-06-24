@@ -4,18 +4,18 @@ Host individual pupil / employee web development projects on a school (or small 
 Configures a Debian Linux installation as a development and hosting environment for your users. Gives each user a development environment with tools ready for them to start learning and developing useful stuff with, but with enough security and guardrails built-in to let them experiment safely. By default, websites and applications are limited to other users in your organisation, although individual items can be made public if approved by the administrator.
 
 ## Rationale
-The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a starting knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, may then go on to specialist university courses to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting), non-specialists very much have a role in tasks and projects that involve some level of software development, increasingly with the assitance of modern tools such as AI coding agents.
+The UK's general Information & Communications Technology ("ICT") school syllabus and GCSE (14-16 years old) / A-Level (16-18 years old) Computing exams are producing school leavers with a starting knowledge of basic computer science priciples and the practice of computer programming. Some of those leavers, of course, may then go on to become professional software developers, data scienctists and so on. However, in the modern workplace (and, indeed, home setting), non-specialists very much have a role in tasks and projects that involve some level of software development, increasingly with the assitance of modern tools such as AI coding agents.
 
 This project is intended to provide both a solid foundation for an environment where school-aged learners can experiment and learn, and is designed to fit in with the kind of systems, processes and policies (data privacy, safeguarding) used in a typical school environment, and for where those same people who, when they start a job or their own business, need an environment that provides useful, up-to-date tools for day-to-day use.
 
 ## Features
-- Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an XFCE4 GUI desktop or SSH command line) to a software development environment, including (optionally) AI coding tools.
+- Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an [XFCE4](https://www.xfce.org/) GUI desktop or SSH command line) to a [Debian Linux](https://www.debian.org/) software development environment, including (optionally) AI coding tools.
 - Integrates with [Pangolin](https://github.com/fosrl/pangolin) to handle authentication, including OAuth (login-with-Google / Microsoft / etc) providers, so no separate accounts / password to setup or maintain.
 - Integrates with cloud storage (Google Drive, Microsoft OneDrive, etc), [mounting](https://rclone.org/commands/rclone_mount/) each user's cloud storage area as a local file system accesible via standard desktop and command-line tools.
 - User logins can be obfuscated before being passed to user-created applications, useful for schools if allowing access by parents to pupil-created applications.
 - A selection of programming languages, libraries, IDEs, tools and utilities installed in a ready-to-use setup, including:
   - [Python](https://www.python.org/), with common libraries ([Pandas](https://pandas.pydata.org/) for data handling, [NumPy](https://numpy.org/) for scientific / mathematical computing, [Jinja2](https://pypi.org/project/Jinja2/) templates, [OpenCV](https://pypi.org/project/opencv-python/) for computer vision, [Pillow](https://pillow.readthedocs.io/en/stable/) for image handling) and IDE ([Idle](https://en.wikipedia.org/wiki/IDLE)).
-  - [Go](https://go.dev/), with common libraries
+  - [Go](https://go.dev/), with common libraries.
   - [PHP](https://www.php.net/)
   - [Node.js](https://nodejs.org/en)
   - The [Hugo](https://gohugo.io/) static site generation tool
@@ -44,12 +44,12 @@ And run the installer:
 bash per-user-web-server/install.sh -pangolin
 ```
 
-This project is basically an installation script that you run on a Debian Linux machine (physical or virtual) that installs a number of open-source projects and then adds some configuration and additional code to integrate those projects together.
+This project is centered around an installation script that you run on a Debian Linux machine (physical or virtual) that installs a number of open-source projects and then adds some configuration and additional code to integrate those projects together.
 
 For more detailed instructions, see the [installation documentation](documentation/installation.md).
 
 ## Usage
-After installation, you should basically have a freshly-installed Docker setup. If you are using Pangolin you will need to walk through its initial setup and configure a few settings before it is ready to use, if you are using a different tunneling / authetication provider there might be other configuration details.
+After installation, you should have a freshly-installed Docker setup. If you are using Pangolin you will need to walk through its initial setup and configure a few settings before it is ready to use, if you are using a different tunneling / authetication provider there might be other configuration details.
 
 ## Contributing
 Please contact via Github if you are interested in contributing. Suggestions for additional web-based packages to put behind an endpoint are always welcome, as are test sites.

@@ -41,7 +41,7 @@ git clone https://github.com/dhicks6345789/per-user-web-server.git
 And run the installer:
 
 ```
-bash per-user-web-server/install.sh -pangolin
+bash per-user-web-server/install.sh -pangolin -build all -run root,caddy
 ```
 
 This project is centered around an installation script that you run on a Debian Linux machine (physical or virtual) that installs a number of open-source projects and then adds some configuration and additional code to integrate those projects together.

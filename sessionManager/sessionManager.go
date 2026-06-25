@@ -64,6 +64,19 @@ func startShellCommand(command string, args ...string) string {
 	return ""
 }
 
+func mkdirChown(theFolder, theUserID, theUserGID) {
+	userDirErr = os.MkdirAll(theFolder, 0700)
+	if userDirErr != nil {
+		http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	userChownErr = os.Chown(theFolder, theUserUID, theUserGID)
+	if userChownErr != nil {
+		http.Error(httpResponse, "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func main() {
 	// We want each desktop instance to have a separate, un-guessable VNC password. However, we also want that password to be consistant so we can easily reconnect a user to their session.
 	// Rather than hold session passwords in memory, we use a hash function to generate a password for each session from the username and a secret seed value.
@@ -232,27 +245,9 @@ func main() {
 			// We're about to create a container that mounts the user's /var/www/username and /etc/webconsole/tasks/username folders.
 			// First, make sure those folders exist, and that they are owned by the matching user and have
 			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folders.
-			userDirErr := os.MkdirAll("/var/www/" + username, 0700)
-			if userDirErr != nil {
-				http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
-				return
-			}
-			userChownErr := os.Chown("/var/www/" + username, userUID, userGID)
-			if userChownErr != nil {
-				http.Error(httpResponse, "Error assigning directory /var/www" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
-				return
-			}
-			userDirErr = os.MkdirAll("/etc/webconsole/tasks/" + username, 0700)
-			if userDirErr != nil {
-				http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
-				return
-			}
-			userChownErr = os.Chown("/etc/webconsole/tasks/" + username, userUID, userGID)
-			if userChownErr != nil {
-				http.Error(httpResponse, "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
-				return
-			}
-
+			mkdirChown("/var/www/" + username, userID, userGID)
+			mkdirChown("/etc/webconsole/tasks/" + username, userID, userGID)
+			
 			// Go through the config (which is simply empty by default) and use rclone to mount any remote folders.
 			for _, rcloneOptions in config.RcloneMount {
 				// First, set up the values used in the rclone commands.
@@ -261,18 +256,9 @@ func main() {
 				rcloneRemote := strings.ReplaceAll(rcloneOptions.Remote, "{{USERNAME}}", username)
 				
 				// Make sure the local folder exists and is owned by the user.
-				userDirErr := os.MkdirAll(rcloneLocal, 0700)
-				if userDirErr != nil {
-					http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
-					return
-				}
-				userChownErr := os.Chown(rcloneLocal, userUID, userGID)
-				if userChownErr != nil {
-					http.Error(httpResponse, "Error assigning directory " + rcloneLocal + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				// Make sure the remote destination exists - create a new, empty folder if not.
+				mkdirChown(rcloneLocal, userID, userGID)
+				
+				// Make sure the remote destination exists - create a new, empty folder (using rclone) if not.
 				mkdirOutput := runShellCommand("rclone", "mkdir", "--drive-impersonate", rcloneUsername, rcloneRemote)
 				if mkdirOutput != "" {
 					fmt.Println("mkdirOutput: " + mkdirOutput)

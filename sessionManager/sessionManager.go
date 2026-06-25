@@ -244,12 +244,12 @@ func main() {
 			// We're about to create a container that mounts the user's /var/www/username and /etc/webconsole/tasks/username folders.
 			// First, make sure those folders exist, and that they are owned by the matching user and have
 			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folders.
-			mkdirErr := mkdirChown("/var/www/" + username, userID, userGID)
+			mkdirErr := mkdirChown("/var/www/" + username, userUID, userGID)
 			if mkdirErr != "" {
 				http.Error(httpResponse, mkdirErr, http.StatusInternalServerError)
 				return
 			}
-			mkdirErr = mkdirChown("/etc/webconsole/tasks/" + username, userID, userGID)
+			mkdirErr = mkdirChown("/etc/webconsole/tasks/" + username, userUID, userGID)
 			if mkdirErr != "" {
 				http.Error(httpResponse, mkdirErr, http.StatusInternalServerError)
 				return
@@ -263,7 +263,7 @@ func main() {
 				rcloneRemote := strings.ReplaceAll(rcloneOptions.Remote, "{{USERNAME}}", username)
 				
 				// Make sure the local folder exists and is owned by the user.
-				mkdirErr = mkdirChown(rcloneLocal, userID, userGID)
+				mkdirErr = mkdirChown(rcloneLocal, userUID, userGID)
 				if mkdirErr != "" {
 					http.Error(httpResponse, mkdirErr, http.StatusInternalServerError)
 					return

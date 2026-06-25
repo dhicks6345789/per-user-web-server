@@ -267,6 +267,12 @@ func main() {
 				}
 				rcloneLocal := strings.ReplaceAll(rcloneOptions.Local, "{{USERNAME}}", username)
 				rcloneRemote := strings.ReplaceAll(rcloneOptions.Remote, "{{USERNAME}}", username)
+
+				// Make sure the local folder isn't already being used as a mount point.
+				umountOutput := runShellCommand("umount", rcloneLocal)
+				if umountOutput != "" {
+					fmt.Println("umountOutput: " + umountOutput)
+				}
 				
 				// Make sure the local folder exists and is owned by the user.
 				mkdirErr = mkdirChown(rcloneLocal, userUID, userGID)
@@ -279,12 +285,6 @@ func main() {
 				rcloneMkdirOutput := startShellCommand("rclone", append(append([]string{"mkdir"}, rcloneDriveImpersonate...), []string{rcloneUsername, rcloneRemote}...)...)
 				if rcloneMkdirOutput != "" {
 					fmt.Println("rcloneMkdirOutput: " + rcloneMkdirOutput)
-				}
-
-				// Make sure the local folder isn't already being used as a mount point.
-				umountOutput := runShellCommand("umount", rcloneLocal)
-				if umountOutput != "" {
-					fmt.Println("umountOutput: " + umountOutput)
 				}
 				
 				// Mount the remote folder using rclone.

@@ -39,6 +39,7 @@ import (
 
 // A struct to hold config data.
 type Config struct {
+	RcloneMkdirs [][]string `yaml:"rcloneMkdirs"`
 	RcloneMounts [][]string `yaml:"rcloneMounts"`
 }
 
@@ -99,10 +100,7 @@ func main() {
 		fmt.Println("Error reading random seed value from file: " + seedPath + ", " + randomSeedErr.Error())
         return
     }
-
-
 	
-
 	// Create an empty instance of the Config struct...
 	var config Config
 	// ...and read config data - just skip if there's no config file, the config variable will simply remain empty.
@@ -114,11 +112,8 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to parse YAML config: %v", err)
 		}
-		fmt.Printf("Successfully loaded config data.\n")
+		fmt.Printf("Config data loaded from " + configPath)
 	}
-	fmt.Printf("rcloneMounts:: %v\n\n", config)
-
-
 	
 	// Initialize the Docker client. It automatically looks for the Docker socket (unix:///var/run/docker.sock).
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -253,34 +248,39 @@ func main() {
 				http.Error(httpResponse, "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
 				return
 			}
-			
-			// Make sure the user has a "Coding" folder in their Google Drive root, that's the folder we mount as the user's "Documents" folder inside their desktop environment.
-			mkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "mkdir", "gdrive:Coding")
-			if mkdirOutput != "" {
-				fmt.Println("mkdirOutput: " + mkdirOutput)
-			}
-			
-			// Mount (using rclone) /home/username/Documents to the user's Google Drive.
-			umountOutput := runShellCommand("umount", "/home/" + username + "/Documents")
-			if umountOutput != "" {
-				fmt.Println("umountOutput: " + mkdirOutput)
-			}
-			rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Coding", "/home/" + username + "/Documents")
-			if rcloneMountOutput != "" {
-				fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
-			}
 
-			homeFolderMounted := false
-			for homeFolderMounted == false {
-				// Run "df -h" to see if the user's home folder is mounted okay.
-				for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
-					if strings.Contains(line, "/home/" + username + "/Documents") {
-						homeFolderMounted = true
-					}
+			// Go through the config (which is simply empty by default) and use rclone to create any remote folders required...
+			for _, rcloneOptions in config.RcloneMkdirs {
+				mkdirOutput := runShellCommand("rclone", "mkdir", rcloneOptions...)
+				if mkdirOutput != "" {
+					fmt.Println("mkdirOutput: " + mkdirOutput)
 				}
-				fmt.Println("Waiting for rclone mount Documents to complete...")
-				// Pause to make sure(ish) the mount operation is complete.
-				time.Sleep(1 * time.Second)
+			}
+			
+			//umountOutput := runShellCommand("umount", "/home/" + username + "/Documents")
+			//if umountOutput != "" {
+				//fmt.Println("umountOutput: " + mkdirOutput)
+			//}
+			
+			// ...and then the same for any rclone mount operations.
+			for _, rcloneOptions in config.RcloneMounts {
+				rcloneMountOutput := startShellCommand("rclone", "mount", rcloneOptions...)
+				if rcloneMountOutput != "" {
+					fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
+				}
+
+				rcloneFolderMounted := false
+				for rcloneFolderMounted == false {
+					// Run "df -h" to see if the folder is mounted okay.
+					for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
+						if strings.Contains(line, "/home/" + username + "/Documents") {
+							homeFolderMounted = true
+						}
+					}
+					fmt.Println("Waiting for rclone mount Documents to complete...")
+					// Pause to make sure(ish) the mount operation is complete.
+					time.Sleep(1 * time.Second)
+				}
 			}
 			
 			/*

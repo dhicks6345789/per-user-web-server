@@ -37,10 +37,14 @@ import (
 	"github.com/moby/moby/api/types/mount"
 )
 
-// A struct to hold config data.
+// Define structs to hold YAML config data.
+type RcloneMount struct {
+	Username string `yaml:"username"`
+	Local    int    `yaml:"local"`
+	Remote   bool   `yaml:"remote"`
+}
 type Config struct {
-	RcloneMkdirs [][]string `yaml:"rcloneMkdirs"`
-	RcloneMounts [][]string `yaml:"rcloneMounts"`
+	RcloneMounts []RcloneMount `yaml:"rcloneMounts"`
 }
 
 func runShellCommand(command string, args ...string) string {
@@ -249,83 +253,57 @@ func main() {
 				return
 			}
 
-			// Go through the config (which is simply empty by default) and use rclone to create any remote folders required...
-			for _, rcloneOptions in config.RcloneMkdirs {
-				mkdirOutput := runShellCommand("rclone", "mkdir", rcloneOptions...)
+			// Go through the config (which is simply empty by default) and use rclone to mount any remote folders.
+			for _, rcloneOptions in config.RcloneMount {
+				// First, set up the values used in the rclone commands.
+				rcloneUsername := strings.ReplaceAll(rcloneOptions.Username, "{{USERNAME}}", username)
+				rcloneLocal := strings.ReplaceAll(rcloneOptions.Local, "{{USERNAME}}", username)
+				rcloneRemote := strings.ReplaceAll(rcloneOptions.Remote, "{{USERNAME}}", username)
+				
+				// Make sure the local folder exists and is owned by the user.
+				userDirErr := os.MkdirAll(rcloneLocal, 0700)
+				if userDirErr != nil {
+					http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
+					return
+				}
+				userChownErr := os.Chown(rcloneLocal, userUID, userGID)
+				if userChownErr != nil {
+					http.Error(httpResponse, "Error assigning directory " + rcloneLocal + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				// Make sure the remote destination exists - create a new, empty folder if not.
+				mkdirOutput := runShellCommand("rclone", "mkdir", "--drive-impersonate", rcloneUsername, rcloneRemote)
 				if mkdirOutput != "" {
 					fmt.Println("mkdirOutput: " + mkdirOutput)
 				}
-			}
-			
-			//umountOutput := runShellCommand("umount", "/home/" + username + "/Documents")
-			//if umountOutput != "" {
-				//fmt.Println("umountOutput: " + mkdirOutput)
-			//}
-			
-			// ...and then the same for any rclone mount operations.
-			for _, rcloneOptions in config.RcloneMounts {
-				rcloneMountOutput := startShellCommand("rclone", "mount", rcloneOptions...)
+
+				// Make sure the local folder isn't already mounted.
+				umountOutput := runShellCommand("rclone", "umount", rcloneLocal)
+				if umountOutput != "" {
+					fmt.Println("umountOutput: " + mkdirOutput)
+				}
+				
+				// Mount the remote folder using rclone.
+				rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", rcloneUsername, "--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal)
 				if rcloneMountOutput != "" {
 					fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
 				}
 
+				// Wait for the mount operation to complete.
 				rcloneFolderMounted := false
 				for rcloneFolderMounted == false {
 					// Run "df -h" to see if the folder is mounted okay.
 					for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
-						if strings.Contains(line, "/home/" + username + "/Documents") {
+						if strings.Contains(line, rcloneLocal) {
 							homeFolderMounted = true
 						}
 					}
-					fmt.Println("Waiting for rclone mount Documents to complete...")
+					fmt.Println("Waiting for rclone mount " + rcloneLocal + " to complete...")
 					// Pause to make sure(ish) the mount operation is complete.
 					time.Sleep(1 * time.Second)
 				}
 			}
-			
-			/*
-			// Check if the user has a "Classroom" folder in their Google Drive root, if so mount it as the user's "Classroom" folder inside their desktop environment so they
-			// have access to resources shared from Google Classrooms.
-			checkdirOutput := runShellCommand("rclone", "--drive-impersonate", username + "@knightsbridgeschool.com", "ls", "gdrive:Classroom")
-			if checkdirOutput != "" {
-				if !strings.Contains(checkdirOutput, "Failed to ls") {
-					// Make sure the user has a "Classroom" folder in their home folder.
-					userDirErr := os.MkdirAll("/home/" + username + "/Classroom", 0700)
-					if userDirErr != nil {
-						http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
-						return
-					}
-					userChownErr := os.Chown("/home/" + username + "/Classroom", userUID, userGID)
-					if userChownErr != nil {
-						http.Error(httpResponse, "Error assigning directory /home/" + username + "/Classroom to user: " + userChownErr.Error(), http.StatusInternalServerError)
-						return
-					}
-					
-					// Mount (using rclone) /home/username/Classroom to the user's Google Drive.
-					umountOutput := runShellCommand("umount", "/home/" + username + "/Classroom")
-					if umountOutput != "" {
-						fmt.Println("umountOutput: " + mkdirOutput)
-					}
-					rcloneMountOutput := startShellCommand("rclone", "mount", "--drive-impersonate", username + "@knightsbridgeschool.com", "--vfs-cache-mode", "full", "--allow-other", "gdrive:Classroom", "/home/" + username + "/Classroom")
-					if rcloneMountOutput != "" {
-						fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
-					}
-		
-					classroomFolderMounted := false
-					for classroomFolderMounted == false {
-						// Run "df -h" to see if the user's Classroom folder is mounted okay.
-						for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
-							if strings.Contains(line, "/home/" + username + "/Classroom") {
-								classroomFolderMounted = true
-							}
-						}
-						fmt.Println("Waiting for rclone mount Classroom to complete...")
-						// Pause to make sure(ish) the mount operation is complete.
-						time.Sleep(1 * time.Second)
-					}
-				}
-			}
-			*/
 			
 			/*
 			// Two variables used below in the VNC-for-debugging purposes.

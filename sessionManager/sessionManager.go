@@ -44,7 +44,7 @@ type RcloneMount struct {
 	Remote   string `yaml:"remote"`
 }
 type Config struct {
-	RcloneMounts []Mount `yaml:"rcloneMounts"`
+	RcloneMounts []RcloneMount `yaml:"rcloneMounts"`
 }
 
 func runShellCommand(command string, args ...string) string {

@@ -276,7 +276,7 @@ func main() {
 				}
 				
 				// Make sure the remote destination exists - create a new, empty folder (using rclone) if not.
-				rcloneMkdirOutput := startShellCommand("rclone", append(append([]string{"mkdir"}, rcloneDriveImpersonate...), []string{rcloneUsername, rcloneRemote}...)
+				rcloneMkdirOutput := startShellCommand("rclone", append(append([]string{"mkdir"}, rcloneDriveImpersonate...), []string{rcloneUsername, rcloneRemote}...))
 				if rcloneMkdirOutput != "" {
 					fmt.Println("rcloneMkdirOutput: " + rcloneMkdirOutput)
 				}
@@ -288,7 +288,7 @@ func main() {
 				}
 				
 				// Mount the remote folder using rclone.
-				rcloneMountOutput := startShellCommand("rclone", append(append([]string{"mount"}, rcloneDriveImpersonate...), []string{"--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal}...)
+				rcloneMountOutput := startShellCommand("rclone", append(append([]string{"mount"}, rcloneDriveImpersonate...), []string{"--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal}...))
 				if rcloneMountOutput != "" {
 					fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
 				}

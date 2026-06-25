@@ -39,7 +39,7 @@ import (
 
 // A struct to hold config data.
 type Config struct {
-	rcloneMounts [][]string `yaml:"rcloneMounts"`
+	RcloneMounts [][]string `yaml:"rcloneMounts"`
 }
 
 func runShellCommand(command string, args ...string) string {

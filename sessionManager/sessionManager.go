@@ -129,6 +129,8 @@ func main() {
 			log.Fatalf("Failed to parse YAML config: %v", err)
 		}
 		fmt.Println("Config data loaded from " + configPath)
+	} else {
+		fmt.Println("No config file found at " + configPath + ", using default values.")
 	}
 	
 	// Initialize the Docker client. It automatically looks for the Docker socket (unix:///var/run/docker.sock).

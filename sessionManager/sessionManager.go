@@ -40,11 +40,11 @@ import (
 // Define structs to hold YAML config data.
 type RcloneMount struct {
 	Username string `yaml:"username"`
-	Local    int    `yaml:"local"`
-	Remote   bool   `yaml:"remote"`
+	Local    string `yaml:"local"`
+	Remote   string `yaml:"remote"`
 }
 type Config struct {
-	RcloneMounts []RcloneMount `yaml:"rcloneMounts"`
+	RcloneMounts []Mount `yaml:"rcloneMounts"`
 }
 
 func runShellCommand(command string, args ...string) string {

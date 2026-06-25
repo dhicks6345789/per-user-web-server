@@ -67,11 +67,11 @@ func startShellCommand(command string, args ...string) string {
 func mkdirChown(theFolder string, theUserUID int, theUserGID int) string {
 	userDirErr := os.MkdirAll(theFolder, 0700)
 	if userDirErr != nil {
-		return "Error creating directory: " + userDirErr.Error()
+		return "Error creating directory" + theFolder + ": " + userDirErr.Error()
 	}
 	userChownErr := os.Chown(theFolder, theUserUID, theUserGID)
 	if userChownErr != nil {
-		return "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error()
+		return "Error assigning directory " + theFolder + " to user: " + userChownErr.Error()
 	}
 	return ""
 }

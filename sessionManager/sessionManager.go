@@ -24,6 +24,9 @@ import (
 	// Only needed if we need to map a container's port to the host for VNC debugging purposes.
 	//"net/netip"
 
+	// The YAML package, used for config data.
+	"gopkg.in/yaml.v3"
+
 	// The Argon2 hashing library, used to produce passwords for VNC sessions.
 	"golang.org/x/crypto/argon2"
 
@@ -33,6 +36,11 @@ import (
 	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/api/types/mount"
 )
+
+// A struct to hold config data.
+type Config struct {
+	rcloneMounts [][]string `yaml:"rcloneMounts"`
+}
 
 func runShellCommand(command string, args ...string) string {
 	fmt.Println("runShellCommand: " + command + " " + strings.Join(args, " "))
@@ -91,6 +99,29 @@ func main() {
 		fmt.Println("Error reading random seed value from file: " + seedPath + ", " + randomSeedErr.Error())
         return
     }
+
+
+	
+
+	// Create an empty instance of the Config struct.
+	var config Config
+	
+	// Read config data - just skip if there's no config file, the config variable will simply remain empty.
+	configPath := "/etc/puws/config.yml"
+	yamlFile, err := os.ReadFile(configPath)
+	if err == nil {
+		// Parse the YAML bytes into the struct instance.
+		err = yaml.Unmarshal(yamlFile, &config)
+		if err != nil {
+			log.Fatalf("failed to parse YAML config: %v", err)
+		}
+		
+		// 4. Access your configuration data safely
+		fmt.Printf("Successfully loaded config!\n")
+	}
+	fmt.Printf(config.rcloneMounts)
+
+
 	
 	// Initialize the Docker client. It automatically looks for the Docker socket (unix:///var/run/docker.sock).
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

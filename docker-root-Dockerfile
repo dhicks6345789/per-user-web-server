@@ -24,7 +24,7 @@ RUN curl https://rclone.org/install.sh | bash
 RUN apt-get install -y python3 python3-pip python3-venv
 
 # Figure out and store the Python install path and version for later use.
-RUN PYTHONVERSION=$(ls /usr/local/lib | grep python") && echo "PYTHONVERSION=$PYTHONVERSION" > /tmp/dockerEnv
+RUN PYTHONVERSION=$(ls /usr/local/lib | grep python) && echo "PYTHONVERSION=$PYTHONVERSION" > /tmp/dockerEnv
 RUN . /tmp/dockerEnv && echo "Python Version: $PYTHONVERSION"
 
 # The Google GenAI package - used to access Google's generative AI services.

@@ -249,7 +249,7 @@ func main() {
 			mkdirChown("/etc/webconsole/tasks/" + username, userID, userGID)
 			
 			// Go through the config (which is simply empty by default) and use rclone to mount any remote folders.
-			for _, rcloneOptions in config.RcloneMount {
+			for _, rcloneOptions := range config.RcloneMount {
 				// First, set up the values used in the rclone commands.
 				rcloneUsername := strings.ReplaceAll(rcloneOptions.Username, "{{USERNAME}}", username)
 				rcloneLocal := strings.ReplaceAll(rcloneOptions.Local, "{{USERNAME}}", username)

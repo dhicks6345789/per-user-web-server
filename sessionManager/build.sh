@@ -6,6 +6,7 @@ echo Building Session Manager...
 systemctl stop PUWSSessionManager
 
 # Get any required Go mondules.
+go get gopkg.in/yaml.v3
 go get github.com/moby/moby/client
 go get github.com/moby/moby/api/types/container
 go get golang.org/x/crypto/argon2

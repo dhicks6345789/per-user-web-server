@@ -293,7 +293,7 @@ func main() {
 					// Run "df -h" to see if the folder is mounted okay.
 					for _, line := range strings.Split(runShellCommand("df", "-h"), "\n") {
 						if strings.Contains(line, rcloneLocal) {
-							homeFolderMounted = true
+							rcloneFolderMounted = true
 						}
 					}
 					fmt.Println("Waiting for rclone mount " + rcloneLocal + " to complete...")

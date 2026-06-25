@@ -286,9 +286,9 @@ func main() {
 				// Mount the remote folder using rclone.
 				rcloneMountOptions := []string{"mount"}
 				if rcloneUsername != "" {
-					rcloneMountOptions = append(rcloneMountOptions, ["--drive-impersonate", rcloneUsername]...)
+					rcloneMountOptions = append(rcloneMountOptions, []string{"--drive-impersonate", rcloneUsername}...)
 				}
-				rcloneMountOptions = append(rcloneMountOptions, ["--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal]...)
+				rcloneMountOptions = append(rcloneMountOptions, []string{"--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal}...)
 				rcloneMountOutput := startShellCommand("rclone", rcloneMountOptions...)
 				if rcloneMountOutput != "" {
 					fmt.Println("rcloneMountOutput: " + rcloneMountOutput)

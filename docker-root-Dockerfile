@@ -48,7 +48,7 @@ RUN python3 -m venv /opt/google_ai_env
 # ...install the google-geni package...
 RUN /opt/google_ai_env/bin/pip install google-genai
 # ...and link it so all users can see it.
-RUN echo "/opt/google_ai_env/lib/python3.11/site-packages" | tee /usr/local/lib/python3.11/dist-packages/google_ai.pth
+RUN bash -c echo "/opt/google_ai_env/lib/python3.11/site-packages" | tee /usr/local/lib/python3.11/dist-packages/google_ai.pth
 
 
 

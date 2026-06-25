@@ -69,7 +69,7 @@ func mkdirChown(theFolder string, theUserID string, theUserGID string) string {
 	if userDirErr != nil {
 		return "Error creating directory: " + userDirErr.Error()
 	}
-	userChownErr = os.Chown(theFolder, theUserUID, theUserGID)
+	userChownErr := os.Chown(theFolder, theUserUID, theUserGID)
 	if userChownErr != nil {
 		return "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error()
 	}

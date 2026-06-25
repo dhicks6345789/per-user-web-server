@@ -103,21 +103,18 @@ func main() {
 
 	
 
-	// Create an empty instance of the Config struct.
+	// Create an empty instance of the Config struct...
 	var config Config
-	
-	// Read config data - just skip if there's no config file, the config variable will simply remain empty.
+	// ...and read config data - just skip if there's no config file, the config variable will simply remain empty.
 	configPath := "/etc/puws/config.yml"
 	yamlFile, err := os.ReadFile(configPath)
 	if err == nil {
-		// Parse the YAML bytes into the struct instance.
+		// Parse the YAML bytes into the Config struct instance.
 		err = yaml.Unmarshal(yamlFile, &config)
 		if err != nil {
-			log.Fatalf("failed to parse YAML config: %v", err)
+			log.Fatalf("Failed to parse YAML config: %v", err)
 		}
-		
-		// 4. Access your configuration data safely
-		fmt.Printf("Successfully loaded config!\n")
+		fmt.Printf("Successfully loaded config data.\n")
 	}
 	fmt.Printf("rcloneMounts:: %v\n\n", config.rcloneMounts)
 

@@ -41,6 +41,10 @@ RUN apt-get install -y python3-numpy
 # The Python Pil (or Pillow) image handling library.
 RUN apt-get install -y python3-pil
 
+# The Google GenAI package - used to access Google's generative AI services.
+# Debian doesn't package google-genai, so we can ignore pip's warning about installing system-wide.
+RUN pip install google-genai --break-system-packages
+
 
 
 # Install a Node.js development environment.

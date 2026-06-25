@@ -119,7 +119,7 @@ func main() {
 		// 4. Access your configuration data safely
 		fmt.Printf("Successfully loaded config!\n")
 	}
-	fmt.Printf(config.rcloneMounts)
+	fmt.Printf("rcloneMounts:: %v\n\n", config.rcloneMounts)
 
 
 	

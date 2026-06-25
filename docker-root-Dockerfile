@@ -23,9 +23,8 @@ RUN curl https://rclone.org/install.sh | bash
 # Therefore, we generally wind up using the Debian package of common Python libraries, some of which can be a few versions behind the most current.
 RUN apt-get install -y python3 python3-pip python3-venv
 
-# Figur eout the Python install path for later use.
-RUN export PYTHONPATH=$(python3 -c "import sys; print(sys.executable)")
-RUN export PYTHONVERSION=$(basename $PYTHONPATH)
+# Figure out and store the Python install path and version for later use.
+RUN PYTHONPATH=$(python3 -c "import sys; print(sys.executable)") && echo "PYTHONPATH=$PYTHONPATH" > /tmp/dockerEnv && PYTHONVERSION=$(basename $PYTHONPATH) && echo "PYTHONVERSION=$PYTHONVERSION" >> /tmp/dockerEnv
 
 # The Pandas data-processing library...
 RUN apt-get install -y python3-pandas
@@ -52,7 +51,8 @@ RUN python3 -m venv /opt/google_ai_env
 # ...install the google-geni package...
 RUN /opt/google_ai_env/bin/pip install google-genai
 # ...and link it so all users can see it.
-RUN echo "/opt/google_ai_env/lib/$PYTHONVERSION/site-packages" | tee $PYTHONPATH/dist-packages/google_ai.pth
+RUN . /tmp/dockerEnv && echo "/opt/google_ai_env/lib/$PYTHONVERSION/site-packages" | tee $PYTHONPATH/dist-packages/google_ai.pth
+RUN rm /tmp/dockerEnv
 
 
 

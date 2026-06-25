@@ -24,8 +24,8 @@ RUN curl https://rclone.org/install.sh | bash
 RUN apt-get install -y python3 python3-pip python3-venv
 
 # Figure out and store the Python install path and version for later use.
-RUN PYTHONPATH=$(python3 -c "import sys; print(sys.executable)") && echo "PYTHONPATH=$PYTHONPATH" > /tmp/dockerEnv && PYTHONVERSION=$(basename $PYTHONPATH) && echo "PYTHONVERSION=$PYTHONVERSION" >> /tmp/dockerEnv
-RUN . /tmp/dockerEnv && echo "Python Path: $PYTHONPATH, Python Version: $PYTHONVERSION"
+RUN PYTHONVERSION=$(ls /usr/local/lib | grep python") && echo "PYTHONVERSION=$PYTHONVERSION" > /tmp/dockerEnv
+RUN . /tmp/dockerEnv && echo "Python Version: $PYTHONVERSION"
 
 # The Google GenAI package - used to access Google's generative AI services.
 # Not available as a Debian package to install via apt, so we install this in a globally-accessible Python venv - first we create the venv...
@@ -33,7 +33,7 @@ RUN python3 -m venv /opt/google_ai_env
 # ...install the google-geni package...
 RUN /opt/google_ai_env/bin/pip install google-genai
 # ...and link it so all users can see it.
-RUN . /tmp/dockerEnv && echo "/opt/google_ai_env/lib/$PYTHONVERSION/site-packages" | tee $PYTHONPATH/dist-packages/google_ai.pth
+RUN . /tmp/dockerEnv && echo "/opt/google_ai_env/lib/$PYTHONVERSION/site-packages" | tee /usr/local/lib/$PYTHONVERSION/dist-packages/google_ai.pth
 RUN rm /tmp/dockerEnv
 
 # The Pandas data-processing library...

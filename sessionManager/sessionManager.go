@@ -64,7 +64,7 @@ func startShellCommand(command string, args ...string) string {
 	return ""
 }
 
-func mkdirChown(theFolder string, theUserUID string, theUserGID string) string {
+func mkdirChown(theFolder string, theUserUID int, theUserGID int) string {
 	userDirErr := os.MkdirAll(theFolder, 0700)
 	if userDirErr != nil {
 		return "Error creating directory: " + userDirErr.Error()

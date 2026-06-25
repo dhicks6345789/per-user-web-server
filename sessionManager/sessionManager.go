@@ -64,17 +64,16 @@ func startShellCommand(command string, args ...string) string {
 	return ""
 }
 
-func mkdirChown(theFolder string, theUserID string, theUserGID string) {
+func mkdirChown(theFolder string, theUserID string, theUserGID string) string {
 	userDirErr := os.MkdirAll(theFolder, 0700)
 	if userDirErr != nil {
-		http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
-		return
+		return "Error creating directory: " + userDirErr.Error()
 	}
 	userChownErr = os.Chown(theFolder, theUserUID, theUserGID)
 	if userChownErr != nil {
-		http.Error(httpResponse, "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error(), http.StatusInternalServerError)
-		return
+		return "Error assigning directory /etc/webconsole/tasks/" + username + " to user: " + userChownErr.Error()
 	}
+	return ""
 }
 
 func main() {
@@ -245,8 +244,16 @@ func main() {
 			// We're about to create a container that mounts the user's /var/www/username and /etc/webconsole/tasks/username folders.
 			// First, make sure those folders exist, and that they are owned by the matching user and have
 			// permissions of 711 (drwx--x--x) so that other users won't be able to access the folders.
-			mkdirChown("/var/www/" + username, userID, userGID)
-			mkdirChown("/etc/webconsole/tasks/" + username, userID, userGID)
+			mkdirErr := mkdirChown("/var/www/" + username, userID, userGID)
+			if mkdirErr != "" {
+				http.Error(httpResponse, mkdirErr, http.StatusInternalServerError)
+				return
+			}
+			mkdirErr = mkdirChown("/etc/webconsole/tasks/" + username, userID, userGID)
+			if mkdirErr != "" {
+				http.Error(httpResponse, mkdirErr, http.StatusInternalServerError)
+				return
+			}
 			
 			// Go through the config (which is simply empty by default) and use rclone to mount any remote folders.
 			for _, rcloneOptions := range config.RcloneMount {
@@ -256,7 +263,11 @@ func main() {
 				rcloneRemote := strings.ReplaceAll(rcloneOptions.Remote, "{{USERNAME}}", username)
 				
 				// Make sure the local folder exists and is owned by the user.
-				mkdirChown(rcloneLocal, userID, userGID)
+				mkdirErr = mkdirChown(rcloneLocal, userID, userGID)
+				if mkdirErr != "" {
+					http.Error(httpResponse, mkdirErr, http.StatusInternalServerError)
+					return
+				}
 				
 				// Make sure the remote destination exists - create a new, empty folder (using rclone) if not.
 				mkdirOutput := runShellCommand("rclone", "mkdir", "--drive-impersonate", rcloneUsername, rcloneRemote)

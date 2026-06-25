@@ -281,10 +281,10 @@ func main() {
 					fmt.Println("rcloneMkdirOutput: " + rcloneMkdirOutput)
 				}
 
-				// Make sure the local folder isn't already mounted.
-				umountOutput := runShellCommand("rclone", "umount", rcloneLocal)
+				// Make sure the local folder isn't already being used as a mount point.
+				umountOutput := runShellCommand("umount", rcloneLocal)
 				if umountOutput != "" {
-					fmt.Println("umountOutput: " + mkdirOutput)
+					fmt.Println("umountOutput: " + umountOutput)
 				}
 				
 				// Mount the remote folder using rclone.

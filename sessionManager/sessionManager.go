@@ -65,7 +65,7 @@ func startShellCommand(command string, args ...string) string {
 }
 
 func mkdirChown(theFolder string, theUserID string, theUserGID string) {
-	userDirErr = os.MkdirAll(theFolder, 0700)
+	userDirErr := os.MkdirAll(theFolder, 0700)
 	if userDirErr != nil {
 		http.Error(httpResponse, "Error creating directory: " + userDirErr.Error(), http.StatusInternalServerError)
 		return

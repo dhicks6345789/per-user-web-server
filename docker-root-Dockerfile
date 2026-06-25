@@ -19,7 +19,8 @@ RUN curl https://rclone.org/install.sh | bash
 
 
 
-# Install a Python development environment.
+# Install a Python development environment. Note: we can't generally use Python's "pip" package manager here, as Debian generally wants to install system-wide Python packages itself.
+# Therefore, we generally wind up using the Debian package of common Python libraries, some of which can be a few versions behind the most current.
 RUN apt-get install -y python3 python3-pip python3-venv
 
 # The Pandas data-processing library...
@@ -42,8 +43,12 @@ RUN apt-get install -y python3-numpy
 RUN apt-get install -y python3-pil
 
 # The Google GenAI package - used to access Google's generative AI services.
-# Debian doesn't package google-genai, so we can ignore pip's warning about installing system-wide.
-RUN pip install google-genai --break-system-packages
+# Not available as a Debian package to install via apt, so we install this in a globally-acceisble Python venv - first we create the venv...
+RUN python3 -m venv /opt/google_ai_env
+# ...install the google-geni package...
+RUN /opt/google_ai_env/bin/pip install google-genai
+# ...and link it so all users can see it.
+RUN echo "/opt/google_ai_env/lib/python3.11/site-packages" | tee /usr/local/lib/python3.11/dist-packages/google_ai.pth
 
 
 

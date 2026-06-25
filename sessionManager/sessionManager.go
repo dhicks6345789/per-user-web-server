@@ -261,6 +261,10 @@ func main() {
 			for _, rcloneOptions := range config.RcloneMounts {
 				// First, set up the values used in the rclone commands.
 				rcloneUsername := strings.ReplaceAll(rcloneOptions.Username, "{{USERNAME}}", username)
+				rcloneDriveImpersonate := []string{}
+				if rcloneUsername != "" {
+					rcloneDriveImpersonate = []string{"--drive-impersonate", rcloneUsername}
+				}
 				rcloneLocal := strings.ReplaceAll(rcloneOptions.Local, "{{USERNAME}}", username)
 				rcloneRemote := strings.ReplaceAll(rcloneOptions.Remote, "{{USERNAME}}", username)
 				
@@ -272,9 +276,9 @@ func main() {
 				}
 				
 				// Make sure the remote destination exists - create a new, empty folder (using rclone) if not.
-				mkdirOutput := runShellCommand("rclone", "mkdir", "--drive-impersonate", rcloneUsername, rcloneRemote)
-				if mkdirOutput != "" {
-					fmt.Println("mkdirOutput: " + mkdirOutput)
+				rcloneMkdirOutput := startShellCommand("rclone", append(append([]string{"mkdir"}, rcloneDriveImpersonate...), []string{rcloneUsername, rcloneRemote}...)
+				if rcloneMkdirOutput != "" {
+					fmt.Println("rcloneMkdirOutput: " + rcloneMkdirOutput)
 				}
 
 				// Make sure the local folder isn't already mounted.
@@ -284,12 +288,7 @@ func main() {
 				}
 				
 				// Mount the remote folder using rclone.
-				rcloneMountOptions := []string{"mount"}
-				if rcloneUsername != "" {
-					rcloneMountOptions = append(rcloneMountOptions, []string{"--drive-impersonate", rcloneUsername}...)
-				}
-				rcloneMountOptions = append(rcloneMountOptions, []string{"--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal}...)
-				rcloneMountOutput := startShellCommand("rclone", rcloneMountOptions...)
+				rcloneMountOutput := startShellCommand("rclone", append(append([]string{"mount"}, rcloneDriveImpersonate...), []string{"--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal}...)
 				if rcloneMountOutput != "" {
 					fmt.Println("rcloneMountOutput: " + rcloneMountOutput)
 				}

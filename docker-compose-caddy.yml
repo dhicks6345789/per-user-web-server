@@ -5,8 +5,9 @@
     restart: unless-stopped
     expose:
       - "80"
+      - "443"
     volumes:
-      - /opt/caddy:/etc/caddy
+      - /opt/caddy/Caddyfile:/etc/caddy/Caddyfile
       - /opt/caddy/data:/data
       - /opt/caddy/config:/config
       # We share the list of users and groups (read only) with the web server container so that CGI execute permissions (handled with the suEXEC module) can work properly.

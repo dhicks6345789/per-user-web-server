@@ -21,7 +21,7 @@ RUN curl https://rclone.org/install.sh | bash
 
 # Install a Python development environment. Note: we can't generally use Python's "pip" package manager here, as Debian generally wants to install system-wide Python packages itself.
 # Therefore, we generally wind up using the Debian package of common Python libraries, some of which can be a few versions behind the most current.
-RUN apt-get install -y python3 python3-pip python3-venv
+RUN apt-get install -y python3 python3-pip python3-venv python-is-python3
 
 # Figure out and store the Python install path and version for later use.
 RUN PYTHONVERSION=$(ls /usr/local/lib | grep python) && echo "PYTHONVERSION=$PYTHONVERSION" > /tmp/dockerEnv

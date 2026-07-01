@@ -7,10 +7,7 @@
       - "80"
       - "443"
     volumes:
-      - type: bind
-        source: /opt/caddy/Caddyfile
-        target: /etc/caddy/Caddyfile
-        read_only: true
+      - /opt/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - /opt/caddy/data:/data
       - /opt/caddy/config:/config
       # We share the list of users and groups (read only) with the web server container so that users and permissions match the host server.

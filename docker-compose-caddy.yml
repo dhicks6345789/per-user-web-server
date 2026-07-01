@@ -7,7 +7,6 @@
       - "80"
       - "443"
     volumes:
-    volumes:
       - type: bind
         source: /opt/caddy/Caddyfile
         target: /etc/caddy/Caddyfile

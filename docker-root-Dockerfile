@@ -66,3 +66,6 @@ RUN npm install -g @google/gemini-cli
 
 # Install Hugo, a static-site building tool.
 RUN apt-get install -y hugo
+
+# Install Pandoc, a tool for converting various document formats.
+RUN apt-get install -y pandoc

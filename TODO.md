@@ -23,6 +23,7 @@ Schools / education establishments are an intended target market (along with sma
 - [ ] User instance culling / suspension to free up resources - maybe see example Go project (URL?...)
 - [ ] Persistant SSH sessions? VNC is currently persistant (I think?), SSH opens a new session even if Guacamole disconnects for a few seconds.
 - [ ] Shared VNC / SSH sessions?
+- [ ] Raw SSH connections as well as through web page?
 - [ ] Make Pangolin optional - some users might want to use Cloudflare, etc, as their identity provider.
 - [ ] Does audio work on remote desktop? Does it need Audiomass installed?
 - [ ] Cotainers - possibly use "rootless Docker" mode to run user containers, then "root" inside containers gets mapped to standard user in bind-mount folders.
@@ -34,6 +35,8 @@ Schools / education establishments are an intended target market (along with sma
 - [ ] /docs, maybe integrate the [Euro Office](https://github.com/Euro-Office) editors?
 
 ## Potential Sub-Projects
+- [ ] Start menu - simple page-of-icons from a CSV (JSON? / YAML?) / spreadsheet.
+- [ ] Office-To-Markdown - use a set of office documents as input to static site generators.
 - [ ] An example Golang app repository, set up to produce a single executable (for multiple platforms) containing backend server, frontend HTML / Javascript user interface and OpenAPI documentation. Add suitible structure for AI assistance so someone can start staright away modifying single back-end .go file and one front-end file to create app with AI help.
 - [ ] As Go project above, but for Python's Flask web framework.
 

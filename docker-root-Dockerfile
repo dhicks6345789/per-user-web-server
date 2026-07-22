@@ -17,6 +17,9 @@ RUN apt-get install -y curl sudo wget nano procps unzip p7zip rsync dos2unix
 # Therefore, we install using rclone's own install script rather than via apt.
 RUN curl https://rclone.org/install.sh | bash
 
+# Install Poppler, a PDF rendering engine.
+RUN apt-get install -y poppler-utils
+
 
 
 # Install a Python development environment. Note: we can't generally use Python's "pip" package manager here, as Debian generally wants to install system-wide Python packages itself.

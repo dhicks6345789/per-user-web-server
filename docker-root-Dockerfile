@@ -20,6 +20,9 @@ RUN curl https://rclone.org/install.sh | bash
 # Install Poppler, a PDF rendering engine.
 RUN apt-get install -y poppler-utils
 
+# Install ffmpeg, a tool / library for handling video (and audio) files.
+RUN apt-get install -y ffmpeg
+
 
 
 # Install a Python development environment. Note: we can't generally use Python's "pip" package manager here, as Debian generally wants to install system-wide Python packages itself.

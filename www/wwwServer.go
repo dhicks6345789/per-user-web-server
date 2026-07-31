@@ -64,9 +64,17 @@ func main() {
 
 		// Check if the requested path exists on the file system - it might be a file or a folder.
 		requestStatInfo, requestStatErr := os.Stat(fullPath)
+		
+		// If the requested path doesn't exist, return an error.
 		if os.IsNotExist(requestStatErr) {
 			http.NotFound(w, r)
 			log.Print("wwwServer, request: " + requestPath + ", not found: " + fullPath)
+			return
+		}
+
+		// If it's a directory and the (original, not cleaned) path is missing a trailing slash, redirect - this is the standard way to handle directory requests, it causes browsers confusion with relative paths if not handled as standard.
+		if requestStatErr == nil && requestStatInfo.IsDir() && !strings.HasSuffix(r.URL.Path, "/") {
+			http.Redirect(w, r, r.URL.Path+"/", http.StatusMovedPermanently)
 			return
 		}
 

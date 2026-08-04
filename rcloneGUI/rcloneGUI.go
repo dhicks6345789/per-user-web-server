@@ -148,7 +148,7 @@ func main() {
 		if strings.HasPrefix(r.URL.Path, "/app") {
 			// Split the URL into 4 parts: "app", username, port, and everything else.
 			URLParts := strings.SplitN(strings.TrimPrefix(r.URL.Path, "/"), "/", 4)
-			if len(parts) >= 3 {
+			if len(URLParts) >= 3 {
 				URLUsername := URLParts[1]
 				URLPort := URLParts[2]
 				var URLRemainder string
@@ -156,7 +156,7 @@ func main() {
 					URLRemainder = parts[3]
 				}
 
-				proxy, password, exists := rcloneProxies.get(URLUsername)
+				proxy, _, exists := rcloneProxies.get(URLUsername)
 				if exists == true {
 					// Rewrite the URL to point at the given user's app.
 					r.URL.Path = URLRemainder + ":" + URLPort

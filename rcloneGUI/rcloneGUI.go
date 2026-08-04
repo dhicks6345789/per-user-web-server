@@ -118,6 +118,9 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 		
 		// Ensure the host header matches the target so Rclone doesn't reject it.
 		req.Host = proxyTargetURL.Host
+		
+		// Pass the original prefix so the downstream app can map static asset MIME types correctly.
+		req.Header.Set("X-Forwarded-Prefix", "/app/" + username + "/" + targetURLString)
 	}
 	
 	pr.mu.Lock() // Block readers and other writers.
@@ -193,7 +196,7 @@ func main() {
 			if exists == false {
 				password = connectToSession(URLUsername, false)
 				
-				If we get a blabk password, a session doesn't exist - return an error.
+				// If we get a blank password, a session doesn't exist - return an error.
 				if password == "" {
 					http.Error(w, "Application endpoint not found - user session for " + URLUsername + " not running.", http.StatusNotFound)
 					return

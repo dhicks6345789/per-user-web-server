@@ -120,7 +120,7 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 		req.Host = proxyTargetURL.Host
 		
 		// Pass the original prefix so the downstream app can map static asset MIME types correctly.
-		req.Header.Set("X-Forwarded-Prefix", "/app/" + username + "/" + targetURLString)
+		req.Header.Set("X-Forwarded-Prefix", "/app/" + username + "/" + targetURLStr)
 	}
 	
 	pr.mu.Lock() // Block readers and other writers.

@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 	"strings"
+	"strconv"
 	"net/url"
 	"net/http"
 	"net/http/httputil"
@@ -187,7 +188,7 @@ func main() {
 			}
 
 			// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
-			proxy, password, exists := rcloneProxies.get(username)
+			proxy, password, exists := rcloneProxies.get(URLUsername)
 			if exists == false {
 				// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
 				password = connectToSession(URLUsername, false)
@@ -198,7 +199,7 @@ func main() {
 				} else {
 					// Create a new proxy object to connect with.
 					rcloneProxies.set(URLUsername, password, "http://desktop-" + URLUsername + ":" + URLPort)
-					proxy, password, exists = rcloneProxies.get(username)
+					proxy, password, exists = rcloneProxies.get(URLUsername)
 				}
 			}
 			

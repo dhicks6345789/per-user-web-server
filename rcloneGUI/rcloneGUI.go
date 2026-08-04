@@ -52,14 +52,15 @@ func (pr *ProxyRegistry) get(username string) (*httputil.ReverseProxy, string, b
 	return proxy, password, exists
 }
 
-// Call the connectOrStartSession endpoint on the host's Session Manager to ensure that a "desktop" instance (which runs the rclone GUI server) is running for this user. That endpoint returns the user's generated password
+// Call the connectToSession endpoint on the host's Session Manager to ensure that a "desktop" instance (which runs the rclone GUI server) is running for this user. That endpoint returns the user's generated password
 // which we can use for connections.
 // To do: Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
-func connectOrStartSession(username string) (string) {
+func connectToSession(username string, startIfNotRunning bool) (string) {
 	// Define our form data to pass via POST to the sessionManager server, using url.Values...
 	sessionManagerData := url.Values{}
 	sessionManagerData.Set("username", username)
 	sessionManagerData.Set("image", "desktop")
+	sessionManagerData.Set("start", strconv.FormatBool(startIfNotRunning))
 	// ...and encode that data into a string in "bar=baz&foo=qux" format.
 	sessionManagerEncodedData := sessionManagerData.Encode()
 
@@ -69,7 +70,7 @@ func connectOrStartSession(username string) (string) {
 	}
 
 	// Create the POST request using strings.NewReader.
-	sessionManagerRequest, err := http.NewRequest("POST", "http://host.docker.internal:8091/connectOrStartSession", strings.NewReader(sessionManagerEncodedData))
+	sessionManagerRequest, err := http.NewRequest("POST", "http://host.docker.internal:8091/connectToSession", strings.NewReader(sessionManagerEncodedData))
 	if err != nil {
 		log.Printf("Error creating request: %v\n", err)
 		return ""
@@ -151,7 +152,7 @@ func main() {
 		proxy, password, exists := rcloneProxies.get(username)
 		if exists == false {
 			// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
-			password = connectOrStartSession(username)
+			password = connectToSession(username, true)
 
 			// Create a new proxy object to connect with.
 			rcloneProxies.set(username, password, "http://desktop-" + username + ":8090")

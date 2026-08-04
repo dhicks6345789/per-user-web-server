@@ -144,30 +144,52 @@ func main() {
 	rcloneHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
-		
-		// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
-		proxy, password, exists := rcloneProxies.get(username)
-		if exists == false {
-			// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
-			password = connectOrStartSession(username)
 
-			// Create a new proxy object to connect with.
-			rcloneProxies.set(username, password, "http://desktop-" + username + ":8090")
-			proxy, password, exists = rcloneProxies.get(username)
+		if strings.HasPrefix(r.URL.Path, "/app") {
+			// Split the URL into 4 parts: "app", username, port, and everything else.
+			URLParts := strings.SplitN(strings.TrimPrefix(r.URL.Path, "/"), "/", 4)
+			if len(parts) >= 3 {
+				URLUsername := URLParts[1]
+				URLPort := URLParts[2]
+				var URLRemainder string
+				if len(URLParts) == 4 {
+					URLRemainder = parts[3]
+				}
+
+				proxy, password, exists := rcloneProxies.get(URLUsername)
+				if exists == true {
+					// Rewrite the URL to point at the given user's app.
+					r.URL.Path = URLRemainder + ":" + URLPort
+				}
+
+				log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
+				proxy.ServeHTTP(w, r)
+			}
+		} else {
+			// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
+			proxy, password, exists := rcloneProxies.get(username)
+			if exists == false {
+				// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
+				password = connectOrStartSession(username)
+	
+				// Create a new proxy object to connect with.
+				rcloneProxies.set(username, password, "http://desktop-" + username + ":8090")
+				proxy, password, exists = rcloneProxies.get(username)
+			}
+			
+			// Rewrite the URL to remove the "/rclone" prefix.
+			r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
+			
+			// Redirect the "/" URL to include the (Base64-ed "username:password") login token (if it doesn't already) so the user is logged straight in rather than being shown the "login" screen.
+			if r.URL.Path == "/" && !r.URL.Query().Has("login_token") {
+				log.Printf("Redirecting request: %s %s", r.Method, r.URL.Path)
+				http.Redirect(w, r, "/rclone/?login_token=" + base64.StdEncoding.EncodeToString([]byte(username + ":" + password)), http.StatusSeeOther)
+				return
+			}
+			
+			log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
+			proxy.ServeHTTP(w, r)
 		}
-		
-		// Rewrite the URL to remove the "/rclone" prefix.
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
-		
-		// Redirect the "/" URL to include the (Base64-ed "username:password") login token (if it doesn't already) so the user is logged straight in rather than being shown the "login" screen.
-		if r.URL.Path == "/" && !r.URL.Query().Has("login_token") {
-			log.Printf("Redirecting request: %s %s", r.Method, r.URL.Path)
-			http.Redirect(w, r, "/rclone/?login_token=" + base64.StdEncoding.EncodeToString([]byte(username + ":" + password)), http.StatusSeeOther)
-			return
-		}
-		
-		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
-		proxy.ServeHTTP(w, r)
 	})
 	
 	http.Handle("/rclone/", http.StripPrefix("/rclone", rcloneHandler))

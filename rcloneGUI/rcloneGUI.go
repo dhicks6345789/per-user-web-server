@@ -175,29 +175,35 @@ func main() {
 	appHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Proxying app request: %s %s", r.Method, r.URL.Path)
 
-		// Split the URL into 4 parts: "app", username, port, and everything else.
-		URLParts := strings.SplitN(strings.TrimPrefix(r.URL.Path, "/"), "/", 4)
-		if len(URLParts) >= 3 {
-			URLUsername := URLParts[1]
-			URLPort := URLParts[2]
+		// Split the URL into 3 parts: username, port, and everything else.
+		URLParts := strings.SplitN(r.URL.Path, "/", 3)
+		if len(URLParts) >= 2 {
+			URLUsername := URLParts[0]
+			URLPort := URLParts[1]
 			var URLRemainder string
-			if len(URLParts) == 4 {
-				URLRemainder = URLParts[3]
+			if len(URLParts) == 3 {
+				URLRemainder = URLParts[2]
 			}
 
 			proxy, _, exists := rcloneProxies.get(URLUsername)
 			if exists == true {
 				// Rewrite the URL to point at the given user's app.
 				r.URL.Path = URLRemainder + ":" + URLPort
+			} else {
+				http.Error(w, "Application endpoint not found - server not running.", http.StatusNotFound)
+				return
 			}
 
 			log.Printf("Re-written app request: %s %s", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)
+		} else {
+			http.Error(w, "Endpoint not found - app routing requested, but not enough parts to URL.", http.StatusNotFound)
+			return
 		}
 	})
 	
-	http.Handle("/rclone/", http.StripPrefix("/rclone", rcloneHandler))
-	http.Handle("/app/", http.StripPrefix("/app", appHandler))
+	http.Handle("/rclone/", http.StripPrefix("/rclone/", rcloneHandler))
+	http.Handle("/app/", http.StripPrefix("/app/", appHandler))
 	
 	// Execution starts here.
 	log.Println("rcloneGUI starting on :8080...")

@@ -153,7 +153,7 @@ func main() {
 				URLPort := URLParts[2]
 				var URLRemainder string
 				if len(URLParts) == 4 {
-					URLRemainder = parts[3]
+					URLRemainder = URLParts[3]
 				}
 
 				proxy, _, exists := rcloneProxies.get(URLUsername)

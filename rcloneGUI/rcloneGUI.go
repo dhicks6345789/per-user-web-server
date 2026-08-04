@@ -187,12 +187,13 @@ func main() {
 				URLRemainder = URLParts[2]
 			}
 
-			// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
+			// See if a user session to the given user's Desktop Docker container (which is where the "app" / server will be running) exists. Don't create a session if one doesn't exist,
+			// that's up to the user themselves.
 			proxy, password, exists := rcloneProxies.get(URLUsername)
 			if exists == false {
-				// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
 				password = connectToSession(URLUsername, false)
 				
+				If we get a blabk password, a session doesn't exist - return an error.
 				if password == "" {
 					http.Error(w, "Application endpoint not found - user session for " + URLUsername + " not running.", http.StatusNotFound)
 					return

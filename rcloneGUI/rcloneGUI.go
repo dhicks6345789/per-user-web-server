@@ -142,10 +142,10 @@ func fileExists(thePath string) bool {
 
 func main() {
 	rcloneHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Proxying rclone request: %s %s", r.Method, r.URL.Path)
+		
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
-
-		log.Printf("Proxying rclone request: %s %s", r.Method, r.URL.Path)
 		
 		// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
 		proxy, password, exists := rcloneProxies.get(username)
@@ -158,8 +158,8 @@ func main() {
 			proxy, password, exists = rcloneProxies.get(username)
 		}
 		
-		// Rewrite the URL to remove the "/rclone" prefix.
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
+		// // Rewrite the URL to remove the "/rclone" prefix.
+		// r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
 		
 		// Redirect the "/" URL to include the (Base64-ed "username:password") login token (if it doesn't already) so the user is logged straight in rather than being shown the "login" screen.
 		if r.URL.Path == "/" && !r.URL.Query().Has("login_token") {
@@ -173,9 +173,6 @@ func main() {
 	})
 	
 	appHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
-		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
-
 		log.Printf("Proxying app request: %s %s", r.Method, r.URL.Path)
 
 		// Split the URL into 4 parts: "app", username, port, and everything else.

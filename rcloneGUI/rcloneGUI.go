@@ -145,6 +145,8 @@ func main() {
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 
+		log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
+
 		if strings.HasPrefix(r.URL.Path, "/app") {
 			// Split the URL into 4 parts: "app", username, port, and everything else.
 			URLParts := strings.SplitN(strings.TrimPrefix(r.URL.Path, "/"), "/", 4)
@@ -162,7 +164,7 @@ func main() {
 					r.URL.Path = URLRemainder + ":" + URLPort
 				}
 
-				log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
+				log.Printf("Re-written request: %s %s", r.Method, r.URL.Path)
 				proxy.ServeHTTP(w, r)
 			}
 		} else {
@@ -187,7 +189,7 @@ func main() {
 				return
 			}
 			
-			log.Printf("Proxying request: %s %s", r.Method, r.URL.Path)
+			log.Printf("Re-written request: %s %s", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)
 		}
 	})

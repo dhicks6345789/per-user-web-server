@@ -186,14 +186,24 @@ func main() {
 				URLRemainder = URLParts[2]
 			}
 
-			proxy, _, exists := rcloneProxies.get(URLUsername)
-			if exists == true {
-				// Rewrite the URL to point at the given user's app.
-				r.URL.Path = URLRemainder + ":" + URLPort
-			} else {
-				http.Error(w, "Application endpoint not found - user session for " + URLUsername + " not running.", http.StatusNotFound)
-				return
+			// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
+			proxy, password, exists := rcloneProxies.get(username)
+			if exists == false {
+				// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
+				password = connectToSession(URLUsername, false)
+				
+				if password == "" {
+					http.Error(w, "Application endpoint not found - user session for " + URLUsername + " not running.", http.StatusNotFound)
+					return
+				} else {
+					// Create a new proxy object to connect with.
+					rcloneProxies.set(URLUsername, password, "http://desktop-" + URLUsername + ":" + URLPort)
+					proxy, password, exists = rcloneProxies.get(username)
+				}
 			}
+			
+			// Rewrite the URL to point at the given user's app.
+			r.URL.Path = URLRemainder + ":" + URLPort
 
 			log.Printf("Re-written app request: %s %s", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)

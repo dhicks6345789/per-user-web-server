@@ -146,7 +146,7 @@ func main() {
 	// Usage: POST /connectOrStartSession?username=USERNAME&image=IMAGENAME
 	// Returns: JSON { portNumber, password }
 	// If an existing session already exists for the user it returns the details for that, otherwise it starts a new session (container).
-	http.HandleFunc("/connectOrStartSession", func(httpResponse http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/connectToSession", func(httpResponse http.ResponseWriter, r *http.Request) {
 		// Parse the HTTP GET/POST request form data.
 		if err := r.ParseForm(); err != nil {
 			http.Error(httpResponse, "Error parsing form", http.StatusBadRequest)
@@ -155,6 +155,7 @@ func main() {
 		// Get any passed variables using FormValue or PostForm.
 		username := strings.TrimSpace(r.FormValue("username"))
 		imageName := strings.TrimSpace(r.FormValue("image"))
+		startIfNotRunning := strings.TrimSpace(r.FormValue("start"))
 		if username == "" {
 			http.Error(httpResponse, "Missing 'username' parameter", http.StatusBadRequest)
 			return
@@ -191,8 +192,15 @@ func main() {
 		// Generate the Argon2-hashed password. Parameters are: time (in iterations), memory (in bytes), threads, key length.
 		VNCPassword := hex.EncodeToString(argon2.IDKey([]byte(username), randomSeed, 1, 64*1024, 4, 32))
 
-		// If no existing session found, start one.
+		// If no existing session found, possibly start one.
 		if VNCPort == 0 {
+			// An existing session hasn't been found, but we don't want to create one, so return to the caller.
+			if startIfNotRunning != "true" {
+				httpResponse.Header().Set("Content-Type", "application/json")
+				fmt.Fprintf(httpResponse, "{\"portNumber\":\"0\", \"password\":\"\"}")
+				return
+			}
+			
 			// Start an instance of our named Docker container - see for example code:
 			// https://docs.docker.com/reference/api/engine/sdk/examples/
 			// And for create options:

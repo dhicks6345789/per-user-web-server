@@ -204,7 +204,8 @@ func main() {
 			}
 			
 			// Rewrite the URL to point at the given user's app.
-			r.URL.Path = URLRemainder + ":" + URLPort
+			//r.URL.Path = URLRemainder + ":" + URLPort
+			r.URL.Path = "/" + URLRemainder
 
 			log.Printf("Re-written app request: %s %s", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)

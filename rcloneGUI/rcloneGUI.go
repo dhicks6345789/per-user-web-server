@@ -207,7 +207,7 @@ func main() {
 			//r.URL.Path = URLRemainder + ":" + URLPort
 			r.URL.Path = "/" + URLRemainder
 
-			log.Printf("Re-written app request: %s %s", r.Method, r.URL.Path)
+			log.Printf("Re-written app request: %s %s %s", r.Method, r.URL.Path, r.Header.Get("Content-Type"))
 			proxy.ServeHTTP(w, r)
 		} else {
 			http.Error(w, "Endpoint not found - app routing requested, but not enough parts to URL.", http.StatusNotFound)

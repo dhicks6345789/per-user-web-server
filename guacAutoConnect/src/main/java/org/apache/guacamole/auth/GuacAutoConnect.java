@@ -76,7 +76,7 @@ public class GuacAutoConnect extends SimpleAuthenticationProvider {
     // Call the Session Manager service to tell it the user wants to connect to a VM instance via VNC.
     // We pass in the username, if there's a free slot available we should get back a password we can use to connect to the VNC session.
     HttpClient sessionManagerClient = HttpClient.newHttpClient();
-    HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectOrStartSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username + "&image=" + imageName)).build();
+    HttpRequest sessionManagerRequest = HttpRequest.newBuilder().uri(URI.create("http://host.docker.internal:8091/connectToSession")).header("Content-Type", "application/x-www-form-urlencoded").POST(BodyPublishers.ofString("username=" + username + "&image=" + imageName + "&start=true")).build();
     try {
       HttpResponse<String> sessionManagerResponse = sessionManagerClient.send(sessionManagerRequest, HttpResponse.BodyHandlers.ofString());
       logger.info("Session Manager responded: " + sessionManagerResponse.body());

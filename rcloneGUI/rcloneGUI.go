@@ -190,7 +190,7 @@ func main() {
 				// Rewrite the URL to point at the given user's app.
 				r.URL.Path = URLRemainder + ":" + URLPort
 			} else {
-				http.Error(w, "Application endpoint not found - server not running.", http.StatusNotFound)
+				http.Error(w, "Application endpoint not found - user session for " + URLUsername + " not running.", http.StatusNotFound)
 				return
 			}
 

@@ -213,8 +213,8 @@ func main() {
 			r.URL.Path = "/" + URLRemainder
 
 			if r.URL.Path == "/" && !strings.HasSuffix(originalPath, "/") {
-				log.Printf("Redirecting (Error 301): %s %s", r.Method, r.URL.Path)
-				http.Redirect(w, r, originalPath+"/", http.StatusMovedPermanently)
+				log.Printf("Redirecting (Error 301) root request with no trailing slash (see RFC 3986): %s %s", r.Method, r.URL.Path)
+				http.Redirect(w, r, "/app/" + originalPath + "/", http.StatusMovedPermanently)
 				return
 			}
 			

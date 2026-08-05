@@ -213,11 +213,12 @@ func main() {
 			r.URL.Path = "/" + URLRemainder
 
 			if r.URL.Path == "/" && !strings.HasSuffix(originalPath, "/") {
+				log.Printf("Redirecting (Error 301): %s %s", r.Method, r.URL.Path)
 				http.Redirect(w, r, originalPath+"/", http.StatusMovedPermanently)
 				return
 			}
 			
-			log.Printf("Re-written app request: %s %s %s", r.Method, r.URL.Path, r.Header.Get("Content-Type"))
+			log.Printf("Re-written app request: %s %s", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)
 		} else {
 			http.Error(w, "Endpoint not found - app routing requested, but not enough parts to URL.", http.StatusNotFound)

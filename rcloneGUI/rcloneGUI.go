@@ -180,6 +180,8 @@ func main() {
 	appHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Proxying app request: %s %s", r.Method, r.URL.Path)
 
+		originalPath := r.URL.Path
+
 		// Split the URL into 3 parts: username, port, and everything else.
 		URLParts := strings.SplitN(r.URL.Path, "/", 3)
 		if len(URLParts) >= 2 {
@@ -208,9 +210,13 @@ func main() {
 			}
 			
 			// Rewrite the URL to point at the given user's app.
-			//r.URL.Path = URLRemainder + ":" + URLPort
 			r.URL.Path = "/" + URLRemainder
 
+			if r.URL.Path == "/" && !strings.HasSuffix(originalPath, "/") {
+				http.Redirect(w, r, originalPath+"/", http.StatusMovedPermanently)
+				return
+			}
+			
 			log.Printf("Re-written app request: %s %s %s", r.Method, r.URL.Path, r.Header.Get("Content-Type"))
 			proxy.ServeHTTP(w, r)
 		} else {

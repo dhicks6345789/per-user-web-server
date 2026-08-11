@@ -112,4 +112,4 @@ COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-roo
 COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
 
 # Clean up apt repository lists.
-# RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 
 # Install some basic utilities.
-RUN apt-get install -y curl sudo wget nano procps unzip p7zip rsync dos2unix
+RUN apt-get install -y curl sudo wget nano procps unzip p7zip rsync dos2unix ca-certificates gnupg
 
 # Install rclone, a tool for handling cloud / remote file systems. Debian does include a packaged version of rclone,
 # but as of May 2026 that version is older than the one we want to use - we want a version with the built-in GUI capability.
@@ -67,12 +67,22 @@ RUN apt-get install -y python3-pil
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs npm
 
-# Install the Google Gemini command-line (CLI) tool - depends on Node.js.
-# RUN npm install -g @google/gemini-cli
-# To do: replace with Google Antigravity, seems to be Google's replacement for Gemini CLI.
-
 # Install OpenCode, a terminal-based AI agent development tool.
-RUN npm install -g opencode-cli
+RUN npm install -g opencode-ai
+
+# Install Pi, a lighter-weight terminal-based AI coding agent.
+RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+
+# Install Antigravity, Google's command-line coding tool.
+RUN mkdir -p /etc/apt/keyrings
+# Download and import the GPG key.
+RUN curl -fsSL https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg | gpg --dearmor -o /etc/apt/keyrings/antigravity-repo-key.gpg
+# Add the official APT repository source.
+RUN echo "deb [signed-by=/etc/apt/keyrings/antigravity-repo-key.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/antigravity-deb stable main" | tee /etc/apt/sources.list.d/antigravity.list
+# Update APT cache and install the package globally.
+RUN apt-get update && apt-get install -y --no-install-recommends antigravity
+
+
 
 # Install Hugo, a static-site building tool.
 RUN apt-get install -y hugo

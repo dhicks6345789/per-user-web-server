@@ -65,11 +65,14 @@ RUN apt-get install -y python3-pil
 
 # Install a Node.js development environment.
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
+RUN apt-get install -y nodejs npm
 
 # Install the Google Gemini command-line (CLI) tool - depends on Node.js.
 # RUN npm install -g @google/gemini-cli
 # To do: replace with Google Antigravity, seems to be Google's replacement for Gemini CLI.
+
+# Install OpenCode, a terminal-based AI agent development tool.
+RUN npm install -g opencode-cli
 
 # Install Hugo, a static-site building tool.
 RUN apt-get install -y hugo

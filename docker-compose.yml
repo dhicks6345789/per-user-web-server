@@ -96,6 +96,25 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # Our own Admin Control Panel - a web-based dashboard for system administrators, showing the status of the server
+  # (running sessions / containers and host resource usage). Served to admins only via Pangolin (which handles the
+  # "admin" role check), talking to the host-side Session Manager using the shared admin key below.
+  adminpanel:
+    image: {{DOCKERADMINPANEL_DOCKER_IMAGE}}
+    command: /usr/local/bin/adminPanel
+    container_name: adminpanel
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      # The shared admin key, used to authenticate with the Session Manager. Must match the "adminKey" value in the
+      # Session Manager's config file (/etc/puws/config.yml). Substituted by the install script.
+      ADMIN_KEY: {{ADMINPANEL_ADMIN_KEY}}
+    networks:
+      - main
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   # Our own Web Console server.
   webconsole:
     image: {{DOCKERWEBCONSOLE_DOCKER_IMAGE}}

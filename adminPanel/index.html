@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Control Panel</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --border: #d9dce1;
+    --text: #1f2933;
+    --muted: #5f6b7a;
+    --accent: #2563eb;
+    --ok: #16a34a;
+    --bad: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; margin: 0; }
+  header .sub { color: var(--muted); font-size: 14px; }
+  header button {
+    margin-left: auto;
+    padding: 6px 14px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    cursor: pointer;
+  }
+  main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 8px; }
+  .card .value { font-size: 18px; font-weight: 600; }
+  .bar {
+    background: #e5e7eb;
+    border-radius: 4px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .bar > div { height: 100%; background: var(--accent); }
+  .card table { border-collapse: collapse; width: 100%; }
+  .card th, .card td { text-align: left; padding: 6px 8px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .card th { color: var(--muted); font-weight: 600; }
+  .state { padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .state.running { background: #dcfce7; color: var(--ok); }
+  .state.exited, .state.dead { background: #fee2e2; color: var(--bad); }
+  .state.creating, .state.restarting { background: #fef9c3; color: #854d0e; }
+  .error { background: #fee2e2; color: var(--bad); border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+  .meta { text-align: center; color: var(--muted); font-size: 13px; padding: 16px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Admin Control Panel</h1>
+  <span class="sub" id="header-sub">Per-User Web Server</span>
+  <button onclick="refreshStatus()">Refresh</button>
+</header>
+
+<main>
+  <div class="error" id="error" style="display:none;"></div>
+
+  <section class="cards" id="summary">
+    <div class="card"><h2>Hostname</h2><div class="value" id="hostname">-</div></div>
+    <div class="card"><h2>Uptime</h2><div class="value" id="uptime">-</div></div>
+    <div class="card"><h2>CPU Count</h2><div class="value" id="cpu-count">-</div></div>
+  </section>
+
+  <section class="cards" style="margin-top:16px;">
+    <div class="card">
+      <h2>Memory</h2>
+      <div class="value" id="memory">-</div>
+      <div class="bar"><div id="memory-bar" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <h2>Disk</h2>
+      <div class="value" id="disk">-</div>
+      <div class="bar"><div id="disk-bar" style="width:0%"></div></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px;">
+    <h2>Sessions / Containers</h2>
+    <div id="sessions-empty" style="color:var(--muted); font-size:14px;">No data yet...</div>
+    <table id="sessions" style="display:none;">
+      <thead>
+        <tr><th>Name</th><th>Image</th><th>State</th><th>Status</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <div class="meta" id="updated"></div>
+</main>
+
+<script>
+// Simple helpers for turning numbers into human-readable values.
+function formatBytes(bytes) {
+  if (bytes === 0) return "0 B";
+  const units = ["B", "kB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / Math.pow(1024, i)).toFixed(1) + " " + units[i];
+}
+function formatPercent(used, total) {
+  if (!total) return "0%";
+  return Math.round((used / total) * 100) + "%";
+}
+
+// Fetches the server status from the "/api/status" endpoint and updates the page.
+async function refreshStatus() {
+  const errorEl = document.getElementById("error");
+  try {
+    const response = await fetch("/api/status");
+    if (!response.ok) {
+      throw new Error("Server returned status " + response.status + " (" + response.statusText + ")");
+    }
+    const data = await response.json();
+    errorEl.style.display = "none";
+
+    document.getElementById("hostname").textContent = data.hostname;
+    document.getElementById("uptime").textContent = data.uptime;
+    document.getElementById("cpu-count").textContent = data.cpuCount;
+
+    // Memory and disk bars, showing how much of each is in use.
+    const memUsed = data.memTotalKb - data.memAvailableKb;
+    const memEl = document.getElementById("memory");
+    memEl.textContent = formatBytes(memUsed * 1024) + " used of " + formatBytes(data.memTotalKb * 1024);
+    document.getElementById("memory-bar").style.width = formatPercent(memUsed, data.memTotalKb);
+
+    const diskUsed = data.diskTotalBytes - data.diskAvailableBytes;
+    const diskEl = document.getElementById("disk");
+    diskEl.textContent = formatBytes(diskUsed) + " used of " + formatBytes(data.diskTotalBytes);
+    document.getElementById("disk-bar").style.width = formatPercent(diskUsed, data.diskTotalBytes);
+
+    // The sessions table.
+    const sessionsTable = document.getElementById("sessions");
+    const sessionsEmpty = document.getElementById("sessions-empty");
+    const sessionsBody = sessionsTable.querySelector("tbody");
+    sessionsBody.innerHTML = "";
+    if (data.sessions.length === 0) {
+      sessionsTable.style.display = "none";
+      sessionsEmpty.style.display = "block";
+    } else {
+      sessionsEmpty.style.display = "none";
+      sessionsTable.style.display = "table";
+      for (const session of data.sessions) {
+        const row = document.createElement("tr");
+        row.innerHTML = "<td></td><td></td><td><span class=\"state\"></span></td><td></td>";
+        const cells = row.querySelectorAll("td");
+        cells[0].textContent = session.name;
+        cells[1].textContent = session.image;
+        cells[2].querySelector(".state").textContent = session.state;
+        cells[2].querySelector(".state").classList.add(session.state);
+        cells[3].textContent = session.status;
+        sessionsBody.appendChild(row);
+      }
+    }
+
+    document.getElementById("updated").textContent = "Last updated: " + new Date().toLocaleTimeString();
+  } catch (err) {
+    errorEl.textContent = "Could not load status: " + err.message;
+    errorEl.style.display = "block";
+  }
+}
+
+// Refresh immediately on page load, and then every 15 seconds.
+refreshStatus();
+setInterval(refreshStatus, 15000);
+</script>
+</body>
+</html>

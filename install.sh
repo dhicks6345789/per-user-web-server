@@ -12,6 +12,7 @@ DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 DOCKERWEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-dockerwebconsole:0.1-beta.3"
 DOCKERRCLONEGUI_DOCKER_IMAGE="sansay.co.uk-dockerrclonegui:0.1-beta.3"
+DOCKERADMINPANEL_DOCKER_IMAGE="sansay.co.uk-dockeradminpanel:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
 DOCKEREXAMS_DOCKER_IMAGE="sansay.co.uk-dockerexams:0.1-beta.3"
@@ -301,6 +302,16 @@ if [ ! -f "per-user-web-server/rcloneGUI/rcloneGUI" ]; then
     exit 1
 fi
 
+echo Building the Go admin control panel.
+cd per-user-web-server/adminPanel
+bash build.sh
+cd ..
+cd ..
+if [ ! -f "per-user-web-server/adminPanel/adminPanel" ]; then
+    echo "Problem building the Go admin control panel - stopping."
+    exit 1
+fi
+
 echo Building the custom Java authentication plugin for Guacamole...
 rm per-user-web-server/guacAutoConnect/target/guacamole-auto-connect-1.6.0.jar
 cd per-user-web-server/guacAutoConnect; mvn package; cd ..; cd ..
@@ -436,6 +447,10 @@ if [ $INSTALL_PANGOLIN = true ]; then
     cp per-user-web-server/docker-rcloneGUI-Dockerfile .
     docker build -f docker-rcloneGUI-Dockerfile --progress=plain --tag=$DOCKERRCLONEGUI_DOCKER_IMAGE . 2>&1
 
+    echo "Building our Docker image for the admin control panel."
+    cp per-user-web-server/docker-adminPanel-Dockerfile .
+    docker build -f docker-adminPanel-Dockerfile --progress=plain --tag=$DOCKERADMINPANEL_DOCKER_IMAGE . 2>&1
+
     if [ $RUN_CADDY = true ]; then
         if [ ! -f "/opt/caddy/Caddyfile" ]; then
             sudo mkdir -p /opt/caddy
@@ -485,6 +500,23 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERWEBCONSOLE_DOCKER_IMAGE}}/$DOCKERWEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERRCLONEGUI_DOCKER_IMAGE}}/$DOCKERRCLONEGUI_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERADMINPANEL_DOCKER_IMAGE}}/$DOCKERADMINPANEL_DOCKER_IMAGE/g" docker-compose.yml
+
+    # Make sure the Session Manager config file (/etc/puws/config.yml) has an admin key set. This is the shared
+    # secret the admin control panel uses to authenticate with the Session Manager. If the file doesn't exist or
+    # has no key set, generate a fresh random one - if a key is already there, use that value so it stays persistent.
+    mkdir -p /etc/puws
+    if [ ! -f /etc/puws/config.yml ]; then
+        ADMINPANEL_ADMIN_KEY=`cat /dev/urandom | tr -dc 'a-f0-9' | head -c 64`
+        echo "adminKey: $ADMINPANEL_ADMIN_KEY" > /etc/puws/config.yml
+    elif ! grep -q "^adminKey:" /etc/puws/config.yml; then
+        ADMINPANEL_ADMIN_KEY=`cat /dev/urandom | tr -dc 'a-f0-9' | head -c 64`
+        echo "adminKey: $ADMINPANEL_ADMIN_KEY" >> /etc/puws/config.yml
+    else
+        ADMINPANEL_ADMIN_KEY=`grep "^adminKey:" /etc/puws/config.yml | head -1 | cut -d ' ' -f2`
+    fi
+
+    sed -i "s/{{ADMINPANEL_ADMIN_KEY}}/$ADMINPANEL_ADMIN_KEY/g" docker-compose.yml
     sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
     # Start up the Docker containers.

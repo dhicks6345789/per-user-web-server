@@ -18,7 +18,10 @@ import (
 	"net/http"
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
+	"encoding/json"
+	"syscall"
 	"path/filepath"
 
 	// Only needed if we need to map a container's port to the host for VNC debugging purposes.
@@ -45,6 +48,8 @@ type RcloneMount struct {
 }
 type Config struct {
 	RcloneMounts []RcloneMount `yaml:"rcloneMounts"`
+	// A shared key used to protect the admin-only endpoints (used by the admin control panel). If empty, admin endpoints are disabled.
+	AdminKey string `yaml:"adminKey"`
 }
 
 func runShellCommand(command string, args ...string) string {
@@ -76,6 +81,67 @@ func mkdirChown(theFolder string, theUserUID int, theUserGID int) string {
 	return ""
 }
 
+// A helper function to check the admin key presented by a caller (the admin control panel) against the key stored in the config file.
+// A timing-safe comparison is used so the two keys can't be guessed by measuring how long the comparison takes.
+func isValidAdminKey(r *http.Request, configKey string) bool {
+	// If no admin key is set in the config file, the admin endpoints are disabled - fail closed.
+	if configKey == "" {
+		return false
+	}
+	// Get the key the caller passed in the header.
+	requestKey := r.Header.Get("X-Admin-Key")
+	if requestKey == "" {
+		return false
+	}
+	// Compare the two keys in a timing-safe way.
+	return subtle.ConstantTimeCompare([]byte(requestKey), []byte(configKey)) == 1
+}
+
+// Reads the total and available memory from /proc/meminfo, returning the values in kilobytes.
+func readMemoryInfo() (int64, int64, error) {
+	memInfoFile, openErr := os.Open("/proc/meminfo")
+	if openErr != nil {
+		return 0, 0, openErr
+	}
+	defer memInfoFile.Close()
+
+	var memTotal int64 = 0
+	var memAvailable int64 = 0
+	memScanner := bufio.NewScanner(memInfoFile)
+	for memScanner.Scan() {
+		// Each line looks like "MemTotal:       16299248 kB" - split into the label and the value.
+		memFields := strings.Fields(memScanner.Text())
+		if len(memFields) < 2 {
+			continue
+		}
+		memValue, parseErr := strconv.ParseInt(memFields[1], 10, 64)
+		if parseErr != nil {
+			continue
+		}
+		switch memFields[0] {
+		case "MemTotal:":
+			memTotal = memValue
+		case "MemAvailable:":
+			memAvailable = memValue
+		}
+	}
+	if memScanner.Err() != nil {
+		return 0, 0, memScanner.Err()
+	}
+	return memTotal, memAvailable, nil
+}
+
+// Reads the total and available disk space on the root file system, returning the values in bytes.
+func readDiskInfo() (uint64, uint64, error) {
+	var diskStat syscall.Statfs_t
+	statfsErr := syscall.Statfs("/", &diskStat)
+	if statfsErr != nil {
+		return 0, 0, statfsErr
+	}
+	// Note: "Bavail" is the space available to unprivileged users, so it doesn't include the blocks reserved for root.
+	return diskStat.Blocks * uint64(diskStat.Bsize), diskStat.Bavail * uint64(diskStat.Bsize), nil
+}
+
 func main() {
 	// We want each desktop instance to have a separate, un-guessable VNC password. However, we also want that password to be consistant so we can easily reconnect a user to their session.
 	// Rather than hold session passwords in memory, we use a hash function to generate a password for each session from the username and a secret seed value.
@@ -103,7 +169,7 @@ func main() {
 			return
 		}
 		// ...and write it to the seed file.
-		fmt.Fprintf(newSeedFile, hex.EncodeToString(seedBytes))
+		newSeedFile.WriteString(hex.EncodeToString(seedBytes))
 		newSeedFile.Close()
 	} else if seedFileErr != nil {
 		fmt.Println("An error occurred while checking the file: " + seedPath + ", " + seedFileErr.Error())
@@ -427,7 +493,78 @@ func main() {
 
 		// If we've got to this point, we should have a running container with a VNC session started up on a known port and with a known password.
 		httpResponse.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(httpResponse, "{\"portNumber\":\"" + strconv.Itoa(int(VNCPort)) + "\", \"password\":\"" + VNCPassword + "\"}")
+		fmt.Fprintf(httpResponse, "{\"portNumber\":\"%s\", \"password\":\"%s\"}", strconv.Itoa(int(VNCPort)), VNCPassword)
+	})
+
+	// The following endpoints provide a read-only "control panel" for system administrators, used by the web-based admin panel.
+	// The endpoints are protected by a shared admin key, set in the config file, which the admin panel presents via the "X-Admin-Key" header.
+
+	// Endpoint /admin/status - returns the status of the server: running sessions (Docker containers) and host resource usage.
+	// Usage: GET /admin/status
+	// Returns: JSON with a list of sessions and host resource usage values.
+	http.HandleFunc("/admin/status", func(httpResponse http.ResponseWriter, r *http.Request) {
+		// Check the caller is presenting the correct admin key.
+		if !isValidAdminKey(r, config.AdminKey) {
+			http.Error(httpResponse, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Build up the response data, which we'll encode to JSON before sending back.
+		responseData := make(map[string]any)
+
+		// The hostname of the machine the Session Manager is running on.
+		hostname, hostnameErr := os.Hostname()
+		if hostnameErr != nil {
+			http.Error(httpResponse, "Error getting hostname: " + hostnameErr.Error(), http.StatusInternalServerError)
+			return
+		}
+		responseData["hostname"] = hostname
+
+		// Get a list of the existing containers (sessions) from Docker.
+		containers, containersErr := cli.ContainerList(context.Background(), client.ContainerListOptions{})
+		if containersErr != nil {
+			http.Error(httpResponse, "Error listing containers: " + containersErr.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Go through the containers, adding the important details of each one to our response.
+		var sessions []map[string]string
+		for _, item := range containers.Items {
+			sessions = append(sessions, map[string]string{
+				"name":   strings.TrimPrefix(item.Names[0], "/"),
+				"image":  item.Image,
+				"state":  string(item.State),
+				"status": item.Status,
+			})
+		}
+		responseData["sessions"] = sessions
+
+		// Host resource usage - system uptime, number of CPUs, memory and disk usage.
+		responseData["uptime"] = runShellCommand("uptime")
+		responseData["cpuCount"] = strings.TrimSpace(runShellCommand("nproc"))
+		memTotal, memAvailable, memErr := readMemoryInfo()
+		if memErr != nil {
+			http.Error(httpResponse, "Error reading memory info: " + memErr.Error(), http.StatusInternalServerError)
+			return
+		}
+		responseData["memTotalKb"] = memTotal
+		responseData["memAvailableKb"] = memAvailable
+		diskTotal, diskAvailable, diskErr := readDiskInfo()
+		if diskErr != nil {
+			http.Error(httpResponse, "Error reading disk info: " + diskErr.Error(), http.StatusInternalServerError)
+			return
+		}
+		responseData["diskTotalBytes"] = diskTotal
+		responseData["diskAvailableBytes"] = diskAvailable
+
+		// Encode the response data as a JSON string and return it to the caller.
+		jsonData, jsonErr := json.Marshal(responseData)
+		if jsonErr != nil {
+			http.Error(httpResponse, "Error encoding JSON: " + jsonErr.Error(), http.StatusInternalServerError)
+			return
+		}
+		httpResponse.Header().Set("Content-Type", "application/json")
+		httpResponse.Write(jsonData)
 	})
 
 	fmt.Println("Server starting on :8091...")

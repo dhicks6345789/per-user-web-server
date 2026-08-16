@@ -1,0 +1,5 @@
+# This container just needs to run our own custom Go application, so the minimal Alpine image should do nicely.
+FROM alpine:latest
+
+COPY per-user-web-server/adminPanel/adminPanel /usr/local/bin/adminPanel
+EXPOSE 8080

@@ -97,16 +97,18 @@ func isValidAdminKey(r *http.Request, configKey string) bool {
 	return subtle.ConstantTimeCompare([]byte(requestKey), []byte(configKey)) == 1
 }
 
-// Reads the total and available memory from /proc/meminfo, returning the values in kilobytes.
-func readMemoryInfo() (int64, int64, error) {
+// Reads the total and available memory and swap from /proc/meminfo, returning the values in kilobytes.
+func readMemoryInfo() (int64, int64, int64, int64, error) {
 	memInfoFile, openErr := os.Open("/proc/meminfo")
 	if openErr != nil {
-		return 0, 0, openErr
+		return 0, 0, 0, 0, openErr
 	}
 	defer memInfoFile.Close()
 
 	var memTotal int64 = 0
 	var memAvailable int64 = 0
+	var swapTotal int64 = 0
+	var swapFree int64 = 0
 	memScanner := bufio.NewScanner(memInfoFile)
 	for memScanner.Scan() {
 		// Each line looks like "MemTotal:       16299248 kB" - split into the label and the value.
@@ -123,12 +125,16 @@ func readMemoryInfo() (int64, int64, error) {
 			memTotal = memValue
 		case "MemAvailable:":
 			memAvailable = memValue
+		case "SwapTotal:":
+			swapTotal = memValue
+		case "SwapFree:":
+			swapFree = memValue
 		}
 	}
 	if memScanner.Err() != nil {
-		return 0, 0, memScanner.Err()
+		return 0, 0, 0, 0, memScanner.Err()
 	}
-	return memTotal, memAvailable, nil
+	return memTotal, memAvailable, swapTotal, swapFree, nil
 }
 
 // Reads the total and available disk space on the root file system, returning the values in bytes.
@@ -542,13 +548,15 @@ func main() {
 		// Host resource usage - system uptime, number of CPUs, memory and disk usage.
 		responseData["uptime"] = runShellCommand("uptime")
 		responseData["cpuCount"] = strings.TrimSpace(runShellCommand("nproc"))
-		memTotal, memAvailable, memErr := readMemoryInfo()
+		memTotal, memAvailable, swapTotal, swapFree, memErr := readMemoryInfo()
 		if memErr != nil {
 			http.Error(httpResponse, "Error reading memory info: " + memErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		responseData["memTotalKb"] = memTotal
 		responseData["memAvailableKb"] = memAvailable
+		responseData["swapTotalKb"] = swapTotal
+		responseData["swapAvailableKb"] = swapFree
 		diskTotal, diskAvailable, diskErr := readDiskInfo()
 		if diskErr != nil {
 			http.Error(httpResponse, "Error reading disk info: " + diskErr.Error(), http.StatusInternalServerError)

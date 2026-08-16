@@ -94,6 +94,11 @@
       <div class="bar"><div id="memory-bar" style="width:0%"></div></div>
     </div>
     <div class="card">
+      <h2>Swap</h2>
+      <div class="value" id="swap">-</div>
+      <div class="bar"><div id="swap-bar" style="width:0%"></div></div>
+    </div>
+    <div class="card">
       <h2>Disk</h2>
       <div class="value" id="disk">-</div>
       <div class="bar"><div id="disk-bar" style="width:0%"></div></div>
@@ -128,10 +133,16 @@ function formatPercent(used, total) {
 }
 
 // Fetches the server status from the "/api/status" endpoint and updates the page.
+// The panel can be mounted at the domain root or under a sub-path (e.g. via a reverse
+// proxy that strips a path prefix), so the API URL is built from the page's own path.
+function statusUrl() {
+  const base = location.pathname.replace(/\/+$/, "");
+  return base + "/api/status";
+}
 async function refreshStatus() {
   const errorEl = document.getElementById("error");
   try {
-    const response = await fetch("/api/status");
+    const response = await fetch(statusUrl());
     if (!response.ok) {
       throw new Error("Server returned status " + response.status + " (" + response.statusText + ")");
     }
@@ -147,6 +158,11 @@ async function refreshStatus() {
     const memEl = document.getElementById("memory");
     memEl.textContent = formatBytes(memUsed * 1024) + " used of " + formatBytes(data.memTotalKb * 1024);
     document.getElementById("memory-bar").style.width = formatPercent(memUsed, data.memTotalKb);
+
+    const swapUsed = data.swapTotalKb - data.swapAvailableKb;
+    const swapEl = document.getElementById("swap");
+    swapEl.textContent = formatBytes(swapUsed * 1024) + " used of " + formatBytes(data.swapTotalKb * 1024);
+    document.getElementById("swap-bar").style.width = formatPercent(swapUsed, data.swapTotalKb);
 
     const diskUsed = data.diskTotalBytes - data.diskAvailableBytes;
     const diskEl = document.getElementById("disk");

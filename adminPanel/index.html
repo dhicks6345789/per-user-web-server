@@ -116,6 +116,29 @@
     </table>
   </section>
 
+  <section class="card" style="margin-top:16px;">
+    <h2>Auto Start</h2>
+    <div class="value" style="font-size:14px; font-weight:400; color:var(--muted);">Sessions to start automatically when the server restarts, without the user logging in to the "/desktop" or "/ssh" endpoints first.</div>
+    <table id="autostart" style="display:none; margin-top:8px;">
+      <thead>
+        <tr><th>Auto start</th><th>User</th><th>Image</th><th>State</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="autostart-empty" style="color:var(--muted); font-size:14px; margin-top:8px;">No sessions yet...</div>
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <input id="autostart-user" placeholder="Username" style="padding:6px 10px; font-size:14px; border:1px solid var(--border); border-radius:6px;">
+      <select id="autostart-image" style="padding:6px 10px; font-size:14px; border:1px solid var(--border); border-radius:6px;">
+        <option value="desktop">desktop</option>
+        <option value="wine">wine</option>
+        <option value="calc">calc</option>
+        <option value="exams">exams</option>
+      </select>
+      <button onclick="addAutoStart()" style="padding:6px 14px; font-size:14px; border:1px solid var(--border); border-radius:6px; background:var(--card); cursor:pointer;">Add auto start</button>
+    </div>
+    <div id="autostart-message" style="margin-top:8px; font-size:13px;"></div>
+  </section>
+
   <div class="meta" id="updated"></div>
 </main>
 
@@ -135,9 +158,12 @@ function formatPercent(used, total) {
 // Fetches the server status from the "/api/status" endpoint and updates the page.
 // The panel can be mounted at the domain root or under a sub-path (e.g. via a reverse
 // proxy that strips a path prefix), so the API URL is built from the page's own path.
-function statusUrl() {
+function apiUrl(path) {
   const base = location.pathname.replace(/\/+$/, "");
-  return base + "/api/status";
+  return base + path;
+}
+function statusUrl() {
+  return apiUrl("/api/status");
 }
 async function refreshStatus() {
   const errorEl = document.getElementById("error");
@@ -193,11 +219,115 @@ async function refreshStatus() {
       }
     }
 
+    // The auto-start list.
+    autoStartEntries = data.autostart || [];
+    renderAutoStart(data.sessions);
+
     document.getElementById("updated").textContent = "Last updated: " + new Date().toLocaleTimeString();
   } catch (err) {
     errorEl.textContent = "Could not load status: " + err.message;
     errorEl.style.display = "block";
   }
+}
+
+// The current session auto-start list, as loaded from the server.
+let autoStartEntries = [];
+
+// Builds and fills in the auto-start table. Shows every existing session (running or stopped),
+// plus any auto-start entries that don't yet have a session, so the admin can check or uncheck them.
+function renderAutoStart(sessions) {
+  const table = document.getElementById("autostart");
+  const empty = document.getElementById("autostart-empty");
+  const tbody = table.querySelector("tbody");
+  tbody.innerHTML = "";
+
+  // Build the list of rows: every existing session, plus any auto-start entry without a session.
+  const rows = [];
+  const seen = new Set();
+  for (const s of sessions) {
+    rows.push({ imageName: s.imageName, username: s.username, state: s.state, autoStart: s.autoStart === "true" });
+    seen.add(s.imageName + "\0" + s.username);
+  }
+  for (const entry of autoStartEntries) {
+    const key = entry.image + "\0" + entry.username;
+    if (!seen.has(key)) {
+      rows.push({ imageName: entry.image, username: entry.username, state: "not created", autoStart: true });
+      seen.add(key);
+    }
+  }
+  rows.sort((a, b) => a.username.localeCompare(b.username) || a.imageName.localeCompare(b.imageName));
+
+  if (rows.length === 0) {
+    table.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  table.style.display = "table";
+  for (const row of rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = "<td><input type=\"checkbox\"></td><td></td><td></td><td><span class=\"state\"></span></td>";
+    const checkbox = tr.querySelector("input");
+    checkbox.checked = row.autoStart;
+    checkbox.dataset.image = row.imageName;
+    checkbox.dataset.user = row.username;
+    checkbox.addEventListener("change", saveAutoStart);
+    const cells = tr.querySelectorAll("td");
+    cells[1].textContent = row.username;
+    cells[2].textContent = row.imageName;
+    const stateEl = cells[3].querySelector(".state");
+    stateEl.textContent = row.state;
+    stateEl.classList.add(row.state);
+    tbody.appendChild(tr);
+  }
+}
+
+// Sends the current state of the auto-start checkboxes to the server, replacing the saved list.
+async function saveAutoStart() {
+  const message = document.getElementById("autostart-message");
+  const sessions = [];
+  document.querySelectorAll("#autostart tbody input[type=checkbox]").forEach(checkbox => {
+    if (checkbox.checked) {
+      sessions.push({ image: checkbox.dataset.image, username: checkbox.dataset.user });
+    }
+  });
+  autoStartEntries = sessions;
+  try {
+    const response = await fetch(apiUrl("/api/autostart"), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessions })
+    });
+    if (!response.ok) {
+      throw new Error("Server returned status " + response.status + " (" + response.statusText + ")");
+    }
+    message.textContent = "Auto start list saved. Changes take effect when the server next restarts.";
+    message.style.color = "var(--ok)";
+  } catch (err) {
+    message.textContent = "Error saving auto start list: " + err.message;
+    message.style.color = "var(--bad)";
+  }
+}
+
+// Adds a brand-new auto-start entry (for a user who doesn't have a session yet) and saves the list.
+async function addAutoStart() {
+  const userInput = document.getElementById("autostart-user");
+  const imageSelect = document.getElementById("autostart-image");
+  const message = document.getElementById("autostart-message");
+  const username = userInput.value.trim();
+  const image = imageSelect.value;
+  if (!username) {
+    message.textContent = "Enter a username.";
+    message.style.color = "var(--bad)";
+    return;
+  }
+  const key = image + "\0" + username;
+  if (!autoStartEntries.some(e => e.image + "\0" + e.username === key)) {
+    autoStartEntries.push({ image, username });
+  }
+  userInput.value = "";
+  await saveAutoStart();
+  refreshStatus();
 }
 
 // Refresh immediately on page load, and then every 15 seconds.

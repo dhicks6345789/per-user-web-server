@@ -60,27 +60,19 @@ func main() {
 		}
 	}
 
-	// The admin dashboard web page.
-	http.HandleFunc("/", adminOnly(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write(indexHTML)
-	}))
-
-	// The JSON API endpoint that fetches the server status from the Session Manager and returns it
-	// to the dashboard page.
-	http.HandleFunc("/api/status", adminOnly(func(w http.ResponseWriter, r *http.Request) {
-		// Build a request to the Session Manager's admin status endpoint...
-		sessionManagerRequest, requestErr := http.NewRequest(http.MethodGet, sessionManagerURL+"/admin/status", nil)
+	// A helper that proxies a request through to the Session Manager's admin API, adding the shared
+	// admin key and passing the method, body and status code straight back to the caller.
+	proxyToSessionManager := func(w http.ResponseWriter, r *http.Request, sessionManagerPath string) {
+		sessionManagerRequest, requestErr := http.NewRequest(r.Method, sessionManagerURL+sessionManagerPath, r.Body)
 		if requestErr != nil {
 			http.Error(w, "Error building Session Manager request: "+requestErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		// ...adding the shared admin key as a header.
 		sessionManagerRequest.Header.Set(adminKeyHeader, adminKey)
+		if contentType := r.Header.Get("Content-Type"); contentType != "" {
+			sessionManagerRequest.Header.Set("Content-Type", contentType)
+		}
 
 		// Send the request to the Session Manager.
 		sessionManagerClient := &http.Client{}
@@ -95,6 +87,29 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(sessionManagerResponse.StatusCode)
 		io.Copy(w, sessionManagerResponse.Body)
+	}
+
+	// The admin dashboard web page.
+	http.HandleFunc("/", adminOnly(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(indexHTML)
+	}))
+
+	// The JSON API endpoint that fetches the server status from the Session Manager and returns it
+	// to the dashboard page.
+	http.HandleFunc("/api/status", adminOnly(func(w http.ResponseWriter, r *http.Request) {
+		proxyToSessionManager(w, r, "/admin/status")
+	}))
+
+	// The JSON API endpoint that reads or updates the session auto-start list (the sessions that
+	// should be started automatically when the server restarts), passing requests through to the
+	// Session Manager.
+	http.HandleFunc("/api/autostart", adminOnly(func(w http.ResponseWriter, r *http.Request) {
+		proxyToSessionManager(w, r, "/admin/autostart")
 	}))
 
 	// Execution starts here.

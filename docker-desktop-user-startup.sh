@@ -22,7 +22,7 @@ echo "Starting rclone GUI server, username $1, password $4 on port 8090."
 rclone rcd --rc-web-gui --rc-addr 0.0.0.0:8090 --rc-web-gui-no-open-browser --rc-user $1 --rc-pass $4 --rc-serve &
 
 if [ -f "~/startup.sh" ]; then
-  bash ~/startup.sh
+  bash ~/startup.sh $1 $2 $3 $4 $5
 fi
 
 echo "Starting VNC server, password $4 on display number $5."

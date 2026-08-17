@@ -1,27 +1,28 @@
 /*
-	The session manager for the per-user-web-server (PUWS) project. Sits on the main host server and communicates with / manages Docker containers,
-	in particular the desktop instances of users who are connecting via Guacamole.
+The session manager for the per-user-web-server (PUWS) project. Sits on the main host server and communicates with / manages Docker containers,
+in particular the desktop instances of users who are connecting via Guacamole.
 */
 package main
 
 import (
-	"os"
-	"os/exec"
-	"os/user"
-	"fmt"
-	"log"
-	"time"
 	"bufio"
-	"strings"
-	"strconv"
-	"net/http"
 	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
-	"syscall"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
+	"os/user"
 	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
 
 	// Only needed if we need to map a container's port to the host for VNC debugging purposes.
 	//"net/netip"
@@ -33,10 +34,10 @@ import (
 	"golang.org/x/crypto/argon2"
 
 	// The Docker management library - originally docker/docker, but now called "moby".
-	"github.com/moby/moby/client"
 	"github.com/moby/moby/api/types/container"
-	"github.com/moby/moby/api/types/network"
 	"github.com/moby/moby/api/types/mount"
+	"github.com/moby/moby/api/types/network"
+	"github.com/moby/moby/client"
 )
 
 // Define structs to hold YAML config data.
@@ -107,6 +108,33 @@ func isValidAdminKey(r *http.Request, configKey string) bool {
 	}
 	// Compare the two keys in a timing-safe way.
 	return subtle.ConstantTimeCompare([]byte(requestKey), []byte(configKey)) == 1
+}
+
+// readUserList reads /etc/passwd and returns the usernames of all Linux users with a UID of 1001 or
+// higher (i.e. the "real" users of the system, as opposed to system accounts). Used by the admin panel
+// to offer a drop-down of users that can be added to the session auto-start list.
+func readUserList() []string {
+	passwdFile, openErr := os.Open("/etc/passwd")
+	if openErr != nil {
+		fmt.Println("Error opening /etc/passwd: " + openErr.Error())
+		return nil
+	}
+	defer passwdFile.Close()
+
+	var users []string
+	passwdScanner := bufio.NewScanner(passwdFile)
+	for passwdScanner.Scan() {
+		// Each line looks like "username:x:1001:1001:Full Name:/home/username:/bin/bash".
+		fields := strings.Split(passwdScanner.Text(), ":")
+		if len(fields) < 3 {
+			continue
+		}
+		uid, uidErr := strconv.ParseInt(fields[2], 10, 64)
+		if uidErr == nil && uid >= 1001 && fields[0] != "" && fields[0] != "nobody" {
+			users = append(users, fields[0])
+		}
+	}
+	return users
 }
 
 // Reads the total and available memory and swap from /proc/meminfo, returning the values in kilobytes.
@@ -199,6 +227,69 @@ func isAutoStartSession(autoStartSessions []AutoStartEntry, imageName string, us
 	return false
 }
 
+// A mutex and set used to make sure we never try to start the same auto-start session twice at
+// once (for example, from both the periodic retry loop and an admin "save" at the same time).
+var autoStartMu sync.Mutex
+var autoStartStarting = map[string]bool{}
+
+// The interval between checks that make sure all auto-start sessions are running.
+const autoStartRetryInterval = 30 * time.Second
+
+// isSessionRunning reports whether a session (Docker container) for the given image and username
+// currently exists and is running.
+func isSessionRunning(cli *client.Client, imageName string, username string) (bool, error) {
+	existingSession, existingErr := findSession(cli, imageName, username)
+	if existingErr != nil {
+		return false, existingErr
+	}
+	return existingSession != nil && existingSession.State == "running", nil
+}
+
+// startAutoStartSession starts a session marked for auto-start, guarding against two callers
+// starting the same session at the same time. It logs the result rather than returning it, as it
+// is always called from a background goroutine.
+func startAutoStartSession(cli *client.Client, config Config, randomSeed []byte, username string, imageName string) {
+	sessionKey := imageName + "\x00" + username
+	autoStartMu.Lock()
+	if autoStartStarting[sessionKey] {
+		autoStartMu.Unlock()
+		return
+	}
+	autoStartStarting[sessionKey] = true
+	autoStartMu.Unlock()
+
+	if startErr := startSession(cli, config, randomSeed, username, imageName); startErr != "" {
+		log.Println("Error auto-starting session for user " + username + " (" + imageName + "): " + startErr)
+	} else {
+		fmt.Println("Auto-started session for user " + username + " (" + imageName + ")")
+	}
+
+	autoStartMu.Lock()
+	delete(autoStartStarting, sessionKey)
+	autoStartMu.Unlock()
+}
+
+// ensureAutoStartSessions makes sure every session in the given auto-start list that isn't already
+// running gets started, each in its own goroutine so a slow-starting container doesn't hold up the
+// others or the caller. A session that is already running is left alone.
+func ensureAutoStartSessions(cli *client.Client, config Config, randomSeed []byte, sessions []AutoStartEntry) {
+	for _, entry := range sessions {
+		if entry.Username == "" || entry.Image == "" {
+			log.Println("Skipping invalid auto-start entry: " + entry.Image + " / " + entry.Username)
+			continue
+		}
+		running, runningErr := isSessionRunning(cli, entry.Image, entry.Username)
+		if runningErr != nil {
+			log.Println("Error checking auto-start session for user " + entry.Username + ": " + runningErr.Error())
+			continue
+		}
+		if running {
+			continue
+		}
+		go startAutoStartSession(cli, config, randomSeed, entry.Username, entry.Image)
+	}
+}
+
 // findSession looks for an existing container (running or stopped) for the given image and username,
 // named "imageName-username". Returns nil if no matching container is found.
 func findSession(cli *client.Client, imageName string, username string) (*container.Summary, error) {
@@ -231,7 +322,7 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 		return "Error listing containers: " + existingErr.Error()
 	}
 	if existingSession != nil {
-		fmt.Println("Starting existing " + imageName + " session for user: ", username)
+		fmt.Println("Starting existing "+imageName+" session for user: ", username)
 		_, containerStartErr := cli.ContainerStart(context.Background(), existingSession.ID, client.ContainerStartOptions{})
 		if containerStartErr != nil {
 			return "Error starting container for user " + username + ": " + containerStartErr.Error()
@@ -239,7 +330,7 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 		return ""
 	}
 
-	fmt.Println("Starting " + imageName + " session for user: ", username)
+	fmt.Println("Starting "+imageName+" session for user: ", username)
 
 	// Make sure there is a user with that username on the host machine so that when we create folders to mount in their Docker image they have the appropriate ownership and permissions.
 	userUIDStr := ""
@@ -268,19 +359,19 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 	if userGIDErr != nil {
 		return "Error getting user GID: " + userGIDErr.Error()
 	}
-	
+
 	// We're about to create a container that mounts the user's /var/www/username and /etc/webconsole/tasks/username folders.
 	// First, make sure those folders exist, and that they are owned by the matching user and have
 	// permissions of 711 (drwx--x--x) so that other users won't be able to access the folders.
-	mkdirErr := mkdirChown("/var/www/" + username, userUID, userGID)
+	mkdirErr := mkdirChown("/var/www/"+username, userUID, userGID)
 	if mkdirErr != "" {
 		return mkdirErr
 	}
-	mkdirErr = mkdirChown("/etc/webconsole/tasks/" + username, userUID, userGID)
+	mkdirErr = mkdirChown("/etc/webconsole/tasks/"+username, userUID, userGID)
 	if mkdirErr != "" {
 		return mkdirErr
 	}
-	
+
 	// Go through the config (which is simply empty by default) and use rclone to mount any remote folders.
 	for _, rcloneOptions := range config.RcloneMounts {
 		// First, set up the values used in the rclone commands.
@@ -297,19 +388,19 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 		if umountOutput != "" {
 			fmt.Println("umountOutput: " + umountOutput)
 		}
-		
+
 		// Make sure the local folder exists and is owned by the user.
 		mkdirErr = mkdirChown(rcloneLocal, userUID, userGID)
 		if mkdirErr != "" {
 			return mkdirErr
 		}
-		
+
 		// Make sure the remote destination exists - create a new, empty folder (using rclone) if not.
 		rcloneMkdirOutput := startShellCommand("rclone", append(append([]string{"mkdir"}, rcloneDriveImpersonate...), []string{rcloneUsername, rcloneRemote}...)...)
 		if rcloneMkdirOutput != "" {
 			fmt.Println("rcloneMkdirOutput: " + rcloneMkdirOutput)
 		}
-		
+
 		// Mount the remote folder using rclone.
 		rcloneMountOutput := startShellCommand("rclone", append(append([]string{"mount"}, rcloneDriveImpersonate...), []string{"--vfs-cache-mode", "full", "--allow-other", rcloneRemote, rcloneLocal}...)...)
 		if rcloneMountOutput != "" {
@@ -330,14 +421,14 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 			time.Sleep(1 * time.Second)
 		}
 	}
-	
+
 	// Create the container that holds the user's VNC session.
 	containerContext := context.Background()
 	exposedPort, _ := network.ParsePort(strconv.Itoa(int(VNCPort)) + "/TCP")
 	resp, containerCreateErr := cli.ContainerCreate(containerContext, client.ContainerCreateOptions{
 		Config: &container.Config{
 			// Expose the VNC port number we want to use to connect to the VNC instance running in this container.
-			ExposedPorts: network.PortSet{exposedPort:{}},
+			ExposedPorts: network.PortSet{exposedPort: {}},
 			// Pass in the VNC password and display number to the custom startup script that runs inside the container.
 			Cmd: []string{"bash", "/root/docker-" + imageName + "-root-startup.sh", username, userUIDStr, userGIDStr, VNCPassword, strconv.Itoa(VNCDisplay)},
 			Tty: false,
@@ -355,24 +446,24 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 				// We mount the host's user's home folder into the container. We have to match up the UIDs for the host and containers, hence us having to pass in the
 				// host user's UID to the container's startup script.
 				mount.Mount{
-					Type: mount.TypeBind,
-					Source: "/home/" + username,
-					Target: "/home/" + username,
+					Type:     mount.TypeBind,
+					Source:   "/home/" + username,
+					Target:   "/home/" + username,
 					ReadOnly: false,
 				},
 				// We mount the host www folder into the container. This is separate from the user's main home folder, we have a (custom) web server in a separate container
 				// that serves user websites. This means a user doesn't have to have an active desktop session running for their website files to be served.
 				mount.Mount{
-					Type: mount.TypeBind,
-					Source: "/var/www/" + username,
-					Target: "/home/" + username + "/www",
+					Type:     mount.TypeBind,
+					Source:   "/var/www/" + username,
+					Target:   "/home/" + username + "/www",
 					ReadOnly: false,
 				},
 				// We mount the host /etc/webconsole/tasks folder into the container. This lets the user create and edit Web Console Tasks.
 				mount.Mount{
-					Type: mount.TypeBind,
-					Source: "/etc/webconsole/tasks/" + username,
-					Target: "/home/" + username + "/webconsole",
+					Type:     mount.TypeBind,
+					Source:   "/etc/webconsole/tasks/" + username,
+					Target:   "/home/" + username + "/webconsole",
 					ReadOnly: false,
 				},
 			},
@@ -392,14 +483,14 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 	if containerStartErr != nil {
 		return "Error starting container for user " + username + ", " + containerStartErr.Error()
 	}
-	
+
 	// Get a reader object to read the container logs so we can check to see when the VNC server has started up.
-	logReader, logReaderErr := cli.ContainerLogs(containerContext, resp.ID, client.ContainerLogsOptions{ShowStdout:true, ShowStderr:true, Follow:true, Timestamps:true, Tail:"all"})
+	logReader, logReaderErr := cli.ContainerLogs(containerContext, resp.ID, client.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true, Timestamps: true, Tail: "all"})
 	if logReaderErr != nil {
 		return "Error getting reader from container, " + logReaderErr.Error()
 	}
 	defer logReader.Close()
-	
+
 	// Create a new buffered scanner object so we can read the container logs a line at a time, looping until we see the "Starting VNC server" message.
 	logScanner := bufio.NewScanner(logReader)
 	logLine := ""
@@ -409,7 +500,7 @@ func startSession(cli *client.Client, config Config, randomSeed []byte, username
 		fmt.Println(logLine)
 		time.Sleep(1 * time.Second)
 	}
-	
+
 	// Report any errors during the log reading process.
 	if logScannerErr := logScanner.Err(); logScannerErr != nil {
 		return "Error getting reader from container, " + logScannerErr.Error()
@@ -453,11 +544,11 @@ func main() {
 
 	// Get the random seed value.
 	randomSeed, randomSeedErr := os.ReadFile(seedPath)
-    if randomSeedErr != nil {
+	if randomSeedErr != nil {
 		fmt.Println("Error reading random seed value from file: " + seedPath + ", " + randomSeedErr.Error())
-        return
-    }
-	
+		return
+	}
+
 	// Create an empty instance of the Config struct...
 	var config Config
 	// ...and read config data - just skip if there's no config file, the config variable will simply remain empty.
@@ -473,7 +564,7 @@ func main() {
 	} else {
 		fmt.Println("No config file found at " + configPath + ", using default values.")
 	}
-	
+
 	// Initialize the Docker client. It automatically looks for the Docker socket (unix:///var/run/docker.sock).
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -482,7 +573,7 @@ func main() {
 	defer cli.Close()
 
 	// To do: somewhere, add a periodic function that can do things like close sessions that have been disconnected from for a set time.
-	
+
 	// Endpoint connectToSession - returns a port number and password to connect with VNC.
 	// Usage: POST /connectToSession?username=USERNAME&image=IMAGENAME
 	// Returns: JSON { portNumber, password }
@@ -558,7 +649,7 @@ func main() {
 		// The hostname of the machine the Session Manager is running on.
 		hostname, hostnameErr := os.Hostname()
 		if hostnameErr != nil {
-			http.Error(httpResponse, "Error getting hostname: " + hostnameErr.Error(), http.StatusInternalServerError)
+			http.Error(httpResponse, "Error getting hostname: "+hostnameErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		responseData["hostname"] = hostname
@@ -566,14 +657,14 @@ func main() {
 		// Get a list of the existing containers (sessions) from Docker, including any that are stopped.
 		containers, containersErr := cli.ContainerList(context.Background(), client.ContainerListOptions{All: true})
 		if containersErr != nil {
-			http.Error(httpResponse, "Error listing containers: " + containersErr.Error(), http.StatusInternalServerError)
+			http.Error(httpResponse, "Error listing containers: "+containersErr.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		// Load the current auto-start list, so we can mark which sessions have been selected for it.
 		autoStartSessions, autoStartErr := loadAutoStart()
 		if autoStartErr != nil {
-			http.Error(httpResponse, "Error loading auto-start list: " + autoStartErr.Error(), http.StatusInternalServerError)
+			http.Error(httpResponse, "Error loading auto-start list: "+autoStartErr.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -602,12 +693,15 @@ func main() {
 		responseData["sessions"] = sessions
 		responseData["autostart"] = autoStartSessions
 
+		// The list of Linux users (UID 1001+) the admin can pick from when adding to the auto-start list.
+		responseData["users"] = readUserList()
+
 		// Host resource usage - system uptime, number of CPUs, memory and disk usage.
 		responseData["uptime"] = runShellCommand("uptime")
 		responseData["cpuCount"] = strings.TrimSpace(runShellCommand("nproc"))
 		memTotal, memAvailable, swapTotal, swapFree, memErr := readMemoryInfo()
 		if memErr != nil {
-			http.Error(httpResponse, "Error reading memory info: " + memErr.Error(), http.StatusInternalServerError)
+			http.Error(httpResponse, "Error reading memory info: "+memErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		responseData["memTotalKb"] = memTotal
@@ -616,7 +710,7 @@ func main() {
 		responseData["swapAvailableKb"] = swapFree
 		diskTotal, diskAvailable, diskErr := readDiskInfo()
 		if diskErr != nil {
-			http.Error(httpResponse, "Error reading disk info: " + diskErr.Error(), http.StatusInternalServerError)
+			http.Error(httpResponse, "Error reading disk info: "+diskErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		responseData["diskTotalBytes"] = diskTotal
@@ -625,7 +719,7 @@ func main() {
 		// Encode the response data as a JSON string and return it to the caller.
 		jsonData, jsonErr := json.Marshal(responseData)
 		if jsonErr != nil {
-			http.Error(httpResponse, "Error encoding JSON: " + jsonErr.Error(), http.StatusInternalServerError)
+			http.Error(httpResponse, "Error encoding JSON: "+jsonErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		httpResponse.Header().Set("Content-Type", "application/json")
@@ -648,12 +742,12 @@ func main() {
 			// Load the current auto-start list and return it to the caller.
 			autoStartSessions, autoStartErr := loadAutoStart()
 			if autoStartErr != nil {
-				http.Error(httpResponse, "Error loading auto-start list: " + autoStartErr.Error(), http.StatusInternalServerError)
+				http.Error(httpResponse, "Error loading auto-start list: "+autoStartErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			jsonData, jsonErr := json.Marshal(AutoStartConfig{Sessions: autoStartSessions})
 			if jsonErr != nil {
-				http.Error(httpResponse, "Error encoding JSON: " + jsonErr.Error(), http.StatusInternalServerError)
+				http.Error(httpResponse, "Error encoding JSON: "+jsonErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			httpResponse.Header().Set("Content-Type", "application/json")
@@ -663,7 +757,7 @@ func main() {
 			var newConfig AutoStartConfig
 			decoderErr := json.NewDecoder(r.Body).Decode(&newConfig)
 			if decoderErr != nil {
-				http.Error(httpResponse, "Error parsing request: " + decoderErr.Error(), http.StatusBadRequest)
+				http.Error(httpResponse, "Error parsing request: "+decoderErr.Error(), http.StatusBadRequest)
 				return
 			}
 			// Check each entry has a username and an image, ignoring any that don't, and removing duplicates.
@@ -684,13 +778,17 @@ func main() {
 			}
 			// Save the new list to the config file.
 			if saveErr := saveAutoStart(validSessions); saveErr != nil {
-				http.Error(httpResponse, "Error saving auto-start list: " + saveErr.Error(), http.StatusInternalServerError)
+				http.Error(httpResponse, "Error saving auto-start list: "+saveErr.Error(), http.StatusInternalServerError)
 				return
 			}
+			// Start any auto-start sessions that aren't already running, so the admin's selection takes
+			// effect straight away. Each is started in its own goroutine so the request can return before
+			// the container finishes booting up.
+			ensureAutoStartSessions(cli, config, randomSeed, validSessions)
 			// Return the saved list to the caller.
 			jsonData, jsonErr := json.Marshal(AutoStartConfig{Sessions: validSessions})
 			if jsonErr != nil {
-				http.Error(httpResponse, "Error encoding JSON: " + jsonErr.Error(), http.StatusInternalServerError)
+				http.Error(httpResponse, "Error encoding JSON: "+jsonErr.Error(), http.StatusInternalServerError)
 				return
 			}
 			httpResponse.Header().Set("Content-Type", "application/json")
@@ -700,25 +798,20 @@ func main() {
 		}
 	})
 
-	// Start any sessions marked for auto-start in the config file, so users don't have to log in to a
-	// "/desktop" or "/ssh" endpoint first. Done in the background so it doesn't hold up the server
-	// while each container boots up.
+	// Make sure every session marked for auto-start in the config file is actually running, so users
+	// don't have to log in to a "/desktop" or "/ssh" endpoint first. Auto-start is attempted straight
+	// away at startup, then retried periodically, because a transient failure (such as the container
+	// image not being ready yet) could otherwise leave a session permanently down. Done in the
+	// background so it doesn't hold up the server while each container boots up.
 	go func() {
-		autoStartSessions, autoStartErr := loadAutoStart()
-		if autoStartErr != nil {
-			log.Println("Error loading auto-start list: " + autoStartErr.Error())
-			return
-		}
-		for _, entry := range autoStartSessions {
-			if entry.Username == "" || entry.Image == "" {
-				log.Println("Skipping invalid auto-start entry: " + entry.Image + " / " + entry.Username)
-				continue
-			}
-			if startErr := startSession(cli, config, randomSeed, entry.Username, entry.Image); startErr != "" {
-				log.Println("Error auto-starting session for user " + entry.Username + " (" + entry.Image + "): " + startErr)
+		for {
+			autoStartSessions, autoStartErr := loadAutoStart()
+			if autoStartErr != nil {
+				log.Println("Error loading auto-start list: " + autoStartErr.Error())
 			} else {
-				fmt.Println("Auto-started session for user " + entry.Username + " (" + entry.Image + ")")
+				ensureAutoStartSessions(cli, config, randomSeed, autoStartSessions)
 			}
+			time.Sleep(autoStartRetryInterval)
 		}
 	}()
 

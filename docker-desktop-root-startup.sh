@@ -57,13 +57,8 @@ service ssh start
 
 
 
-# Let users be able to set systemd services to start on system startup.
-loginctl enable-linger $1
-
-
-
 # Set up and run the user startup script, as the user.
-cp /root/docker-desktop-user-startup.sh /home/$1/startup.sh
-chown $1:$1 /home/$1/startup.sh
-chmod u+x /home/$1/startup.sh
-su - $1 -c "bash /home/$1/startup.sh $1 $2 $3 $4 $5"
+cp /root/docker-desktop-user-startup.sh /home/$1/.startup.sh
+chown $1:$1 /home/$1/.startup.sh
+chmod u+x /home/$1/.startup.sh
+su - $1 -c "bash /home/$1/.startup.sh $1 $2 $3 $4 $5"

@@ -8,7 +8,6 @@ Schools / education establishments are an intended target market (along with sma
 
 ## To-Do
 - [ ] Obfuscate usernames / email addresses when passed through via headers, to aid with data protection / safeguarding in school environments.
-- [ ] 
 - [ ] /rclone endpoint:
   - [ ] Works to redirect web interface, but needs to be able to redirect separate port (consistent port number?) to receive OAuth data. Might need custom-compiled version of rclone (which we already have, just needs adding in). Might need rcloneGUI proxy re-working into more general-purpose proxy tool (for webconsole and user app access)
   - [ ] Might want to add auto-mount of added rclone remotes. Would mean watching central rclone.config directory for user changes, then running mount operation on trigger.

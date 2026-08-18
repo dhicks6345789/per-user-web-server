@@ -328,15 +328,17 @@ if [ ! -d "/var/www" ]; then
     mkdir -p /var/www
 fi
 chmod 711 /var/www
-cp /root/docs-to-markdown/startScreen/startScreenIndex.html /var/www/index.html
 
-echo Get docs-to-markdown.
-if [ ! -d "docs-to-markdown" ]; then
-    git clone -b WebconsoleUpdate https://github.com/dhicks6345789/docs-to-markdown.git
+echo Get office-to-markdown.
+if [ ! -d "office-to-markdown" ]; then
+    git clone -b WebconsoleUpdate https://github.com/dhicks6345789/office-to-markdown.git
 fi
-cd docs-to-markdown
+cd office-to-markdown
 git pull
 cd ..
+
+# Use the "startScreenIndex.html" file as the index file for the main "users" web server.
+cp /root/office-to-markdown/startScreen/startScreenIndex.html /var/www/index.html
 
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then

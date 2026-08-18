@@ -192,7 +192,7 @@ if [ ! -f "/usr/bin/curl" ]; then
 fi
 
 # Make sure CSVKit (used for converting Excel files to CSV) is installed.
-if [ ! -f "/usr/bin/csvkit" ]; then
+if [ ! -f "/usr/bin/in2csv" ]; then
     apt-get install -y csvkit
 fi
 

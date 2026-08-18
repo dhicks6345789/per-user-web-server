@@ -1,0 +1,9 @@
+# Compiled Go binaries.
+adminPanel/adminPanel
+rcloneGUI/rcloneGUI
+sessionManager/sessionManager
+www/wwwServer
+
+# Maven build output.
+guacAutoConnect/target/
+guacAutoConnect/dependency-reduced-pom.xml

@@ -191,6 +191,11 @@ if [ ! -f "/usr/bin/curl" ]; then
     apt-get install -y curl
 fi
 
+# Make sure CSVKit (used for converting Excel files to CSV) is installed.
+if [ ! -f "/usr/bin/csvkit" ]; then
+    apt-get install -y csvkit
+fi
+
 # Make sure Maven (a Java build tool, used to build a custom Guacamole plugin) is installed.
 if [ ! -f "/usr/bin/maven" ]; then
     apt-get install -y maven

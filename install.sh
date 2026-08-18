@@ -331,7 +331,7 @@ chmod 711 /var/www
 
 echo Get office-to-markdown.
 if [ ! -d "office-to-markdown" ]; then
-    git clone -b WebconsoleUpdate https://github.com/dhicks6345789/office-to-markdown.git
+    git clone https://github.com/dhicks6345789/office-to-markdown.git
 fi
 cd office-to-markdown
 git pull
@@ -339,9 +339,6 @@ cd ..
 
 # Use the "startScreenIndex.html" file as the index file for the main "users" web server.
 cp /root/office-to-markdown/startScreen/startScreenIndex.html /var/www/index.html
-
-echo "Point one:"
-pwd
 
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then
@@ -439,7 +436,6 @@ if [ $INSTALL_PANGOLIN = true ]; then
     fi
 
     echo "Building our Docker image for the custom web server."
-    pwd
     cp per-user-web-server/docker-wwwServer-Dockerfile .
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
     docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1

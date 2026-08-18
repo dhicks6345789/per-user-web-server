@@ -230,7 +230,7 @@ func main() {
 	http.Handle("/app/", http.StripPrefix("/app/", appHandler))
 	
 	// Execution starts here.
-	log.Println("rcloneGUI starting on :8080...")
+	log.Println("sessionProxy starting on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}

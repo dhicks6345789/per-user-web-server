@@ -83,11 +83,11 @@ services:
 
   {{docker-compose-exams.yml}}
   
-  # The rclone GUI interface, served at the "/rclone" endpoint. Our own custom router application routes requests to "/rclone" to the rclone GUI instance running on the appropriate user's desktop container.
-  rclone:
-    image: {{DOCKERRCLONEGUI_DOCKER_IMAGE}}
-    command: /usr/local/bin/rcloneGUI
-    container_name: rclonegui
+  # The rclone GUI interface, served at the "/rclone" endpoint. Our own custom session proxy application routes requests to "/rclone" to the rclone GUI instance running on the appropriate user's desktop container.
+  sessionproxy:
+    image: {{DOCKERSESSIONPROXY_DOCKER_IMAGE}}
+    command: /usr/local/bin/sessionProxy
+    container_name: sessionproxy
     restart: unless-stopped
     expose:
       - "8090"

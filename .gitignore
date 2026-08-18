@@ -1,6 +1,6 @@
 # Compiled Go binaries.
 adminPanel/adminPanel
-rcloneGUI/rcloneGUI
+sessionProxy/sessionProxy
 sessionManager/sessionManager
 www/wwwServer
 

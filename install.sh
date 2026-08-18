@@ -11,7 +11,7 @@ DOCKERROOT_DOCKER_IMAGE="sansay.co.uk-dockerroot:0.1-beta.3"
 DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 DOCKERWEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-dockerwebconsole:0.1-beta.3"
-DOCKERRCLONEGUI_DOCKER_IMAGE="sansay.co.uk-dockerrclonegui:0.1-beta.3"
+DOCKERSESSIONPROXY_DOCKER_IMAGE="sansay.co.uk-dockersessionproxy:0.1-beta.3"
 DOCKERADMINPANEL_DOCKER_IMAGE="sansay.co.uk-dockeradminpanel:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
@@ -292,13 +292,13 @@ if [ ! -f "per-user-web-server/www/wwwServer" ]; then
     exit 1
 fi
 
-echo Building the Go rclone GUI router.
-cd per-user-web-server/rcloneGUI
+echo Building the Go session proxy router.
+cd per-user-web-server/sessionProxy
 bash build.sh
 cd ..
 cd ..
-if [ ! -f "per-user-web-server/rcloneGUI/rcloneGUI" ]; then
-    echo "Problem building the Go rclone GUI router server - stopping."
+if [ ! -f "per-user-web-server/sessionProxy/sessionProxy" ]; then
+    echo "Problem building the Go session proxy router server - stopping."
     exit 1
 fi
 
@@ -443,9 +443,9 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-webConsole-Dockerfile
     docker build -f docker-webConsole-Dockerfile --progress=plain --tag=$DOCKERWEBCONSOLE_DOCKER_IMAGE . 2>&1
 
-    echo "Building our Docker image for the custom rclone GUI router."
-    cp per-user-web-server/docker-rcloneGUI-Dockerfile .
-    docker build -f docker-rcloneGUI-Dockerfile --progress=plain --tag=$DOCKERRCLONEGUI_DOCKER_IMAGE . 2>&1
+    echo "Building our Docker image for the custom session proxy router."
+    cp per-user-web-server/docker-sessionProxy-Dockerfile .
+    docker build -f docker-sessionProxy-Dockerfile --progress=plain --tag=$DOCKERSESSIONPROXY_DOCKER_IMAGE . 2>&1
 
     echo "Building our Docker image for the admin control panel."
     cp per-user-web-server/docker-adminPanel-Dockerfile .
@@ -499,7 +499,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERCALC_DOCKER_IMAGE}}/$DOCKERCALC_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWEBCONSOLE_DOCKER_IMAGE}}/$DOCKERWEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
-    sed -i "s/{{DOCKERRCLONEGUI_DOCKER_IMAGE}}/$DOCKERRCLONEGUI_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKERSESSIONPROXY_DOCKER_IMAGE}}/$DOCKERSESSIONPROXY_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERADMINPANEL_DOCKER_IMAGE}}/$DOCKERADMINPANEL_DOCKER_IMAGE/g" docker-compose.yml
 
     # Make sure the Session Manager config file (/etc/puws/config.yml) has an admin key set. This is the shared

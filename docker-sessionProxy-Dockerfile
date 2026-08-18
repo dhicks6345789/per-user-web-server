@@ -1,5 +1,5 @@
 # This container just needs to run our own custom Go application, so the minimal Alpine image should do nicely.
 FROM alpine:latest
 
-COPY per-user-web-server/rcloneGUI/rcloneGUI /usr/local/bin/rcloneGUI
+COPY per-user-web-server/sessionProxy/sessionProxy /usr/local/bin/sessionProxy
 EXPOSE 8080

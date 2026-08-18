@@ -1,15 +1,16 @@
 # Project Roadmap & TODO
 
-Construct a development environment suitible for beginner, non-profesional developers, accesible via a web browser and using existing corporate / school authentication mechanisms.
+Construct a development environment suitable for beginner, non-professional developers, accessible via a web browser and using existing corporate / school authentication mechanisms.
 
-Schools / education establishments are an intended target market (along with small businesses and corporate departments / teams), therefore the environment should be suitible for use by school-aged pupils and interact with / utilise systems typically used by such establishments, with environment isolation between users, good support for network / internet filtering, general guardrails for the development environment, etc.
+Schools / education establishments are an intended target market (along with small businesses and corporate departments / teams), therefore the environment should be suitable for use by school-aged pupils and interact with / utilise systems typically used by such establishments, with environment isolation between users, good support for network / internet filtering, general guardrails for the development environment and close control over the use of AI tools.
 
 ---
 
 ## To-Do
-- [ ] Obsfucate usernames / email addresses when passed through via headers, to aid with data protection / safeguarding in school environments.
+- [ ] Obfuscate usernames / email addresses when passed through via headers, to aid with data protection / safeguarding in school environments.
+- [ ] 
 - [ ] /rclone endpoint:
-  - [ ] Works to redirect web interface, but needs to be able to redirect separate port (consistant port number?) to receive OAuth data. Might need custom-compiled version of rclone (which we already have, just needs adding in). Might need rcloneGUI proxy re-working into more general-pupose proxy tool (for webconsole and user app access)
+  - [ ] Works to redirect web interface, but needs to be able to redirect separate port (consistent port number?) to receive OAuth data. Might need custom-compiled version of rclone (which we already have, just needs adding in). Might need rcloneGUI proxy re-working into more general-purpose proxy tool (for webconsole and user app access)
   - [ ] Might want to add auto-mount of added rclone remotes. Would mean watching central rclone.config directory for user changes, then running mount operation on trigger.
 - [ ] rclone user area mount (at least with tested Google Drive connection) has a refresh issue. Might need a (cache size / timing?) setting tweaked. "rclone copy ..." doesn't seem to have this problem.
 - [ ] User app publishing - needs a proxy that can handle redirection of requests for user's self-published apps to particular ports. Might be best to rename rcloneGUI to be a more general reverse proxy so this function and others (/webconsole) can be added.
@@ -26,13 +27,13 @@ Schools / education establishments are an intended target market (along with sma
 - [ ] Raw SSH connections as well as through web page?
 - [ ] Make Pangolin optional - some users might want to use Cloudflare, etc, as their identity provider.
 - [ ] Does audio work on remote desktop? Does it need Audiomass installed?
-- [ ] Cotainers - possibly use "rootless Docker" mode to run user containers, then "root" inside containers gets mapped to standard user in bind-mount folders.
+- [ ] Containers - possibly use "rootless Docker" mode to run user containers, then "root" inside containers gets mapped to standard user in bind-mount folders.
 - [ ] Session Manager - possibly rename to Control Plane, as that seems to be the term used elsewhere and sounds way snazzier.
 
 ## Potential Additional Endpoints
 - [ ] /wiki - a local, multi-user, editable wiki for internal school / company use. Wiki.js?
-- [ ] /app/username/portnum - route through to a user's environment where they can be running a Go / Flask / whatever application
 - [ ] /docs, maybe integrate the [Euro Office](https://github.com/Euro-Office) editors?
+- [ ] /ai, Add AI AI credit management proxy server, plus frontend for sysadmin.
 
 ## Potential Sub-Projects
 - [ ] Start menu - simple page-of-icons from a CSV (JSON? / YAML?) / spreadsheet.
@@ -49,3 +50,4 @@ Schools / education establishments are an intended target market (along with sma
 - [x] /desktop endpoint for web-based (Guacamole) remote desktop (VNC) access to individual user environments.
 - [x] Go-based control plane to handle on-demand startup of individual, per-user containerised Linux environments.
 - [x] Install process that starts from Pangolin's install script, installing Docker and Pangolin components, then adding more containers and services.
+- [x] /app/username/portnum - route through to a user's environment where they can be running a Go / Flask / whatever application

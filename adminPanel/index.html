@@ -117,17 +117,25 @@
   </section>
 
   <section class="card" style="margin-top:16px;">
-    <h2>Auto Start</h2>
-    <div class="value" style="font-size:14px; font-weight:400; color:var(--muted);">Sessions to start automatically when the server restarts, without the user logging in to the "/desktop" or "/ssh" endpoints first.</div>
-    <table id="autostart" style="display:none; margin-top:8px;">
+    <h2>Desktop Sessions</h2>
+    <div id="desktops-empty" style="color:var(--muted); font-size:14px;">No data yet...</div>
+    <table id="desktops" style="display:none;">
       <thead>
-        <tr><th>Auto start</th><th>User</th><th>Image</th><th>State</th></tr>
+        <tr><th>Name</th><th>Image</th><th>State</th><th>Status</th></tr>
       </thead>
       <tbody></tbody>
     </table>
+  </section>
+
+  <section class="card" style="margin-top:16px;">
+    <h2>Auto Start</h2>
+    <div class="value" style="font-size:14px; font-weight:400; color:var(--muted);">Sessions to start automatically when the server restarts, without the user logging in to the "/desktop" or "/ssh" endpoints first.</div>
+    <div id="autostart" style="display:none; margin-top:8px;"></div>
     <div id="autostart-empty" style="color:var(--muted); font-size:14px; margin-top:8px;">No sessions yet...</div>
     <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-      <input id="autostart-user" placeholder="Username" style="padding:6px 10px; font-size:14px; border:1px solid var(--border); border-radius:6px;">
+      <select id="autostart-user" style="padding:6px 10px; font-size:14px; border:1px solid var(--border); border-radius:6px;">
+        <option value="">Select user...</option>
+      </select>
       <select id="autostart-image" style="padding:6px 10px; font-size:14px; border:1px solid var(--border); border-radius:6px;">
         <option value="desktop">desktop</option>
         <option value="wine">wine</option>
@@ -195,33 +203,24 @@ async function refreshStatus() {
     diskEl.textContent = formatBytes(diskUsed) + " used of " + formatBytes(data.diskTotalBytes);
     document.getElementById("disk-bar").style.width = formatPercent(diskUsed, data.diskTotalBytes);
 
-    // The sessions table.
-    const sessionsTable = document.getElementById("sessions");
-    const sessionsEmpty = document.getElementById("sessions-empty");
-    const sessionsBody = sessionsTable.querySelector("tbody");
-    sessionsBody.innerHTML = "";
-    if (data.sessions.length === 0) {
-      sessionsTable.style.display = "none";
-      sessionsEmpty.style.display = "block";
-    } else {
-      sessionsEmpty.style.display = "none";
-      sessionsTable.style.display = "table";
-      for (const session of data.sessions) {
-        const row = document.createElement("tr");
-        row.innerHTML = "<td></td><td></td><td><span class=\"state\"></span></td><td></td>";
-        const cells = row.querySelectorAll("td");
-        cells[0].textContent = session.name;
-        cells[1].textContent = session.image;
-        cells[2].querySelector(".state").textContent = session.state;
-        cells[2].querySelector(".state").classList.add(session.state);
-        cells[3].textContent = session.status;
-        sessionsBody.appendChild(row);
+    // The sessions tables. Sessions whose names are of the form "desktop-<username>" go into the
+    // separate "Desktop Sessions" panel; everything else stays in "Sessions / Containers".
+    const desktops = [];
+    const containers = [];
+    for (const session of data.sessions) {
+      if (/^desktop-/.test(session.name)) {
+        desktops.push(session);
+      } else {
+        containers.push(session);
       }
     }
+    renderSessionsTable("sessions", "sessions-empty", containers);
+    renderSessionsTable("desktops", "desktops-empty", desktops);
 
     // The auto-start list.
     autoStartEntries = data.autostart || [];
-    renderAutoStart(data.sessions);
+    renderAutoStart();
+    populateUserSelect(data.users || []);
 
     document.getElementById("updated").textContent = "Last updated: " + new Date().toLocaleTimeString();
   } catch (err) {
@@ -233,65 +232,68 @@ async function refreshStatus() {
 // The current session auto-start list, as loaded from the server.
 let autoStartEntries = [];
 
-// Builds and fills in the auto-start table. Shows every existing session (running or stopped),
-// plus any auto-start entries that don't yet have a session, so the admin can check or uncheck them.
-function renderAutoStart(sessions) {
-  const table = document.getElementById("autostart");
-  const empty = document.getElementById("autostart-empty");
-  const tbody = table.querySelector("tbody");
-  tbody.innerHTML = "";
-
-  // Build the list of rows: every existing session, plus any auto-start entry without a session.
-  const rows = [];
-  const seen = new Set();
-  for (const s of sessions) {
-    rows.push({ imageName: s.imageName, username: s.username, state: s.state, autoStart: s.autoStart === "true" });
-    seen.add(s.imageName + "\0" + s.username);
+// Fills the "user" drop-down with the Linux users (UID 1001+) reported by the server, so the admin
+// can pick a user to add to the auto-start list rather than typing the name.
+function populateUserSelect(users) {
+  const select = document.getElementById("autostart-user");
+  const previous = select.value;
+  users.sort((a, b) => a.localeCompare(b));
+  select.innerHTML = '<option value="">Select user...</option>' +
+    users.map(u => '<option value="' + u + '">' + u + '</option>').join("");
+  if (users.includes(previous)) {
+    select.value = previous;
   }
-  for (const entry of autoStartEntries) {
-    const key = entry.image + "\0" + entry.username;
-    if (!seen.has(key)) {
-      rows.push({ imageName: entry.image, username: entry.username, state: "not created", autoStart: true });
-      seen.add(key);
-    }
-  }
-  rows.sort((a, b) => a.username.localeCompare(b.username) || a.imageName.localeCompare(b.imageName));
+}
 
-  if (rows.length === 0) {
+// Fills one of the session tables (sessions or desktops) with the given list of containers.
+function renderSessionsTable(tableId, emptyId, sessions) {
+  const table = document.getElementById(tableId);
+  const empty = document.getElementById(emptyId);
+  const body = table.querySelector("tbody");
+  body.innerHTML = "";
+  if (sessions.length === 0) {
     table.style.display = "none";
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
   table.style.display = "table";
-  for (const row of rows) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = "<td><input type=\"checkbox\"></td><td></td><td></td><td><span class=\"state\"></span></td>";
-    const checkbox = tr.querySelector("input");
-    checkbox.checked = row.autoStart;
-    checkbox.dataset.image = row.imageName;
-    checkbox.dataset.user = row.username;
-    checkbox.addEventListener("change", saveAutoStart);
-    const cells = tr.querySelectorAll("td");
-    cells[1].textContent = row.username;
-    cells[2].textContent = row.imageName;
-    const stateEl = cells[3].querySelector(".state");
-    stateEl.textContent = row.state;
-    stateEl.classList.add(row.state);
-    tbody.appendChild(tr);
+  for (const session of sessions) {
+    const row = document.createElement("tr");
+    row.innerHTML = "<td></td><td></td><td><span class=\"state\"></span></td><td></td>";
+    const cells = row.querySelectorAll("td");
+    cells[0].textContent = session.name;
+    cells[1].textContent = session.image;
+    cells[2].querySelector(".state").textContent = session.state;
+    cells[2].querySelector(".state").classList.add(session.state);
+    cells[3].textContent = session.status;
+    body.appendChild(row);
   }
 }
 
-// Sends the current state of the auto-start checkboxes to the server, replacing the saved list.
+// Builds and fills in the auto-start list - a simple list of the selected user / image pairs.
+function renderAutoStart() {
+  const list = document.getElementById("autostart");
+  const empty = document.getElementById("autostart-empty");
+  list.innerHTML = "";
+  if (autoStartEntries.length === 0) {
+    list.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  list.style.display = "block";
+  for (const entry of autoStartEntries) {
+    const item = document.createElement("div");
+    item.textContent = entry.username + " (" + entry.image + ")";
+    list.appendChild(item);
+  }
+}
+
+// Sends the current state of the auto-start list to the server, replacing the saved list.
 async function saveAutoStart() {
   const message = document.getElementById("autostart-message");
-  const sessions = [];
-  document.querySelectorAll("#autostart tbody input[type=checkbox]").forEach(checkbox => {
-    if (checkbox.checked) {
-      sessions.push({ image: checkbox.dataset.image, username: checkbox.dataset.user });
-    }
-  });
-  autoStartEntries = sessions;
+  const sessions = autoStartEntries;
   try {
     const response = await fetch(apiUrl("/api/autostart"), {
       method: "PUT",
@@ -311,13 +313,13 @@ async function saveAutoStart() {
 
 // Adds a brand-new auto-start entry (for a user who doesn't have a session yet) and saves the list.
 async function addAutoStart() {
-  const userInput = document.getElementById("autostart-user");
+  const userSelect = document.getElementById("autostart-user");
   const imageSelect = document.getElementById("autostart-image");
   const message = document.getElementById("autostart-message");
-  const username = userInput.value.trim();
+  const username = userSelect.value.trim();
   const image = imageSelect.value;
   if (!username) {
-    message.textContent = "Enter a username.";
+    message.textContent = "Select a user.";
     message.style.color = "var(--bad)";
     return;
   }
@@ -325,7 +327,7 @@ async function addAutoStart() {
   if (!autoStartEntries.some(e => e.image + "\0" + e.username === key)) {
     autoStartEntries.push({ image, username });
   }
-  userInput.value = "";
+  userSelect.value = "";
   await saveAutoStart();
   refreshStatus();
 }

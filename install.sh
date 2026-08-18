@@ -436,6 +436,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     fi
 
     echo "Building our Docker image for the custom web server."
+    pwd
     cp per-user-web-server/docker-wwwServer-Dockerfile .
     sed -i "s/{{DOCKERROOT_DOCKER_IMAGE}}/$DOCKERROOT_DOCKER_IMAGE/g" docker-wwwServer-Dockerfile
     docker build -f docker-wwwServer-Dockerfile --progress=plain --tag=$DOCKERWWWSERVER_DOCKER_IMAGE . 2>&1

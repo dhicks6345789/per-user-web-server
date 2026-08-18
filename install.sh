@@ -340,6 +340,9 @@ cd ..
 # Use the "startScreenIndex.html" file as the index file for the main "users" web server.
 cp /root/office-to-markdown/startScreen/startScreenIndex.html /var/www/index.html
 
+echo "Point one:"
+pwd
+
 # If the user has supplied a token for Cloudflare, but we aren't installing Pangolin (and, therefore, Docker) on this server, install cloudflared via apt.
 if [ $INSTALL_PANGOLIN = false ]; then
     if [ ! -z "$CLOUDFLARED_TOKEN" ]; then

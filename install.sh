@@ -191,10 +191,17 @@ if [ ! -f "/usr/bin/curl" ]; then
     apt-get install -y curl
 fi
 
+
+
 ## Make sure CSVKit (used for converting Excel files to CSV) is installed.
 #if [ ! -f "/usr/bin/in2csv" ]; then
 #    apt-get install -y csvkit
 #fi
+
+# Make sure we have a "python" shortcut pointing at "python3".
+if ! dpkg-query -W -f='${Status}' python-is-python3 2>/dev/null | grep -q "ok installed"; then
+    apt-get install -y python-is-python3
+fi
 
 ## Make sure PYTest (used for running and writing unit test during development) is installed.
 #if ! dpkg-query -W -f='${Status}' python3-pytest 2>/dev/null | grep -q "ok installed"; then

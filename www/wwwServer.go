@@ -6,7 +6,6 @@ package main
 import (
 	"os"
 	"io"
-	"fmt"
 	"log"
 	"bytes"
 	"strings"

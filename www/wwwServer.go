@@ -26,7 +26,7 @@ const JSCachePath = "/var/cache/wwwServer/js"
 // Defined at the global/package level for easy configuration.
 // The left-hand side is the local filename, or a regular expression that can
 // match multiple filenames. Match groups in the regular expression can be
-// referenced in the URL (right-hand side) using ${1}, ${2}, etc.
+// referenced in the URL (right-hand side) using {1}, {2}, etc.
 var filesToCache = map[string]string {
 	"react.production.min.js":"https://unpkg.com/react@18/umd/react.production.min.js",
 	"react-dom.production.min.js":"https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
@@ -202,9 +202,9 @@ func expandURL(pattern string, fileName string, url string) (string, error) {
 	if matches == nil {
 		return "", fmt.Errorf("filename %s does not match pattern %s", fileName, pattern)
 	}
-	repl := regexp.MustCompile(`\$\{\d+\}`)
+	repl := regexp.MustCompile(`\{(\d+)\}`)
 	result := repl.ReplaceAllStringFunc(url, func(token string) string {
-		idx, err := strconv.Atoi(token[2 : len(token)-1])
+		idx, err := strconv.Atoi(repl.FindStringSubmatch(token)[1])
 		if err != nil || idx < 0 || idx >= len(matches) {
 			return token
 		}

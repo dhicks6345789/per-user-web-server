@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/http/cgi"
 	"path/filepath"
+	"regexp"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
@@ -22,11 +23,14 @@ const rootPath = "/var/www"
 const JSCachePath = "/var/cache/wwwServer/js"
 
 // Define the Javascript files to download so they can be served locally.
-// 1. Defined at the global/package level for easy configuration
-// 1. Defined at the global/package level for easy configuration
-var JSFilesToCache = map[string]string {
+// Defined at the global/package level for easy configuration.
+// The left-hand side is the local filename, or a regular expression that can
+// match multiple filenames. Match groups in the regular expression can be
+// referenced in the URL (right-hand side) using ${1}, ${2}, etc.
+var filesToCache = map[string]string {
 	"react.production.min.js":"https://unpkg.com/react@18/umd/react.production.min.js",
 	"react-dom.production.min.js":"https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
+	`^(.+)@(\d+)\.min\.js$`:"https://unpkg.com/${1}@${2}/umd/${1}.production.min.js",
 }
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
@@ -127,22 +131,85 @@ func setupJSCacheDir() error {
 	}
 
 	// 3. Loop through and download each file if it doesn't already exist
-	for fileName, url := range JSFilesToCache {
-		filePath := filepath.Join(JSCachePath, fileName)
-
-		// Skip downloading if the file is already there.
-		if _, err := os.Stat(filePath); err == nil {
-			log.Println("File " + filePath + " already exists. Skipping download.")
-			continue
-		}
-		
-		err := downloadFile(filePath, url)
+	for pattern, url := range filesToCache {
+		fileNames, err := expandPattern(pattern)
 		if err != nil {
-			return fmt.Errorf("Failed to download %s: %w", fileName, err)
+			return fmt.Errorf("failed to expand pattern %s: %w", pattern, err)
+		}
+		for _, fileName := range fileNames {
+			filePath := filepath.Join(JSCachePath, fileName)
+
+			// Skip downloading if the file is already there.
+			if _, err := os.Stat(filePath); err == nil {
+				log.Println("File " + filePath + " already exists. Skipping download.")
+				continue
+			}
+
+			fileURL, err := expandURL(pattern, fileName, url)
+			if err != nil {
+				return fmt.Errorf("failed to expand URL %s: %w", url, err)
+			}
+
+			err = downloadFile(filePath, fileURL)
+			if err != nil {
+				return fmt.Errorf("Failed to download %s: %w", fileName, err)
+			}
 		}
 	}
 
 	return nil
+}
+
+// expandPattern returns the list of local filenames for a cache entry. A plain
+// filename is returned as-is, while a regular expression is used to scan the
+// cache folder and return the names of any files that match it.
+func expandPattern(pattern string) ([]string, error) {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return nil, err
+	}
+	if re.String() == pattern {
+		// Not a regular expression - just a plain filename.
+		return []string{pattern}, nil
+	}
+	entries, err := os.ReadDir(JSCachePath)
+	if err != nil {
+		return nil, err
+	}
+	var matches []string
+	for _, entry := range entries {
+		if !entry.IsDir() && re.MatchString(entry.Name()) {
+			matches = append(matches, entry.Name())
+		}
+	}
+	return matches, nil
+}
+
+// expandURL substitutes any ${N} references in the URL with the corresponding
+// match group from the filename's match against the pattern regular expression.
+// If the pattern is not a regular expression, the URL is returned unchanged.
+func expandURL(pattern string, fileName string, url string) (string, error) {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return "", err
+	}
+	if re.String() == pattern {
+		// Not a regular expression - no match groups available.
+		return url, nil
+	}
+	matches := re.FindStringSubmatch(fileName)
+	if matches == nil {
+		return "", fmt.Errorf("filename %s does not match pattern %s", fileName, pattern)
+	}
+	repl := regexp.MustCompile(`\$\{\d+\}`)
+	result := repl.ReplaceAllStringFunc(url, func(token string) string {
+		idx, err := strconv.Atoi(token[2 : len(token)-1])
+		if err != nil || idx < 0 || idx >= len(matches) {
+			return token
+		}
+		return matches[idx]
+	})
+	return result, nil
 }
 
 // Fetches a URL and writes it directly to the specified local path.

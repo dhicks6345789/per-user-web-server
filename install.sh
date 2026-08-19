@@ -191,9 +191,19 @@ if [ ! -f "/usr/bin/curl" ]; then
     apt-get install -y curl
 fi
 
-# Make sure CSVKit (used for converting Excel files to CSV) is installed.
-if [ ! -f "/usr/bin/in2csv" ]; then
-    apt-get install -y csvkit
+## Make sure CSVKit (used for converting Excel files to CSV) is installed.
+#if [ ! -f "/usr/bin/in2csv" ]; then
+#    apt-get install -y csvkit
+#fi
+
+# Make sure PYTest (used for running and writing unit test during development) is installed.
+if [ ! -f "/usr/bin/pytest" ]; then
+    apt-get install -y python3-pytest
+fi
+
+# Make sure Pandas (Python library used by Office-To-Markdown) is installed.
+if [ ! -f "/usr/bin/pandas" ]; then
+    apt-get install -y python3-pandas
 fi
 
 # Make sure Maven (a Java build tool, used to build a custom Guacamole plugin) is installed.

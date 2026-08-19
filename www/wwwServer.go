@@ -133,7 +133,11 @@ func setupJSCacheDir() error {
 
 	// 3. Loop through and download each file if it doesn't already exist
 	for pattern, url := range filesToCache {
-		fileNames, err := expandPattern(pattern)
+		// A cache entry is treated as a regular expression (rather than a plain
+		// filename) if its URL contains ${N} match group references.
+		isRegex := regexp.MustCompile(`\$\{\d+\}`).MatchString(url)
+
+		fileNames, err := expandPattern(pattern, isRegex)
 		if err != nil {
 			return fmt.Errorf("failed to expand pattern %s: %w", pattern, err)
 		}
@@ -146,7 +150,7 @@ func setupJSCacheDir() error {
 				continue
 			}
 
-			fileURL, err := expandURL(pattern, fileName, url)
+			fileURL, err := expandURL(pattern, fileName, url, isRegex)
 			if err != nil {
 				return fmt.Errorf("failed to expand URL %s: %w", url, err)
 			}
@@ -164,14 +168,14 @@ func setupJSCacheDir() error {
 // expandPattern returns the list of local filenames for a cache entry. A plain
 // filename is returned as-is, while a regular expression is used to scan the
 // cache folder and return the names of any files that match it.
-func expandPattern(pattern string) ([]string, error) {
+func expandPattern(pattern string, isRegex bool) ([]string, error) {
+	if !isRegex {
+		// Not a regular expression - just a plain filename.
+		return []string{pattern}, nil
+	}
 	re, err := regexp.Compile(pattern)
 	if err != nil {
 		return nil, err
-	}
-	if re.String() == pattern {
-		// Not a regular expression - just a plain filename.
-		return []string{pattern}, nil
 	}
 	entries, err := os.ReadDir(JSCachePath)
 	if err != nil {
@@ -189,14 +193,14 @@ func expandPattern(pattern string) ([]string, error) {
 // expandURL substitutes any ${N} references in the URL with the corresponding
 // match group from the filename's match against the pattern regular expression.
 // If the pattern is not a regular expression, the URL is returned unchanged.
-func expandURL(pattern string, fileName string, url string) (string, error) {
+func expandURL(pattern string, fileName string, url string, isRegex bool) (string, error) {
+	if !isRegex {
+		// Not a regular expression - no match groups available.
+		return url, nil
+	}
 	re, err := regexp.Compile(pattern)
 	if err != nil {
 		return "", err
-	}
-	if re.String() == pattern {
-		// Not a regular expression - no match groups available.
-		return url, nil
 	}
 	matches := re.FindStringSubmatch(fileName)
 	if matches == nil {

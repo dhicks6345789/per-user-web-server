@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"net/http/cgi"
 	"path/filepath"
-	"regexp"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
@@ -88,11 +87,7 @@ func main() {
 		http.ServeFile(w, r, fullPath)
 	})
 
-	// Execution starts here. First, make sure our local cache folder to serve various JavaScript libraries is set up.
-	if err := setupJSCacheDir(); err != nil {
-		log.Fatal(err)
-	}
-	
+	// Execution starts here.
 	log.Println("wwwServer starting on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)

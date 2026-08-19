@@ -203,6 +203,11 @@ if ! dpkg-query -W -f='${Status}' python-is-python3 2>/dev/null | grep -q "ok in
     apt-get install -y python-is-python3
 fi
 
+# Install the Python Venv package so we can create and use Python venv.
+if ! dpkg-query -W -f='${Status}' python3.13-venv 2>/dev/null | grep -q "ok installed"; then
+    apt-get install -y python3.13-venv
+fi
+
 ## Make sure PYTest (used for running and writing unit test during development) is installed.
 #if ! dpkg-query -W -f='${Status}' python3-pytest 2>/dev/null | grep -q "ok installed"; then
 #    apt-get install -y python3-pytest

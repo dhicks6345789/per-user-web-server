@@ -30,8 +30,8 @@ const JSCachePath = "/var/cache/wwwServer/js"
 var filesToCache = map[string]string {
 	"react.production.min.js":"https://unpkg.com/react@18/umd/react.production.min.js",
 	"react-dom.production.min.js":"https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-	"bootstrap/(\\d+)/css/bootstrap.min.css":"https://cdn.jsdelivr.net/npm/bootstrap@{1}/dist/css/bootstrap.min.css",
-	"bootstrap/(\\d+)/js/bootstrap.bundle.min.js":"https://cdn.jsdelivr.net/npm/bootstrap@{1}/dist/js/bootstrap.bundle.min.js",
+	"bootstrap/(\\d+)/css/bootstrap.min.css":"https://cdn.jsdelivr.net/npm/bootstrap@${1}/dist/css/bootstrap.min.css",
+	"bootstrap/(\\d+)/js/bootstrap.bundle.min.js":"https://cdn.jsdelivr.net/npm/bootstrap@${1}/dist/js/bootstrap.bundle.min.js",
 }
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.

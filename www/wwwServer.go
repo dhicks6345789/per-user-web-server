@@ -19,20 +19,6 @@ import (
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
 const rootPath = "/var/www"
-// The Javascript cache folder. Used to hold local copies of various Javascript libraries that we can then serve locally .
-const JSCachePath = "/var/cache/wwwServer/js"
-
-// Define the Javascript files to download so they can be served locally.
-// Defined at the global/package level for easy configuration.
-// The left-hand side is the local filename, or a regular expression that can
-// match multiple filenames. Match groups in the regular expression can be
-// referenced in the URL (right-hand side) using ${1}, ${2}, etc.
-var filesToCache = map[string]string {
-	"react.production.min.js":"https://unpkg.com/react@18/umd/react.production.min.js",
-	"react-dom.production.min.js":"https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-	"bootstrap/(\\d+)/css/bootstrap.min.css":"https://cdn.jsdelivr.net/npm/bootstrap@${1}/dist/css/bootstrap.min.css",
-	"bootstrap/(\\d+)/js/bootstrap.bundle.min.js":"https://cdn.jsdelivr.net/npm/bootstrap@${1}/dist/js/bootstrap.bundle.min.js",
-}
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {
@@ -48,19 +34,15 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		requestPath := filepath.Clean(r.URL.Path)
 
-		// Serve files from the "/var/www" folder, where the individual user files are...
+		// Serve files from the "/var/www" folder, where the individual user files are.
 		fullPath := filepath.Join(rootPath, requestPath)
-		// ...except for the "/js" endpoint, which we serve from our JS cache folder.
-		if strings.HasPrefix(requestPath, "/js/") {
-			fullPath = filepath.Join(JSCachePath, requestPath[4:])
-		}
 		
 		// If the user asks for the root path, we return the special index file with string substitutions.
 		if requestPath == "" || requestPath == "/" {
 			fullPath = "/var/www/index.html"
 		}
 
-		// We want to exlude some special files from being served so the user can place them in their "www" folder but not have to worrry about hiding them.
+		// We want to exclude some special files from being served so the user can place them in their "www" folder but not have to worrry about hiding them.
 		if strings.HasSuffix(requestPath, "rclone.conf") {
 			http.Error(w, "Forbidden: You do not have permission to access this resource", http.StatusForbidden)
 			log.Print("wwwServer, request: " + requestPath + " - file is in special excluded list.")
@@ -115,132 +97,6 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
-}
-
-// Make sure the local JS cache dir exists and populate it with the Javascript libraries we want to serve locally.
-func setupJSCacheDir() error {
-	// 1. Check if folder exists, if not, create it
-	// os.ModePerm gives standard 0777 permissions (modified by umask)
-	if _, err := os.Stat(JSCachePath); os.IsNotExist(err) {
-		fmt.Printf("Directory %s does not exist. Creating it...\n", JSCachePath)
-		err := os.MkdirAll(JSCachePath, 0755)
-		if err != nil {
-			return fmt.Errorf("failed to create directory: %w", err)
-		}
-	} else if err != nil {
-		return fmt.Errorf("error checking directory: %w", err)
-	}
-
-	// 3. Loop through and download each file if it doesn't already exist
-	for pattern, url := range filesToCache {
-		// A cache entry is treated as a regular expression (rather than a plain
-		// filename) if its URL contains ${N} match group references.
-		isRegex := regexp.MustCompile(`\$\{\d+\}`).MatchString(url)
-
-		fileNames, err := expandPattern(pattern, isRegex)
-		if err != nil {
-			return fmt.Errorf("failed to expand pattern %s: %w", pattern, err)
-		}
-		for _, fileName := range fileNames {
-			filePath := filepath.Join(JSCachePath, fileName)
-
-			// Skip downloading if the file is already there.
-			if _, err := os.Stat(filePath); err == nil {
-				log.Println("File " + filePath + " already exists. Skipping download.")
-				continue
-			}
-
-			fileURL, err := expandURL(pattern, fileName, url, isRegex)
-			if err != nil {
-				return fmt.Errorf("failed to expand URL %s: %w", url, err)
-			}
-
-			err = downloadFile(filePath, fileURL)
-			if err != nil {
-				return fmt.Errorf("Failed to download %s: %w", fileName, err)
-			}
-		}
-	}
-
-	return nil
-}
-
-// expandPattern returns the list of local filenames for a cache entry. A plain
-// filename is returned as-is, while a regular expression is used to scan the
-// cache folder and return the names of any files that match it.
-func expandPattern(pattern string, isRegex bool) ([]string, error) {
-	if !isRegex {
-		// Not a regular expression - just a plain filename.
-		return []string{pattern}, nil
-	}
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return nil, err
-	}
-	entries, err := os.ReadDir(JSCachePath)
-	if err != nil {
-		return nil, err
-	}
-	var matches []string
-	for _, entry := range entries {
-		if !entry.IsDir() && re.MatchString(entry.Name()) {
-			matches = append(matches, entry.Name())
-		}
-	}
-	return matches, nil
-}
-
-// expandURL substitutes any ${N} references in the URL with the corresponding
-// match group from the filename's match against the pattern regular expression.
-// If the pattern is not a regular expression, the URL is returned unchanged.
-func expandURL(pattern string, fileName string, url string, isRegex bool) (string, error) {
-	if !isRegex {
-		// Not a regular expression - no match groups available.
-		return url, nil
-	}
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return "", err
-	}
-	matches := re.FindStringSubmatch(fileName)
-	if matches == nil {
-		return "", fmt.Errorf("filename %s does not match pattern %s", fileName, pattern)
-	}
-	repl := regexp.MustCompile(`\$\{\d+\}`)
-	result := repl.ReplaceAllStringFunc(url, func(token string) string {
-		idx, err := strconv.Atoi(token[2 : len(token)-1])
-		if err != nil || idx < 0 || idx >= len(matches) {
-			return token
-		}
-		return matches[idx]
-	})
-	return result, nil
-}
-
-// Fetches a URL and writes it directly to the specified local path.
-func downloadFile(filepath string, url string) error {
-	// Get the data.
-	log.Print("wwwServer, caching: " + filepath + " - downloading from: " + url)
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status: %s", resp.Status)
-	}
-
-	// Create the local file
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
-	return err
 }
 
 // The function that handles CGI scripts.

@@ -215,7 +215,8 @@ func expandURL(pattern string, fileName string, url string) (string, error) {
 
 // Fetches a URL and writes it directly to the specified local path.
 func downloadFile(filepath string, url string) error {
-	// Get the data
+	// Get the data.
+	log.Print("wwwServer, caching: " + filepath + " - downloading from: " + url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return err

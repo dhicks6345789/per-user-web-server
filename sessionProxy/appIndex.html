@@ -33,7 +33,8 @@
 
 	<div class="result" id="result">
 		<p>Your app URL is:</p>
-		<p><a id="appUrl" href="#" target="_blank" rel="noopener"></a></p>
+		<p><a id="appUrl" href="#"></a></p>
+		<button type="button" id="open">Open App</button>
 	</div>
 </div>
 <script>
@@ -64,13 +65,15 @@
 		var result = document.getElementById("result");
 		var link = document.getElementById("appUrl");
 		var button = document.getElementById("build");
+		var openButton = document.getElementById("open");
 		if (username === "" || port === "") {
 			alert("Please enter a port number.");
 			return;
 		}
-		var url = "/app/" + encodeURIComponent(username) + "/" + encodeURIComponent(port) + "/";
+		var url = window.location.origin + "/app/" + encodeURIComponent(username) + "/" + encodeURIComponent(port) + "/";
 		link.textContent = url;
 		link.href = url;
+		openButton.onclick = function () { window.location.href = url; };
 		result.style.display = "block";
 		copyToClipboard(url).then(function () {
 			var original = button.textContent;

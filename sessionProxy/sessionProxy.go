@@ -196,7 +196,7 @@ func buildPortScanHTML(username string) string {
 	sb.WriteString("<div class=\"portscan\"><h2>Running applications</h2><p>The following ports appear to have applications running:</p><ul>")
 	for _, port := range openPorts {
 		url := "/app/" + html.EscapeString(username) + "/" + strconv.Itoa(port) + "/"
-		sb.WriteString("<li><a href=\"" + url + "\">Port " + strconv.Itoa(port) + "</a></li>")
+		sb.WriteString("<li><a href=\"" + url + "\">Port " + strconv.Itoa(port) + "</a> <button type=\"button\" class=\"copy-port\" data-url=\"" + url + "\" title=\"Copy URL\" aria-label=\"Copy URL\"><i class=\"bi bi-copy\"></i></button></li>")
 	}
 	sb.WriteString("</ul></div>")
 	return sb.String()

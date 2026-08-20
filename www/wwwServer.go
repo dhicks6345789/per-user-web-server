@@ -8,6 +8,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"image"
+	"image/color"
 	"io"
 	"log"
 	"net/http"
@@ -19,8 +21,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/disintegration/imaging"
 	"github.com/xuri/excelize/v2"
 	"golang.org/x/net/html"
+
+	// Register the image decoders for favicon formats not supported by the standard library (ICO, WebP).
+	_ "github.com/biessek/golang-ico"
+	_ "golang.org/x/image/webp"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
@@ -202,15 +209,47 @@ func getIconForURLDefault(theURL, dataPath string) string {
 		return ""
 	}
 
-	// Save it into the data folder under a filename derived from the URL hash, so it is served from "/startScreen/<name>".
-	theExt := iconExtension(iconType)
-	theName := theHash + theExt
-	thePath := filepath.Join(dataPath, theName)
-	if err := os.WriteFile(thePath, iconData, 0644); err != nil {
-		log.Print("wwwServer, /startScreen: unable to save favicon: " + err.Error())
-		return ""
+	// Normalise and save the icon into the data folder under a filename derived from the URL hash, so it is served
+	// from "/startScreen/<name>". SVG icons are kept as-is; raster icons are upscaled to a standard 1024x1024 PNG so
+	// they look sharp in the Start Screen tiles.
+	var theName string
+	if strings.Contains(iconType, "svg") {
+		theName = theHash + ".svg"
+		if err := os.WriteFile(filepath.Join(dataPath, theName), iconData, 0644); err != nil {
+			log.Print("wwwServer, /startScreen: unable to save favicon: " + err.Error())
+			return ""
+		}
+	} else {
+		theName = theHash + ".png"
+		theImage, _, decodeErr := image.Decode(bytes.NewReader(iconData))
+		if decodeErr != nil {
+			log.Print("wwwServer, /startScreen: unable to decode favicon image: " + decodeErr.Error())
+			return ""
+		}
+		upscaled, upscaleErr := upscaleIconImage(theImage)
+		if upscaleErr != nil {
+			log.Print("wwwServer, /startScreen: unable to upscale favicon: " + upscaleErr.Error())
+			return ""
+		}
+		if err := imaging.Save(upscaled, filepath.Join(dataPath, theName)); err != nil {
+			log.Print("wwwServer, /startScreen: unable to save favicon: " + err.Error())
+			return ""
+		}
 	}
 	return theName
+}
+
+// Upscales the given (typically small) icon to a standard 1024x1024 image, fitting it within that canvas on a
+// transparent background. This is a plain resampling upscale (no AI), which keeps small favicons looking reasonably
+// sharp when shown at Start Screen tile size.
+func upscaleIconImage(theImage image.Image) (*image.NRGBA, error) {
+	const ICONSIZE = 1024
+	resized := imaging.Fit(theImage, ICONSIZE, ICONSIZE, imaging.Lanczos)
+	canvas := imaging.New(ICONSIZE, ICONSIZE, color.NRGBA{0, 0, 0, 0})
+	bounds := resized.Bounds()
+	offsetX := (ICONSIZE - bounds.Dx()) / 2
+	offsetY := (ICONSIZE - bounds.Dy()) / 2
+	return imaging.Paste(canvas, resized, image.Pt(offsetX, offsetY)), nil
 }
 
 // A simple, deterministic hash of a string, used to name downloaded favicons.
@@ -300,24 +339,6 @@ func downloadIcon(theURL string) ([]byte, string) {
 		return nil, ""
 	}
 	return data, response.Header.Get("Content-Type")
-}
-
-// Returns a suitable file extension for a given MIME content type, defaulting to ".png".
-func iconExtension(contentType string) string {
-	switch {
-	case strings.Contains(contentType, "x-icon"), strings.Contains(contentType, "vnd.microsoft.icon"):
-		return ".ico"
-	case strings.Contains(contentType, "svg"):
-		return ".svg"
-	case strings.Contains(contentType, "jpeg"), strings.Contains(contentType, "jpg"):
-		return ".jpg"
-	case strings.Contains(contentType, "gif"):
-		return ".gif"
-	case strings.Contains(contentType, "webp"):
-		return ".webp"
-	default:
-		return ".png"
-	}
 }
 
 // The function that handles CGI scripts.

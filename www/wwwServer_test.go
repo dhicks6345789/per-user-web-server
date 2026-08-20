@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"image"
+	"image/color"
+	"image/png"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -131,6 +135,37 @@ func TestHandleStartScreen(t *testing.T) {
 	}
 }
 
+// Returns the bytes of a tiny (16x16) red PNG, used to simulate a downloaded favicon.
+func tinyPNGBytes() []byte {
+	img := image.NewNRGBA(image.Rect(0, 0, 16, 16))
+	for y := 0; y < 16; y++ {
+		for x := 0; x < 16; x++ {
+			img.SetNRGBA(x, y, color.NRGBA{R: 255, G: 0, B: 0, A: 255})
+		}
+	}
+	var buf bytes.Buffer
+	png.Encode(&buf, img)
+	return buf.Bytes()
+}
+
+// Asserts that the saved icon is a valid PNG upscaled to the standard 1024x1024 Start Screen tile size.
+func assertNormalizedIcon(t *testing.T, thePath string) {
+	t.Helper()
+	file, err := os.Open(thePath)
+	if err != nil {
+		t.Fatalf("expected saved icon to open: %v", err)
+	}
+	defer file.Close()
+	img, _, err := image.Decode(file)
+	if err != nil {
+		t.Fatalf("expected saved icon to be a decodable image: %v", err)
+	}
+	bounds := img.Bounds()
+	if bounds.Dx() != 1024 || bounds.Dy() != 1024 {
+		t.Fatalf("expected icon upscaled to 1024x1024, got %dx%d", bounds.Dx(), bounds.Dy())
+	}
+}
+
 func TestGetIconForURLDefault(t *testing.T) {
 	// A test server that serves a homepage with a "link rel=icon" pointing at a PNG.
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +175,7 @@ func TestGetIconForURLDefault(t *testing.T) {
 			w.Write([]byte(`<html><head><link rel="icon" href="/icons/myicon.png"></head><body></body></html>`))
 		case "/icons/myicon.png":
 			w.Header().Set("Content-Type", "image/png")
-			w.Write([]byte("PNG-BYTES"))
+			w.Write(tinyPNGBytes())
 		default:
 			http.NotFound(w, r)
 		}
@@ -152,14 +187,14 @@ func TestGetIconForURLDefault(t *testing.T) {
 	if theName == "" {
 		t.Fatal("expected a favicon to be fetched and saved")
 	}
+	if !strings.HasSuffix(theName, ".png") {
+		t.Fatalf("expected raster favicon to be saved as a PNG, got %q", theName)
+	}
 	savedPath := filepath.Join(dir, theName)
-	content, err := os.ReadFile(savedPath)
-	if err != nil {
+	if _, err := os.Stat(savedPath); err != nil {
 		t.Fatalf("expected favicon to be saved to data folder: %v", err)
 	}
-	if string(content) != "PNG-BYTES" {
-		t.Fatalf("expected saved favicon content, got %q", content)
-	}
+	assertNormalizedIcon(t, savedPath)
 
 	// A second call should re-use the already-saved copy (same filename, no network fetch).
 	again := getIconForURLDefault(server.URL, dir)
@@ -169,7 +204,8 @@ func TestGetIconForURLDefault(t *testing.T) {
 }
 
 func TestGetIconForURLDefaultFallback(t *testing.T) {
-	// A test server with no link rel=icon that serves a conventional favicon.ico.
+	// A test server with no link rel=icon that serves a conventional favicon.ico (simulated with a PNG, as the Go
+	// standard library can't decode ICO files).
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/":
@@ -177,7 +213,7 @@ func TestGetIconForURLDefaultFallback(t *testing.T) {
 			w.Write([]byte(`<html><head><title>hi</title></head><body></body></html>`))
 		case "/favicon.ico":
 			w.Header().Set("Content-Type", "image/x-icon")
-			w.Write([]byte("ICO-BYTES"))
+			w.Write(tinyPNGBytes())
 		default:
 			http.NotFound(w, r)
 		}
@@ -189,16 +225,10 @@ func TestGetIconForURLDefaultFallback(t *testing.T) {
 	if theName == "" {
 		t.Fatal("expected fallback favicon.ico to be fetched and saved")
 	}
-	if !strings.HasSuffix(theName, ".ico") {
-		t.Fatalf("expected .ico extension from fallback, got %q", theName)
+	if !strings.HasSuffix(theName, ".png") {
+		t.Fatalf("expected fallback raster favicon to be saved as a PNG, got %q", theName)
 	}
-	content, err := os.ReadFile(filepath.Join(dir, theName))
-	if err != nil {
-		t.Fatalf("expected fallback favicon to be saved: %v", err)
-	}
-	if string(content) != "ICO-BYTES" {
-		t.Fatalf("expected fallback favicon content, got %q", content)
-	}
+	assertNormalizedIcon(t, filepath.Join(dir, theName))
 }
 
 func TestGetIconForURLDefaultNoFavicon(t *testing.T) {

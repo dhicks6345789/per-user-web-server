@@ -135,7 +135,7 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 }
 
 // A global instance of the proxy registry to store multiple proxies to user rclone instances.
-var rcloneProxies = newProxyRegistry()
+var sessionProxies = newProxyRegistry()
 
 
 
@@ -170,14 +170,14 @@ func main() {
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 		
 		// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
-		proxy, password, exists := rcloneProxies.get(username)
+		proxy, password, exists := sessionProxies.get(username)
 		if exists == false {
 			// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
 			password = connectToSession(username, true)
 
 			// Create a new proxy object to connect with.
-			rcloneProxies.set(username, password, "http://desktop-" + username + ":8090")
-			proxy, password, exists = rcloneProxies.get(username)
+			sessionProxies.set(username, password, "http://desktop-" + username + ":8090")
+			proxy, password, exists = sessionProxies.get(username)
 		}
 		
 		// // Rewrite the URL to remove the "/rclone" prefix.
@@ -225,7 +225,7 @@ func main() {
 
 			// See if a user session to the given user's Desktop Docker container (which is where the "app" / server will be running) exists. Don't create a session if one doesn't exist,
 			// that's up to the user themselves.
-			proxy, password, exists := rcloneProxies.get(proxyKey)
+			proxy, password, exists := sessionProxies.get(proxyKey)
 			if exists == false {
 				password = connectToSession(URLUsername, false)
 				
@@ -235,8 +235,8 @@ func main() {
 					return
 				} else {
 					// Create a new proxy object to connect with.
-					rcloneProxies.set(proxyKey, password, "http://desktop-" + URLUsername + ":" + URLPort)
-					proxy, password, exists = rcloneProxies.get(proxyKey)
+					sessionProxies.set(proxyKey, password, "http://desktop-" + URLUsername + ":" + URLPort)
+					proxy, password, exists = sessionProxies.get(proxyKey)
 				}
 			}
 			

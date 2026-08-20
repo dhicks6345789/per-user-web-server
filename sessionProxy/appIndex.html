@@ -20,10 +20,10 @@
 <body>
 <div class="card">
 	<h1>Your Applications</h1>
-	<p>Applications you run inside your development environment are accessed via a URL of the form:</p>
+	<p>You can run applications (ones you've installed, or ones you've written yourself) inside your development environment that listen out on a numbered network port. You, and other users in your organisation, can access them via a URL of the form:</p>
 	<p><code>/app/&lt;username&gt;/&lt;portnumber&gt;/</code></p>
-	<p>For example, if your username is <code>student1</code> and you have an app listening on port <code>8080</code>, you would visit <code>/app/student1/8080/</code>.</p>
-	<p>You are logged in as <strong id="username">{{USERNAME}}</strong>. Use the form below to construct the URL for your app.</p>
+	<p>For example, your username is <code>{{USERNAME}}</code>, so if you had an application running and listening on port <code>8080</code>, you would visit <code>/app/{{USERNAME}}/8080/</code>.</p>
+	<p>If you have an application running, and you know the port number it is listening on, type that port number here to copy the URL, which you can share with other users.</p>
 
 	<label for="port">Port number</label>
 	<input type="text" id="port" name="port" placeholder="e.g. 8080" autocomplete="off">

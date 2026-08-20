@@ -31,7 +31,6 @@
 
 	<div class="result" id="result">
 		<p>App URL: <a id="appUrl" href="#"></a></p>
-		<button type="button" id="open">Open App</button>
 	</div>
 
 	<button type="button" id="build">Copy URL</button>
@@ -62,7 +61,6 @@
 	var portEl = document.getElementById("port");
 	var result = document.getElementById("result");
 	var link = document.getElementById("appUrl");
-	var openButton = document.getElementById("open");
 	var button = document.getElementById("build");
 
 	// Rebuild and display the app URL whenever the port number changes.
@@ -76,7 +74,6 @@
 		var url = window.location.origin + "/app/" + encodeURIComponent(username) + "/" + encodeURIComponent(port) + "/";
 		link.textContent = url;
 		link.href = url;
-		openButton.onclick = function () { window.location.href = url; };
 		result.style.display = "block";
 	}
 

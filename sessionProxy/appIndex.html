@@ -20,6 +20,7 @@
 <body>
 <div class="card">
 	<h1>Your Applications</h1>
+	<span id="username" hidden>{{USERNAME}}</span>
 	<p>You can run applications (ones you've installed, or ones you've written yourself) inside your development environment that listen out on a numbered network port. You, and other users in your organisation, can access them via a URL of the form:</p>
 	<p><code>/app/&lt;username&gt;/&lt;portnumber&gt;/</code></p>
 	<p>For example, your username is <code>{{USERNAME}}</code>, so if you had an application running and listening on port <code>8080</code>, you would visit <code>/app/{{USERNAME}}/8080/</code>.</p>
@@ -28,7 +29,7 @@
 	<label for="port">Port number</label>
 	<input type="text" id="port" name="port" placeholder="e.g. 8080" autocomplete="off">
 
-	<button type="button" id="build">Build my URL</button>
+	<button type="button" id="build">Copy URL</button>
 
 	<div class="result" id="result">
 		<p>Your app URL is:</p>
@@ -36,11 +37,33 @@
 	</div>
 </div>
 <script>
+	function copyToClipboard(text) {
+		if (navigator.clipboard && window.isSecureContext) {
+			return navigator.clipboard.writeText(text);
+		}
+		return new Promise(function (resolve, reject) {
+			var textarea = document.createElement("textarea");
+			textarea.value = text;
+			textarea.style.position = "fixed";
+			textarea.style.opacity = "0";
+			document.body.appendChild(textarea);
+			textarea.focus();
+			textarea.select();
+			try {
+				document.execCommand("copy") ? resolve() : reject();
+			} catch (e) {
+				reject(e);
+			}
+			document.body.removeChild(textarea);
+		});
+	}
+
 	document.getElementById("build").addEventListener("click", function () {
 		var username = document.getElementById("username").textContent.trim();
 		var port = document.getElementById("port").value.trim();
 		var result = document.getElementById("result");
 		var link = document.getElementById("appUrl");
+		var button = document.getElementById("build");
 		if (username === "" || port === "") {
 			alert("Please enter a port number.");
 			return;
@@ -49,6 +72,11 @@
 		link.textContent = url;
 		link.href = url;
 		result.style.display = "block";
+		copyToClipboard(url).then(function () {
+			var original = button.textContent;
+			button.textContent = "Copied!";
+			setTimeout(function () { button.textContent = original; }, 2000);
+		});
 	});
 </script>
 </body>

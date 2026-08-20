@@ -218,9 +218,14 @@ func main() {
 				URLRemainder = URLParts[2]
 			}
 
+			// The proxy registry is keyed by a unique identifier. As a single user can run multiple apps on
+			// different ports, the key must include the port so a proxy created for one port isn't incorrectly
+			// reused for another. e.g. accessing both port 8080 and 8081 should give two different apps.
+			proxyKey := URLUsername + ":" + URLPort
+
 			// See if a user session to the given user's Desktop Docker container (which is where the "app" / server will be running) exists. Don't create a session if one doesn't exist,
 			// that's up to the user themselves.
-			proxy, password, exists := rcloneProxies.get(URLUsername)
+			proxy, password, exists := rcloneProxies.get(proxyKey)
 			if exists == false {
 				password = connectToSession(URLUsername, false)
 				
@@ -230,8 +235,8 @@ func main() {
 					return
 				} else {
 					// Create a new proxy object to connect with.
-					rcloneProxies.set(URLUsername, password, "http://desktop-" + URLUsername + ":" + URLPort)
-					proxy, password, exists = rcloneProxies.get(URLUsername)
+					rcloneProxies.set(proxyKey, password, "http://desktop-" + URLUsername + ":" + URLPort)
+					proxy, password, exists = rcloneProxies.get(proxyKey)
 				}
 			}
 			

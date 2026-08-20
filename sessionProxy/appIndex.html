@@ -29,13 +29,12 @@
 	<label for="port">Port number</label>
 	<input type="text" id="port" name="port" placeholder="e.g. 8080" autocomplete="off">
 
-	<button type="button" id="build">Copy URL</button>
-
 	<div class="result" id="result">
-		<p>Your app URL is:</p>
-		<p><a id="appUrl" href="#"></a></p>
+		<p>App URL: <a id="appUrl" href="#"></a></p>
 		<button type="button" id="open">Open App</button>
 	</div>
+
+	<button type="button" id="build">Copy URL</button>
 </div>
 <script>
 	function copyToClipboard(text) {
@@ -59,15 +58,19 @@
 		});
 	}
 
-	document.getElementById("build").addEventListener("click", function () {
-		var username = document.getElementById("username").textContent.trim();
-		var port = document.getElementById("port").value.trim();
-		var result = document.getElementById("result");
-		var link = document.getElementById("appUrl");
-		var button = document.getElementById("build");
-		var openButton = document.getElementById("open");
+	var usernameEl = document.getElementById("username");
+	var portEl = document.getElementById("port");
+	var result = document.getElementById("result");
+	var link = document.getElementById("appUrl");
+	var openButton = document.getElementById("open");
+	var button = document.getElementById("build");
+
+	// Rebuild and display the app URL whenever the port number changes.
+	function updateUrl() {
+		var username = usernameEl.textContent.trim();
+		var port = portEl.value.trim();
 		if (username === "" || port === "") {
-			alert("Please enter a port number.");
+			result.style.display = "none";
 			return;
 		}
 		var url = window.location.origin + "/app/" + encodeURIComponent(username) + "/" + encodeURIComponent(port) + "/";
@@ -75,6 +78,18 @@
 		link.href = url;
 		openButton.onclick = function () { window.location.href = url; };
 		result.style.display = "block";
+	}
+
+	portEl.addEventListener("input", updateUrl);
+
+	button.addEventListener("click", function () {
+		var username = usernameEl.textContent.trim();
+		var port = portEl.value.trim();
+		if (username === "" || port === "") {
+			alert("Please enter a port number.");
+			return;
+		}
+		var url = window.location.origin + "/app/" + encodeURIComponent(username) + "/" + encodeURIComponent(port) + "/";
 		copyToClipboard(url).then(function () {
 			var original = button.textContent;
 			button.textContent = "Copied!";

@@ -146,6 +146,8 @@ services:
       - /etc/group:/etc/group:ro
       # The individual users' web folders.
       - /var/www:/var/www
+      # The Start Screen source data (spreadsheet and icon images).
+      - /etc/puws:/etc/puws
       ## We mount the log files so that we can share those with individual user containers so that users can see any CGI errors.
       #- /var/log/apache2/access.log:/var/log/apache2/access.log
       #- /var/log/apache2/error.log:/var/log/apache2/error.log

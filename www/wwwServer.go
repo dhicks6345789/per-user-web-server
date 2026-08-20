@@ -4,19 +4,25 @@
 package main
 
 import (
-	"os"
+	"bytes"
+	"encoding/json"
 	"io"
 	"log"
-	"bytes"
-	"strings"
-	"strconv"
 	"net/http"
 	"net/http/cgi"
+	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
+
+	"github.com/xuri/excelize/v2"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
 const rootPath = "/var/www"
+
+// The folder where the Start Screen source data (the spreadsheet and any local icon images) lives.
+const startScreenDataPath = "/etc/puws/startScreen"
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {
@@ -32,9 +38,17 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		requestPath := filepath.Clean(r.URL.Path)
 
+		// Handle the "/startScreen" endpoint. It returns the Start Screen resources (the same data the Start Screen
+		// template expects) as JSON, built from the spreadsheet in the data folder, with any icons served from
+		// "/startScreen/<imageName>".
+		if requestPath == "/startScreen" || strings.HasPrefix(requestPath, "/startScreen/") {
+			handleStartScreen(w, r, requestPath, startScreenDataPath)
+			return
+		}
+
 		// Serve files from the "/var/www" folder, where the individual user files are.
 		fullPath := filepath.Join(rootPath, requestPath)
-		
+
 		// If the user asks for the root path, we return the special index file with string substitutions.
 		if requestPath == "" || requestPath == "/" {
 			fullPath = "/var/www/index.html"
@@ -49,7 +63,7 @@ func main() {
 
 		// Check if the requested path exists on the file system - it might be a file or a folder.
 		requestStatInfo, requestStatErr := os.Stat(fullPath)
-		
+
 		// If the requested path doesn't exist, return an error.
 		if os.IsNotExist(requestStatErr) {
 			http.NotFound(w, r)
@@ -72,7 +86,7 @@ func main() {
 			}
 			requestStatInfo, _ = os.Stat(fullPath)
 		}
-		
+
 		// A message for the user / logs.
 		log.Print("wwwServer, request: " + requestPath + ", serving: " + fullPath)
 
@@ -93,23 +107,84 @@ func main() {
 	}
 }
 
+// Handles the "/startScreen" endpoint. Returns the Start Screen resources as JSON, or serves a named icon image.
+func handleStartScreen(w http.ResponseWriter, r *http.Request, requestPath, dataPath string) {
+	// A request for "/startScreen/<imageName>" serves the named image file from the data folder.
+	if requestPath != "/startScreen" {
+		imageName := strings.TrimPrefix(requestPath, "/startScreen/")
+		imagePath := filepath.Join(dataPath, filepath.Clean(imageName))
+		// Guard against path traversal out of the data folder.
+		if !strings.HasPrefix(filepath.Clean(imagePath), dataPath) || !fileExists(imagePath) {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, imagePath)
+		return
+	}
+
+	// Otherwise, return the resources as JSON.
+	startScreenJSON, err := loadStartScreenJSON(dataPath)
+	if err != nil {
+		log.Print("wwwServer, /startScreen: unable to load Start Screen data: " + err.Error())
+		http.Error(w, "Unable to load Start Screen data", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(startScreenJSON)
+}
+
+// Reads the Start Screen spreadsheet in the data folder and returns a JSON representation of the resources, in the
+// same format expected by the Start Screen template: a list of sections, each being a [name, table] pair, where
+// "table" is a list of rows with columns URL,Title,Description,Icon.
+func loadStartScreenJSON(dataPath string) ([]byte, error) {
+	spreadsheetPath := filepath.Join(dataPath, "startScreen.xlsx")
+	spreadsheet, err := excelize.OpenFile(spreadsheetPath)
+	if err != nil {
+		return nil, err
+	}
+	defer spreadsheet.Close()
+
+	// Build the resources list, one section per spreadsheet sheet, one resource row per data row.
+	resources := [][]interface{}{}
+	for _, sheetName := range spreadsheet.GetSheetList() {
+		rows, rowErr := spreadsheet.GetRows(sheetName)
+		if rowErr != nil {
+			return nil, rowErr
+		}
+		resourceTable := [][]string{}
+		for _, row := range rows {
+			// Pad short rows out to four columns (URL,Title,Description,Icon).
+			resourceRow := []string{"", "", "", ""}
+			for index, cell := range row {
+				if index < 4 {
+					resourceRow[index] = cell
+				}
+			}
+			resourceTable = append(resourceTable, resourceRow)
+		}
+		resources = append(resources, []interface{}{sheetName, resourceTable})
+	}
+
+	return json.Marshal(resources)
+}
+
 // The function that handles CGI scripts.
 func handleCGI(w http.ResponseWriter, r *http.Request, path string, info os.FileInfo) {
 	// We extract the username to run the CGI script as.
 	username := strings.Split(strings.TrimPrefix(path, rootPath+"/"), "/")[0]
 
 	// To do: we might to disallow some usernames here - "root", probably.
-	
+
 	// We want to capture any error produced by the CGI script so we can display them to the user - this is a CGI server for learners.
 	var errBuf bytes.Buffer
-	
+
 	// Set up the request's handler.
 	handler := &cgi.Handler{
 		// All scripts run under "sudo" so we can change the username they run as.
-		Path:   "/usr/bin/sudo",
-		Args:   []string{"--preserve-env", "-u", username, path},
-		Dir:    filepath.Dir(path),
-		Env:    []string{
+		Path: "/usr/bin/sudo",
+		Args: []string{"--preserve-env", "-u", username, path},
+		Dir:  filepath.Dir(path),
+		Env: []string{
 			"PATH=/usr/local/bin:/usr/bin:/bin",
 			// We have to explicity add these headers back in so CGI scripts know how to process the request (GET or POST).
 			"REQUEST_METHOD=" + r.Method,

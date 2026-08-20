@@ -166,6 +166,40 @@ func assertNormalizedIcon(t *testing.T, thePath string) {
 	}
 }
 
+// A tiny source image upscales to fill the whole 1024x1024 tile (rather than staying a small dot in the corner).
+func TestUpscaleIconImageEnlarges(t *testing.T) {
+	// A 16x16 opaque image - the sort of size a typical favicon is.
+	src := image.NewNRGBA(image.Rect(0, 0, 16, 16))
+	for y := 0; y < 16; y++ {
+		for x := 0; x < 16; x++ {
+			src.SetNRGBA(x, y, color.NRGBA{R: 10, G: 20, B: 30, A: 255})
+		}
+	}
+
+	out, err := upscaleIconImage(src)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	b := out.Bounds()
+	if b.Dx() != 1024 || b.Dy() != 1024 {
+		t.Fatalf("expected 1024x1024 output, got %dx%d", b.Dx(), b.Dy())
+	}
+
+	// Count opaque pixels - a real upscale should fill nearly the whole tile.
+	opaque := 0
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			if _, _, _, a := out.At(x, y).RGBA(); a > 0 {
+				opaque++
+			}
+		}
+	}
+	total := b.Dx() * b.Dy()
+	if opaque < total*9/10 {
+		t.Fatalf("expected the tile to be mostly filled after upscaling, got %d/%d opaque pixels", opaque, total)
+	}
+}
+
 func TestGetIconForURLDefault(t *testing.T) {
 	// A test server that serves a homepage with a "link rel=icon" pointing at a PNG.
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

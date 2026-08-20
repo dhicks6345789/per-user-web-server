@@ -244,11 +244,30 @@ func getIconForURLDefault(theURL, dataPath string) string {
 // sharp when shown at Start Screen tile size.
 func upscaleIconImage(theImage image.Image) (*image.NRGBA, error) {
 	const ICONSIZE = 1024
-	resized := imaging.Fit(theImage, ICONSIZE, ICONSIZE, imaging.Lanczos)
+
+	// Fit the icon to the largest size that fits within the square canvas, preserving its aspect ratio, then centre it
+	// on a transparent canvas. imaging.Resize (unlike imaging.Fit) will upscale small favicons, so the icon fills the
+	// tile instead of appearing as a tiny dot.
+	srcBounds := theImage.Bounds()
+	width, height := srcBounds.Dx(), srcBounds.Dy()
+	if width > height {
+		height = int(float64(height) * ICONSIZE / float64(width))
+		width = ICONSIZE
+	} else {
+		width = int(float64(width) * ICONSIZE / float64(height))
+		height = ICONSIZE
+	}
+	if width < 1 {
+		width = 1
+	}
+	if height < 1 {
+		height = 1
+	}
+	resized := imaging.Resize(theImage, width, height, imaging.Lanczos)
+
 	canvas := imaging.New(ICONSIZE, ICONSIZE, color.NRGBA{0, 0, 0, 0})
-	bounds := resized.Bounds()
-	offsetX := (ICONSIZE - bounds.Dx()) / 2
-	offsetY := (ICONSIZE - bounds.Dy()) / 2
+	offsetX := (ICONSIZE - width) / 2
+	offsetY := (ICONSIZE - height) / 2
 	return imaging.Paste(canvas, resized, image.Pt(offsetX, offsetY)), nil
 }
 

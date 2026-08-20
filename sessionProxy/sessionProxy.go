@@ -137,6 +137,70 @@ var rcloneProxies = newProxyRegistry()
 
 
 
+// Serves an HTML page that explains the "/app/username/portnumber/" URL scheme to the user, with a form that
+// helps them construct the URL to their app.
+func serveAppIndex(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Applications</title>
+<style>
+	body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 2rem; background: #f5f5f7; color: #1d1d1f; }
+	.card { max-width: 40rem; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+	h1 { margin-top: 0; }
+	code { background: #eee; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.95em; }
+	label { display: block; margin: 1rem 0 0.25rem; font-weight: 600; }
+	input { width: 100%; box-sizing: border-box; padding: 0.6rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 6px; }
+	button { margin-top: 1.25rem; padding: 0.6rem 1.25rem; font-size: 1rem; border: none; border-radius: 6px; background: #0071e3; color: #fff; cursor: pointer; }
+	button:hover { background: #005bbd; }
+	.result { margin-top: 1.5rem; display: none; word-break: break-all; }
+	.result a { color: #0071e3; }
+</style>
+</head>
+<body>
+<div class="card">
+	<h1>Your Applications</h1>
+	<p>Applications you run inside your development environment are accessed via a URL of the form:</p>
+	<p><code>/app/&lt;username&gt;/&lt;portnumber&gt;/</code></p>
+	<p>For example, if your username is <code>student1</code> and you have an app listening on port <code>8080</code>, you would visit <code>/app/student1/8080/</code>.</p>
+	<p>Use the form below to construct the URL for your app.</p>
+
+	<label for="username">Username</label>
+	<input type="text" id="username" name="username" placeholder="e.g. student1" autocomplete="off">
+
+	<label for="port">Port number</label>
+	<input type="text" id="port" name="port" placeholder="e.g. 8080" autocomplete="off">
+
+	<button type="button" id="build">Build my URL</button>
+
+	<div class="result" id="result">
+		<p>Your app URL is:</p>
+		<p><a id="appUrl" href="#" target="_blank" rel="noopener"></a></p>
+	</div>
+</div>
+<script>
+	document.getElementById("build").addEventListener("click", function () {
+		var username = document.getElementById("username").value.trim();
+		var port = document.getElementById("port").value.trim();
+		var result = document.getElementById("result");
+		var link = document.getElementById("appUrl");
+		if (username === "" || port === "") {
+			alert("Please enter both a username and a port number.");
+			return;
+		}
+		var url = "/app/" + encodeURIComponent(username) + "/" + encodeURIComponent(port) + "/";
+		link.textContent = url;
+		link.href = url;
+		result.style.display = "block";
+	});
+</script>
+</body>
+</html>`))
+}
+
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {
 	_, pathErr := os.Stat(thePath)
@@ -185,6 +249,13 @@ func main() {
 
 		// Split the URL into 3 parts: username, port, and everything else.
 		URLParts := strings.SplitN(r.URL.Path, "/", 3)
+		if len(URLParts) < 2 || URLParts[0] == "" || URLParts[1] == "" {
+			// No username and/or port supplied - show the user an HTML page explaining the URL scheme.
+			log.Printf("Serving app index page: %s %s", r.Method, r.URL.Path)
+			serveAppIndex(w)
+			return
+		}
+
 		if len(URLParts) >= 2 {
 			URLUsername := URLParts[0]
 			URLPort := URLParts[1]
@@ -229,6 +300,10 @@ func main() {
 	
 	http.Handle("/rclone/", http.StripPrefix("/rclone/", rcloneHandler))
 	http.Handle("/app/", http.StripPrefix("/app/", appHandler))
+	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Serving app index page: %s %s", r.Method, r.URL.Path)
+		serveAppIndex(w)
+	})
 	
 	// Execution starts here.
 	log.Println("sessionProxy starting on :8080...")

@@ -108,11 +108,11 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 		return fmt.Errorf("invalid target URL %s: %w", targetURLStr, err)
 	}
 	// ...then we can create a new reverse proxy instance to that URL.
-	rcloneProxy := httputil.NewSingleHostReverseProxy(proxyTargetURL)
+	sessionProxy := httputil.NewSingleHostReverseProxy(proxyTargetURL)
 	
 	// Customize the proxy's director to handle headers correctly.
-	originalDirector := rcloneProxy.Director
-	rcloneProxy.Director = func(req *http.Request) {
+	originalDirector := sessionProxy.Director
+	sessionProxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		
 		// rclone can use basic authentication, so here we can inject the username and password required by rclone
@@ -129,7 +129,7 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 	pr.mu.Lock() // Block readers and other writers.
 	defer pr.mu.Unlock()
 	
-	pr.proxies[username] = rcloneProxy
+	pr.proxies[username] = sessionProxy
 	pr.passwords[username] = password
 	return nil
 }

@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"net/url"
 	"net/http"
+	"html"
 	"net/http/httputil"
 	"encoding/json"
 	"encoding/base64"
@@ -144,10 +145,12 @@ var rcloneProxies = newProxyRegistry()
 //go:embed appIndex.html
 var appIndexHTML string
 
-// Serves the app index HTML page.
-func serveAppIndex(w http.ResponseWriter) {
+// Serves the app index HTML page, filling in the current user's username (taken from the "Remote-User" header injected
+// by Pangolin) in place of the "{{USERNAME}}" placeholder.
+func serveAppIndex(w http.ResponseWriter, username string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(appIndexHTML))
+	page := strings.Replace(appIndexHTML, "{{USERNAME}}", html.EscapeString(username), -1)
+	w.Write([]byte(page))
 }
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
@@ -201,7 +204,9 @@ func main() {
 		if len(URLParts) < 2 || URLParts[0] == "" || URLParts[1] == "" {
 			// No username and/or port supplied - show the user an HTML page explaining the URL scheme.
 			log.Printf("Serving app index page: %s %s", r.Method, r.URL.Path)
-			serveAppIndex(w)
+			// Get the current user's username (the "Remote-User" HTTP header value injected by Pangolin).
+			username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
+			serveAppIndex(w, username)
 			return
 		}
 
@@ -251,7 +256,8 @@ func main() {
 	http.Handle("/app/", http.StripPrefix("/app/", appHandler))
 	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Serving app index page: %s %s", r.Method, r.URL.Path)
-		serveAppIndex(w)
+		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
+		serveAppIndex(w, username)
 	})
 	
 	// Execution starts here.

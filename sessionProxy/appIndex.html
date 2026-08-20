@@ -23,10 +23,7 @@
 	<p>Applications you run inside your development environment are accessed via a URL of the form:</p>
 	<p><code>/app/&lt;username&gt;/&lt;portnumber&gt;/</code></p>
 	<p>For example, if your username is <code>student1</code> and you have an app listening on port <code>8080</code>, you would visit <code>/app/student1/8080/</code>.</p>
-	<p>Use the form below to construct the URL for your app.</p>
-
-	<label for="username">Username</label>
-	<input type="text" id="username" name="username" placeholder="e.g. student1" autocomplete="off">
+	<p>You are logged in as <strong id="username">{{USERNAME}}</strong>. Use the form below to construct the URL for your app.</p>
 
 	<label for="port">Port number</label>
 	<input type="text" id="port" name="port" placeholder="e.g. 8080" autocomplete="off">
@@ -40,12 +37,12 @@
 </div>
 <script>
 	document.getElementById("build").addEventListener("click", function () {
-		var username = document.getElementById("username").value.trim();
+		var username = document.getElementById("username").textContent.trim();
 		var port = document.getElementById("port").value.trim();
 		var result = document.getElementById("result");
 		var link = document.getElementById("appUrl");
 		if (username === "" || port === "") {
-			alert("Please enter both a username and a port number.");
+			alert("Please enter a port number.");
 			return;
 		}
 		var url = "/app/" + encodeURIComponent(username) + "/" + encodeURIComponent(port) + "/";

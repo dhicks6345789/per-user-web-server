@@ -1,6 +1,7 @@
-// A small routing application designed to take traffic arriving at the "/rclone" endpoint and route it to the appropriate
-// user's instance of the rclone GUI running on their desktop container instance. Gives the user a handy way of using the rclone GUI
-// to set up new remotes and so on.
+// A routing application designed to take traffic arriving at various endpoints ("/rclone", "app", etc) and route it to the appropriate
+// user's development environment instance. This gives the user a handy way of accessing applications running in their development
+// environment (supplied by the system, like rclone, or their own that they've run or developed themselves) directly from the browser,
+// but still behind the Pangolin authenticating proxy.
 
 package main
 

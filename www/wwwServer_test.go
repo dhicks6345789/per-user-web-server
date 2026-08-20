@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"image"
 	"image/color"
@@ -163,6 +164,57 @@ func assertNormalizedIcon(t *testing.T, thePath string) {
 	bounds := img.Bounds()
 	if bounds.Dx() != 1024 || bounds.Dy() != 1024 {
 		t.Fatalf("expected icon upscaled to 1024x1024, got %dx%d", bounds.Dx(), bounds.Dy())
+	}
+}
+
+// Builds a multi-frame ICO file from a set of PNG-encoded frames (which the ICO decoder supports), each given as a
+// byte slice plus its square size.
+func buildMultiFrameICO(frames [][]byte) []byte {
+	var buf bytes.Buffer
+	count := len(frames)
+	// ICO header: reserved(0), type(1=icon), count.
+	buf.Write([]byte{0, 0, 1, 0, byte(count), 0})
+	offset := 6 + count*16
+	// One ICONDIRENTRY (16 bytes) per frame.
+	for _, f := range frames {
+		size, _ := png.DecodeConfig(bytes.NewReader(f))
+		entry := make([]byte, 16)
+		entry[0] = byte(size.Width) // width (0 means 256)
+		entry[1] = byte(size.Height)
+		binary.LittleEndian.PutUint16(entry[4:6], 1)  // planes
+		binary.LittleEndian.PutUint16(entry[6:8], 32) // bits per pixel
+		binary.LittleEndian.PutUint32(entry[8:12], uint32(len(f)))
+		binary.LittleEndian.PutUint32(entry[12:16], uint32(offset))
+		buf.Write(entry)
+		offset += len(f)
+	}
+	for _, f := range frames {
+		buf.Write(f)
+	}
+	return buf.Bytes()
+}
+
+// The ICO decoder should pick the largest available frame as the upscaling source.
+func TestDecodeIconImagePicksLargestICOFrame(t *testing.T) {
+	makeFrame := func(size int) []byte {
+		img := image.NewNRGBA(image.Rect(0, 0, size, size))
+		for y := 0; y < size; y++ {
+			for x := 0; x < size; x++ {
+				img.SetNRGBA(x, y, color.NRGBA{R: 1, G: 2, B: 3, A: 255})
+			}
+		}
+		var buf bytes.Buffer
+		png.Encode(&buf, img)
+		return buf.Bytes()
+	}
+	icoData := buildMultiFrameICO([][]byte{makeFrame(16), makeFrame(32)})
+
+	decoded, err := decodeIconImage(icoData)
+	if err != nil {
+		t.Fatalf("unexpected decode error: %v", err)
+	}
+	if decoded.Bounds().Dx() != 32 || decoded.Bounds().Dy() != 32 {
+		t.Fatalf("expected largest 32x32 frame, got %dx%d", decoded.Bounds().Dx(), decoded.Bounds().Dy())
 	}
 }
 

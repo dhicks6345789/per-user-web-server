@@ -21,12 +21,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/biessek/golang-ico"
 	"github.com/disintegration/imaging"
 	"github.com/xuri/excelize/v2"
 	"golang.org/x/net/html"
 
-	// Register the image decoders for favicon formats not supported by the standard library (ICO, WebP).
-	_ "github.com/biessek/golang-ico"
+	// Register the image decoders for favicon formats not supported by the standard library (WebP). The ICO package
+	// is imported above (named) both for its decoder registration and for access to its DecodeAll function.
 	_ "golang.org/x/image/webp"
 )
 
@@ -221,7 +222,7 @@ func getIconForURLDefault(theURL, dataPath string) string {
 		}
 	} else {
 		theName = theHash + ".png"
-		theImage, _, decodeErr := image.Decode(bytes.NewReader(iconData))
+		theImage, decodeErr := decodeIconImage(iconData)
 		if decodeErr != nil {
 			log.Print("wwwServer, /startScreen: unable to decode favicon image: " + decodeErr.Error())
 			return ""
@@ -239,9 +240,28 @@ func getIconForURLDefault(theURL, dataPath string) string {
 	return theName
 }
 
+// Decodes a downloaded icon image. For multi-resolution ICO files it returns the largest frame available, as that
+// gives the best source for upscaling (rather than the smallest frame the ICO decoder happens to pick first).
+func decodeIconImage(iconData []byte) (image.Image, error) {
+	// ICO files can hold several sizes - use the largest one available.
+	frames, decodeAllErr := ico.DecodeAll(bytes.NewReader(iconData))
+	if decodeAllErr == nil && len(frames) > 0 {
+		best := frames[0]
+		for _, candidate := range frames[1:] {
+			if candidate.Bounds().Dx()*candidate.Bounds().Dy() > best.Bounds().Dx()*best.Bounds().Dy() {
+				best = candidate
+			}
+		}
+		return best, nil
+	}
+	// Any other format - just decode it normally.
+	theImage, _, err := image.Decode(bytes.NewReader(iconData))
+	return theImage, err
+}
+
 // Upscales the given (typically small) icon to a standard 1024x1024 image, fitting it within that canvas on a
-// transparent background. This is a plain resampling upscale (no AI), which keeps small favicons looking reasonably
-// sharp when shown at Start Screen tile size.
+// transparent background, then applies a light sharpening pass so the enlarged favicon looks crisper rather than
+// blurry.
 func upscaleIconImage(theImage image.Image) (*image.NRGBA, error) {
 	const ICONSIZE = 1024
 
@@ -264,6 +284,8 @@ func upscaleIconImage(theImage image.Image) (*image.NRGBA, error) {
 		height = 1
 	}
 	resized := imaging.Resize(theImage, width, height, imaging.Lanczos)
+	// Sharpen the upscaled image to reduce the softness that comes from enlarging a small source.
+	resized = imaging.Sharpen(resized, 0.6)
 
 	canvas := imaging.New(ICONSIZE, ICONSIZE, color.NRGBA{0, 0, 0, 0})
 	offsetX := (ICONSIZE - width) / 2

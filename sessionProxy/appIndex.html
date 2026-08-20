@@ -15,6 +15,11 @@
 	button:hover { background: #005bbd; }
 	.result { margin-top: 1.5rem; display: none; word-break: break-all; }
 	.result a { color: #0071e3; }
+	.portscan { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e5e7; }
+	.portscan h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
+	.portscan p { margin: 0 0 0.5rem; }
+	.portscan ul { margin: 0; padding-left: 1.25rem; }
+	.portscan a { color: #0071e3; }
 </style>
 </head>
 <body>
@@ -34,6 +39,8 @@
 	</div>
 
 	<button type="button" id="build">Copy URL</button>
+
+	{{PORTS}}
 </div>
 <script>
 	function copyToClipboard(text) {

@@ -14,6 +14,8 @@ import (
 	"time"
 	"strings"
 	"strconv"
+	"net"
+	"sort"
 	"net/url"
 	"net/http"
 	"html"
@@ -145,11 +147,62 @@ var sessionProxies = newProxyRegistry()
 //go:embed appIndex.html
 var appIndexHTML string
 
+// The network ports we scan for on each user's session to detect running applications. These cover the most
+// commonly used development ports, and are checked concurrently with a short timeout so the page still loads quickly.
+var scanPorts = []int{3000, 5000, 8000, 8080, 8081, 8082, 8083, 8084, 8085, 8086, 8087, 8088, 8089, 8090}
+
+// scanUserPorts checks which of the common application ports are currently accepting connections in a user's session
+// (their Desktop Docker container). It returns the list of open ports, sorted ascending.
+func scanUserPorts(username string) []int {
+	var openPorts []int
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	for _, port := range scanPorts {
+		wg.Add(1)
+		go func(p int) {
+			defer wg.Done()
+			address := net.JoinHostPort("desktop-"+username, strconv.Itoa(p))
+			conn, err := net.DialTimeout("tcp", address, 300*time.Millisecond)
+			if err != nil {
+				return
+			}
+			conn.Close()
+			mu.Lock()
+			openPorts = append(openPorts, p)
+			mu.Unlock()
+		}(port)
+	}
+
+	wg.Wait()
+	sort.Ints(openPorts)
+	return openPorts
+}
+
+// buildPortScanHTML scans the user's session for open ports and returns the HTML section listing them as links
+// to the corresponding /app/ URLs. Returns an empty string if no ports are open.
+func buildPortScanHTML(username string) string {
+	openPorts := scanUserPorts(username)
+	if len(openPorts) == 0 {
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString("<div class=\"portscan\"><h2>Running applications</h2><p>The following ports appear to have applications running:</p><ul>")
+	for _, port := range openPorts {
+		url := "/app/" + html.EscapeString(username) + "/" + strconv.Itoa(port) + "/"
+		sb.WriteString("<li><a href=\"" + url + "\">Port " + strconv.Itoa(port) + "</a></li>")
+	}
+	sb.WriteString("</ul></div>")
+	return sb.String()
+}
+
 // Serves the app index HTML page, filling in the current user's username (taken from the "Remote-User" header injected
-// by Pangolin) in place of the "{{USERNAME}}" placeholder.
+// by Pangolin) in place of the "{{USERNAME}}" placeholder, and the results of a quick port scan in place of "{{PORTS}}".
 func serveAppIndex(w http.ResponseWriter, username string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	page := strings.Replace(appIndexHTML, "{{USERNAME}}", html.EscapeString(username), -1)
+	page = strings.Replace(page, "{{PORTS}}", buildPortScanHTML(username), -1)
 	w.Write([]byte(page))
 }
 

@@ -5,17 +5,22 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 	"net/http/cgi"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/xuri/excelize/v2"
+	"golang.org/x/net/html"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
@@ -23,6 +28,10 @@ const rootPath = "/var/www"
 
 // The folder where the Start Screen source data (the spreadsheet and any local icon images) lives.
 const startScreenDataPath = "/etc/puws/startScreen"
+
+// A function to get an icon for a URL, saving it into the data folder and returning its filename (or "" on failure).
+// It is a variable so it can be replaced with a stub in tests.
+var getIconForURL = getIconForURLDefault
 
 // A function to return a simple boolean "true" if a file exists, false otherwise.
 func fileExists(thePath string) bool {
@@ -160,12 +169,155 @@ func loadStartScreenJSON(dataPath string) ([]byte, error) {
 					resourceRow[index] = cell
 				}
 			}
+			// Skip the header row (its first column is the literal "URL").
+			if resourceRow[0] != "URL" && resourceRow[3] == "" {
+				// No icon defined in the spreadsheet - try and get one from the URL's favicon.
+				resourceRow[3] = getIconForURL(resourceRow[0], dataPath)
+			}
 			resourceTable = append(resourceTable, resourceRow)
 		}
 		resources = append(resources, []interface{}{sheetName, resourceTable})
 	}
 
 	return json.Marshal(resources)
+}
+
+// The default icon-getter: looks up the favicon for the given URL, saves it into the data folder (so it can be served
+// from "/startScreen/<name>") and returns its filename. Returns an empty string if no favicon can be found.
+func getIconForURLDefault(theURL, dataPath string) string {
+	// If we've already fetched this site's favicon, re-use the saved copy.
+	theHash := iconHash(theURL)
+	existing := findExistingIcon(dataPath, theHash)
+	if existing != "" {
+		return existing
+	}
+
+	// Find and download the favicon for the URL.
+	iconURL := findFaviconURL(theURL)
+	if iconURL == "" {
+		return ""
+	}
+	iconData, iconType := downloadIcon(iconURL)
+	if iconData == nil {
+		return ""
+	}
+
+	// Save it into the data folder under a filename derived from the URL hash, so it is served from "/startScreen/<name>".
+	theExt := iconExtension(iconType)
+	theName := theHash + theExt
+	thePath := filepath.Join(dataPath, theName)
+	if err := os.WriteFile(thePath, iconData, 0644); err != nil {
+		log.Print("wwwServer, /startScreen: unable to save favicon: " + err.Error())
+		return ""
+	}
+	return theName
+}
+
+// A simple, deterministic hash of a string, used to name downloaded favicons.
+func iconHash(theString string) string {
+	hasher := sha256.Sum256([]byte(theString))
+	return hex.EncodeToString(hasher[:8])
+}
+
+// Looks in the data folder for an existing icon with the given hash prefix (any file extension).
+func findExistingIcon(dataPath, theHash string) string {
+	matches, _ := filepath.Glob(filepath.Join(dataPath, theHash+".*"))
+	if len(matches) > 0 {
+		return filepath.Base(matches[0])
+	}
+	return ""
+}
+
+// Finds the URL of a site's favicon. It first fetches the site's homepage and looks for a "link rel=icon" tag,
+// falling back to the conventional "/favicon.ico" path if none is found.
+func findFaviconURL(theURL string) string {
+	client := &http.Client{Timeout: 15 * time.Second}
+	response, err := client.Get(theURL)
+	if err != nil {
+		return ""
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return ""
+	}
+	body, err := io.ReadAll(io.LimitReader(response.Body, 2*1024*1024))
+	if err != nil {
+		return ""
+	}
+
+	// Parse the page for a "link rel=icon" element and return its (resolved) href, if present.
+	parsed, _ := html.Parse(bytes.NewReader(body))
+	baseURL, _ := url.Parse(theURL)
+	for node := parsed.FirstChild; node != nil; node = node.NextSibling {
+		if iconURL := findIconInNode(node, baseURL); iconURL != "" {
+			return iconURL
+		}
+	}
+
+	// Fall back to the conventional favicon location.
+	fallback, _ := url.Parse("/favicon.ico")
+	return baseURL.ResolveReference(fallback).String()
+}
+
+// Recursively searches an HTML node for a "link rel=icon" element, returning the resolved icon URL (or "").
+func findIconInNode(node *html.Node, baseURL *url.URL) string {
+	if node.Type == html.ElementNode && node.Data == "link" {
+		var rel, href string
+		for _, attribute := range node.Attr {
+			switch attribute.Key {
+			case "rel":
+				rel = attribute.Val
+			case "href":
+				href = attribute.Val
+			}
+		}
+		if href != "" && strings.Contains(strings.ToLower(rel), "icon") {
+			iconURL, _ := url.Parse(href)
+			return baseURL.ResolveReference(iconURL).String()
+		}
+	}
+	for child := node.FirstChild; child != nil; child = child.NextSibling {
+		if iconURL := findIconInNode(child, baseURL); iconURL != "" {
+			return iconURL
+		}
+	}
+	return ""
+}
+
+// Downloads the given URL and returns its bytes and content type, or nil on error.
+func downloadIcon(theURL string) ([]byte, string) {
+	client := &http.Client{Timeout: 15 * time.Second}
+	response, err := client.Get(theURL)
+	if err != nil {
+		return nil, ""
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, ""
+	}
+	data, err := io.ReadAll(io.LimitReader(response.Body, 5*1024*1024))
+	if err != nil {
+		return nil, ""
+	}
+	return data, response.Header.Get("Content-Type")
+}
+
+// Returns a suitable file extension for a given MIME content type, defaulting to ".png".
+func iconExtension(contentType string) string {
+	switch {
+	case strings.Contains(contentType, "x-icon"), strings.Contains(contentType, "vnd.microsoft.icon"):
+		return ".ico"
+	case strings.Contains(contentType, "svg"):
+		return ".svg"
+	case strings.Contains(contentType, "jpeg"), strings.Contains(contentType, "jpg"):
+		return ".jpg"
+	case strings.Contains(contentType, "gif"):
+		return ".gif"
+	case strings.Contains(contentType, "webp"):
+		return ".webp"
+	default:
+		return ".png"
+	}
 }
 
 // The function that handles CGI scripts.

@@ -37,7 +37,20 @@ func writeTestSpreadsheet(t *testing.T, theDir string) {
 	}
 }
 
+// Stubs the favicon lookup used when a resource has no icon defined, returning the given icon name.
+func stubGetIcon(t *testing.T, theName string) {
+	t.Helper()
+	original := getIconForURL
+	getIconForURL = func(theURL, dataPath string) string {
+		return theName
+	}
+	t.Cleanup(func() {
+		getIconForURL = original
+	})
+}
+
 func TestLoadStartScreenJSON(t *testing.T) {
+	stubGetIcon(t, "favicon-test.png")
 	dir := t.TempDir()
 	writeTestSpreadsheet(t, dir)
 
@@ -70,14 +83,15 @@ func TestLoadStartScreenJSON(t *testing.T) {
 	if !ok || len(firstRow) != 4 {
 		t.Fatalf("expected a 4-column row, got %#v", table[1])
 	}
-	// A blank icon should be padded to an empty string.
+	// A blank icon should trigger a favicon lookup (stubbed here to return a fixed icon name).
 	secondRow, ok := table[2].([]interface{})
-	if !ok || secondRow[3] != "" {
-		t.Fatalf("expected blank icon padded to empty string, got %#v", secondRow)
+	if !ok || secondRow[3] != "favicon-test.png" {
+		t.Fatalf("expected blank icon resolved via favicon lookup, got %#v", secondRow)
 	}
 }
 
 func TestHandleStartScreen(t *testing.T) {
+	stubGetIcon(t, "")
 	dir := t.TempDir()
 	writeTestSpreadsheet(t, dir)
 	// Put a fake icon in the folder so the image-serving path can be exercised.
@@ -114,5 +128,93 @@ func TestHandleStartScreen(t *testing.T) {
 	handleStartScreen(missingRec, missingReq, "/startScreen/nope.png", dir)
 	if missingRec.Code != http.StatusNotFound {
 		t.Fatalf("expected 404 for missing image, got %d", missingRec.Code)
+	}
+}
+
+func TestGetIconForURLDefault(t *testing.T) {
+	// A test server that serves a homepage with a "link rel=icon" pointing at a PNG.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/":
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(`<html><head><link rel="icon" href="/icons/myicon.png"></head><body></body></html>`))
+		case "/icons/myicon.png":
+			w.Header().Set("Content-Type", "image/png")
+			w.Write([]byte("PNG-BYTES"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	theName := getIconForURLDefault(server.URL, dir)
+	if theName == "" {
+		t.Fatal("expected a favicon to be fetched and saved")
+	}
+	savedPath := filepath.Join(dir, theName)
+	content, err := os.ReadFile(savedPath)
+	if err != nil {
+		t.Fatalf("expected favicon to be saved to data folder: %v", err)
+	}
+	if string(content) != "PNG-BYTES" {
+		t.Fatalf("expected saved favicon content, got %q", content)
+	}
+
+	// A second call should re-use the already-saved copy (same filename, no network fetch).
+	again := getIconForURLDefault(server.URL, dir)
+	if again != theName {
+		t.Fatalf("expected second call to reuse saved icon %q, got %q", theName, again)
+	}
+}
+
+func TestGetIconForURLDefaultFallback(t *testing.T) {
+	// A test server with no link rel=icon that serves a conventional favicon.ico.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/":
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(`<html><head><title>hi</title></head><body></body></html>`))
+		case "/favicon.ico":
+			w.Header().Set("Content-Type", "image/x-icon")
+			w.Write([]byte("ICO-BYTES"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	theName := getIconForURLDefault(server.URL, dir)
+	if theName == "" {
+		t.Fatal("expected fallback favicon.ico to be fetched and saved")
+	}
+	if !strings.HasSuffix(theName, ".ico") {
+		t.Fatalf("expected .ico extension from fallback, got %q", theName)
+	}
+	content, err := os.ReadFile(filepath.Join(dir, theName))
+	if err != nil {
+		t.Fatalf("expected fallback favicon to be saved: %v", err)
+	}
+	if string(content) != "ICO-BYTES" {
+		t.Fatalf("expected fallback favicon content, got %q", content)
+	}
+}
+
+func TestGetIconForURLDefaultNoFavicon(t *testing.T) {
+	// A server that serves a homepage but no favicon anywhere.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/favicon.ico" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><head></head><body></body></html>`))
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	if theName := getIconForURLDefault(server.URL, dir); theName != "" {
+		t.Fatalf("expected empty icon when no favicon exists, got %q", theName)
 	}
 }

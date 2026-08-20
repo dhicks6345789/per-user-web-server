@@ -159,6 +159,11 @@ func scanUserPorts(username string) []int {
 	var wg sync.WaitGroup
 
 	for _, port := range scanPorts {
+		// Port 8090 hosts the rclone GUI server, which is handled separately (via the /rclone endpoint) and isn't
+		// a user application, so skip it.
+		if port == 8090 {
+			continue
+		}
 		wg.Add(1)
 		go func(p int) {
 			defer wg.Done()

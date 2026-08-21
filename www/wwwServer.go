@@ -139,8 +139,10 @@ func handleStartScreen(w http.ResponseWriter, r *http.Request, requestPath, data
 		return
 	}
 
-	// Otherwise, return the resources as JSON.
-	startScreenJSON, err := loadStartScreenJSON(dataPath)
+	// Otherwise, return the resources as JSON. The user's groups come from the "Remote-Role" header
+	// injected by Pangolin (a possibly comma-separated list), and are used to filter group-restricted entries.
+	userGroups := parseHeaderList(r.Header.Get("Remote-Role"))
+	startScreenJSON, err := loadStartScreenJSON(dataPath, userGroups)
 	if err != nil {
 		log.Print("wwwServer, /startScreen: unable to load Start Screen data: " + err.Error())
 		http.Error(w, "Unable to load Start Screen data", http.StatusInternalServerError)
@@ -150,10 +152,41 @@ func handleStartScreen(w http.ResponseWriter, r *http.Request, requestPath, data
 	w.Write(startScreenJSON)
 }
 
+// Splits a comma-separated header value into a trimmed list of non-empty items.
+func parseHeaderList(theValue string) []string {
+	var result []string
+	for _, item := range strings.Split(theValue, ",") {
+		if trimmed := strings.TrimSpace(item); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
+}
+
+// Returns true if the user, given their list of groups, is allowed to see a resource restricted to the given
+// required groups (a possibly comma-separated list of group names from the spreadsheet's "Group" column).
+func groupAllowed(requiredGroups string, userGroups []string) bool {
+	for _, required := range strings.Split(requiredGroups, ",") {
+		required = strings.TrimSpace(required)
+		if required == "" {
+			continue
+		}
+		for _, userGroup := range userGroups {
+			if strings.EqualFold(strings.TrimSpace(userGroup), required) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // Reads the Start Screen spreadsheet in the data folder and returns a JSON representation of the resources, in the
 // same format expected by the Start Screen template: a list of sections, each being a [name, table] pair, where
-// "table" is a list of rows with columns URL,Title,Description,Icon.
-func loadStartScreenJSON(dataPath string) ([]byte, error) {
+// "table" is a list of rows with columns URL,Title,Description,Icon. An optional fifth "Group" column in the
+// spreadsheet is used only to restrict which entries the given user (with their list of groups) can see: entries
+// with a Group value are hidden unless the user is a member of one of those groups, while entries with no Group
+// value are shown to everyone. The Group column itself is not included in the returned data.
+func loadStartScreenJSON(dataPath string, userGroups []string) ([]byte, error) {
 	spreadsheetPath := filepath.Join(dataPath, "startScreen.xlsx")
 	spreadsheet, err := excelize.OpenFile(spreadsheetPath)
 	if err != nil {
@@ -170,19 +203,28 @@ func loadStartScreenJSON(dataPath string) ([]byte, error) {
 		}
 		resourceTable := [][]string{}
 		for _, row := range rows {
-			// Pad short rows out to four columns (URL,Title,Description,Icon).
-			resourceRow := []string{"", "", "", ""}
+			// Pad short rows out to five columns (URL,Title,Description,Icon,Group).
+			resourceRow := []string{"", "", "", "", ""}
 			for index, cell := range row {
-				if index < 4 {
+				if index < 5 {
 					resourceRow[index] = cell
 				}
 			}
 			// Skip the header row (its first column is the literal "URL").
-			if resourceRow[0] != "URL" && resourceRow[3] == "" {
-				// No icon defined in the spreadsheet - try and get one from the URL's favicon.
+			if resourceRow[0] == "URL" {
+				resourceTable = append(resourceTable, resourceRow[:4])
+				continue
+			}
+			// Hide entries restricted to a group the user isn't a member of.
+			if resourceRow[4] != "" && !groupAllowed(resourceRow[4], userGroups) {
+				continue
+			}
+			// No icon defined in the spreadsheet - try and get one from the URL's favicon.
+			if resourceRow[3] == "" {
 				resourceRow[3] = getIconForURL(resourceRow[0], dataPath)
 			}
-			resourceTable = append(resourceTable, resourceRow)
+			// Drop the Group column from the output (it's only used for filtering).
+			resourceTable = append(resourceTable, resourceRow[:4])
 		}
 		resources = append(resources, []interface{}{sheetName, resourceTable})
 	}

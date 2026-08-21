@@ -42,6 +42,111 @@ func writeTestSpreadsheet(t *testing.T, theDir string) {
 	}
 }
 
+// Writes a test spreadsheet that includes a "Group" column, used to restrict which users can see certain entries.
+// Public rows have a blank group; the restricted rows are limited to "staff" and "year12" respectively.
+func writeGroupTestSpreadsheet(t *testing.T, theDir string) {
+	t.Helper()
+	f := excelize.NewFile()
+	sheet := "Main"
+	f.SetSheetName("Sheet1", sheet)
+	for col, val := range []string{"URL", "Title", "Description", "Icon", "Group"} {
+		cell, _ := excelize.CoordinatesToCellName(col+1, 1)
+		f.SetCellValue(sheet, cell, val)
+	}
+	rows := [][]string{
+		{"https://example.com/public", "Public", "Everyone", "", ""},
+		{"https://example.com/staff", "Staff", "Staff only", "", "staff"},
+		{"https://example.com/year12", "Year12", "Year 12 only", "", "year12"},
+		{"https://example.com/multi", "Multi", "Either", "", "staff, year12"},
+	}
+	for rowIdx, row := range rows {
+		for colIdx, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(colIdx+1, rowIdx+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+	if err := f.SaveAs(filepath.Join(theDir, "startScreen.xlsx")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Returns the list of URLs present in the JSON returned by loadStartScreenJSON, for the given user groups.
+func urlsForUserGroups(t *testing.T, dir string, userGroups []string) []string {
+	t.Helper()
+	data, err := loadStartScreenJSON(dir, userGroups)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	var resources [][]interface{}
+	if err := json.Unmarshal(data, &resources); err != nil {
+		t.Fatalf("output is not valid JSON: %v", err)
+	}
+	var urls []string
+	table := resources[0][1].([]interface{})
+	for _, row := range table[1:] {
+		fields := row.([]interface{})
+		urls = append(urls, fields[0].(string))
+	}
+	return urls
+}
+
+func contains(theList []string, target string) bool {
+	for _, item := range theList {
+		if item == target {
+			return true
+		}
+	}
+	return false
+}
+
+func TestLoadStartScreenJSONGroupFiltering(t *testing.T) {
+	stubGetIcon(t, "")
+	dir := t.TempDir()
+	writeGroupTestSpreadsheet(t, dir)
+
+	// A user in no groups should only see entries with no group restriction.
+	if urls := urlsForUserGroups(t, dir, nil); len(urls) != 1 || urls[0] != "https://example.com/public" {
+		t.Fatalf("expected only the public entry for an ungrouped user, got %v", urls)
+	}
+	// A member of "staff" should also see the staff-only and multi-group entries.
+	if urls := urlsForUserGroups(t, dir, []string{"staff"}); len(urls) != 3 || !contains(urls, "https://example.com/staff") || !contains(urls, "https://example.com/multi") {
+		t.Fatalf("expected staff to see public, staff and multi entries, got %v", urls)
+	}
+	// A member of "year12" (via a comma-separated Remote-Role value) should see year12 but not staff.
+	if urls := urlsForUserGroups(t, dir, parseHeaderList("teacher, year12")); len(urls) != 3 || contains(urls, "https://example.com/staff") || !contains(urls, "https://example.com/year12") {
+		t.Fatalf("expected year12 member to see public, multi and year12 entries, got %v", urls)
+	}
+}
+
+func TestHandleStartScreenUsesRemoteRoleHeader(t *testing.T) {
+	stubGetIcon(t, "")
+	dir := t.TempDir()
+	writeGroupTestSpreadsheet(t, dir)
+
+	// A staff user (Remote-Role: staff) should not receive the year12-only entry.
+	req := httptest.NewRequest(http.MethodGet, "/startScreen", nil)
+	req.Header.Set("Remote-Role", "staff")
+	rec := httptest.NewRecorder()
+	handleStartScreen(rec, req, "/startScreen", dir)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, "https://example.com/year12") {
+		t.Fatalf("staff user should not see the year12-only entry: %s", body)
+	}
+	if !strings.Contains(body, "https://example.com/staff") {
+		t.Fatalf("staff user should see the staff entry: %s", body)
+	}
+	// An unauthenticated / ungrouped request should still be able to load the public entries.
+	req = httptest.NewRequest(http.MethodGet, "/startScreen", nil)
+	rec = httptest.NewRecorder()
+	handleStartScreen(rec, req, "/startScreen", dir)
+	if !strings.Contains(rec.Body.String(), "https://example.com/public") {
+		t.Fatalf("expected the public entry for an ungrouped request")
+	}
+}
+
 // Stubs the favicon lookup used when a resource has no icon defined, returning the given icon name.
 func stubGetIcon(t *testing.T, theName string) {
 	t.Helper()
@@ -59,7 +164,7 @@ func TestLoadStartScreenJSON(t *testing.T) {
 	dir := t.TempDir()
 	writeTestSpreadsheet(t, dir)
 
-	data, err := loadStartScreenJSON(dir)
+	data, err := loadStartScreenJSON(dir, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

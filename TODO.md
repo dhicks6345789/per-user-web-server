@@ -14,8 +14,6 @@ Schools / education establishments are an intended target market (along with sma
 - [ ] rclone user area mount (at least with tested Google Drive connection) has a refresh issue. Might need a (cache size / timing?) setting tweaked. "rclone copy ..." doesn't seem to have this problem.
 - [ ] /webconsole endpoint should route to individual user's environment with a running instance of WebConsole.
   - [ ] WebConsole should run in each user context, needs some example new item scripts to add new Flask project, new Go project, etc.
-- [x] Start menu - served at users.example.com, needs to be populated with icons on first row pointing at per-user endpoints. Other sections can be general items to act as a handy general start menu for users.
-  - [ ] Main menu operational, but the menu is the same for all users - could do with functionality to pick up user-specific menus from an endpoint, fall back to file / data.
 - [ ] Arrange YAML files into sub-folder, root of project is getting rather cluttered.
 - [ ] Loading spinner for desktop / ssh connection - initial connection can take 30(?) seconds, needs some progress indication.
 - [ ] Possibly add a separate start menu at public.example.com, constructed from the Caddy config file(?).
@@ -51,3 +49,5 @@ Schools / education establishments are an intended target market (along with sma
 - [x] Install process that starts from Pangolin's install script, installing Docker and Pangolin components, then adding more containers and services.
 - [x] /app/username/portnum - route through to a user's environment where they can be running a Go / Flask / whatever application
 - [x] User app publishing - needs a proxy that can handle redirection of requests for user's self-published apps to particular ports. Might be best to re-work the sessionProxy into a more general reverse proxy so this function and others (/webconsole) can be added.
+- [x] Start menu - served at users.example.com, needs to be populated with icons on first row pointing at per-user endpoints. Other sections can be general items to act as a handy general start menu for users.
+  - [x] Added functionality to pick up user-specific menus (by group membership as provided by Pangolin header) from an endpoint, fall back to file / data.

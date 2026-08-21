@@ -4,9 +4,11 @@ sessionProxy/sessionProxy
 sessionManager/sessionManager
 www/wwwServer
 
-# Custom rclone build output (the rclone source tree and the built binary).
+# Custom rclone build output (the rclone source tree, the built binary and Go build dirs).
 rclone-build/rclone
 rclone-build/src/
+rclone-build/tmp/
+rclone-build/gocache/
 
 # Maven build output.
 guacAutoConnect/target/

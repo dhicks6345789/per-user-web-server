@@ -30,6 +30,15 @@ if ! command -v go >/dev/null 2>&1; then
     exit 1
 fi
 
+# Go's default build work directory and cache live under /tmp, which is often a small tmpfs
+# and can run out of space when building something as large as rclone. Point them at the main
+# disk (alongside this script) instead so the build doesn't fail with "no space left on device".
+BUILDTMP="$BUILDDIR/tmp"
+GOCACHE="$BUILDDIR/gocache"
+mkdir -p "$BUILDTMP" "$GOCACHE"
+export TMPDIR="$BUILDTMP"
+export GOCACHE="$GOCACHE"
+
 # Refresh the rclone source tree (no fork - just the upstream repository, patched at build time).
 if [ ! -d "$SRCDIR/.git" ]; then
     git clone --depth 1 https://github.com/rclone/rclone "$SRCDIR"

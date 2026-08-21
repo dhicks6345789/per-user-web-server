@@ -91,6 +91,10 @@ services:
     restart: unless-stopped
     expose:
       - "8090"
+    environment:
+      # The salt used to hash user identity headers before they are passed to user applications, so digests can't be
+      # reversed. Substituted by the install script from /etc/puws/config.yml.
+      IDENTITY_SALT: {{SESSIONPROXY_IDENTITY_SALT}}
     networks:
       - main
     extra_hosts:

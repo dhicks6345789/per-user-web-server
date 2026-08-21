@@ -545,7 +545,21 @@ if [ $INSTALL_PANGOLIN = true ]; then
         ADMINPANEL_ADMIN_KEY=`grep "^adminKey:" /etc/puws/config.yml | head -1 | cut -d ' ' -f2`
     fi
 
+    # Make sure the Session Manager config file has a salt for obfuscating user identity headers (the session
+    # proxy hashes usernames / email addresses before passing them to user applications, so the digests can't be
+    # reversed). Generated once and re-used on subsequent runs so existing hashes stay consistent.
+    if [ ! -f /etc/puws/config.yml ]; then
+        SESSIONPROXY_IDENTITY_SALT=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 64`
+        echo "identitySalt: $SESSIONPROXY_IDENTITY_SALT" > /etc/puws/config.yml
+    elif ! grep -q "^identitySalt:" /etc/puws/config.yml; then
+        SESSIONPROXY_IDENTITY_SALT=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 64`
+        echo "identitySalt: $SESSIONPROXY_IDENTITY_SALT" >> /etc/puws/config.yml
+    else
+        SESSIONPROXY_IDENTITY_SALT=`grep "^identitySalt:" /etc/puws/config.yml | head -1 | cut -d ' ' -f2`
+    fi
+
     sed -i "s/{{ADMINPANEL_ADMIN_KEY}}/$ADMINPANEL_ADMIN_KEY/g" docker-compose.yml
+    sed -i "s/{{SESSIONPROXY_IDENTITY_SALT}}/$SESSIONPROXY_IDENTITY_SALT/g" docker-compose.yml
     sed -i "s/{{CLOUDFLARED_TOKEN}}/$CLOUDFLARED_TOKEN/g" docker-compose.yml
 
     # Start up the Docker containers.

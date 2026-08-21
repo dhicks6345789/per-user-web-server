@@ -6,28 +6,62 @@
 package main
 
 import (
+	"crypto/sha256"
 	_ "embed"
-	"os"
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"html"
 	"log"
+	"net"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
-	"strings"
-	"strconv"
-	"net"
-	"sort"
-	"net/url"
-	"net/http"
-	"html"
-	"net/http/httputil"
-	"encoding/json"
-	"encoding/base64"
 )
 
 // The root web server folder. Important: don't include include the trailing slash so the prefix gets removed properly from request path strings.
 const rootPath = "/var/www"
 
+// A salt prepended to identity header values before hashing, so the resulting digests can't be reversed with a
+// simple dictionary / rainbow-table lookup (email addresses are fairly predictable). Read from the "IDENTITY_SALT"
+// environment variable, which is set by the install script; falls back to a constant so the app still works if it
+// isn't configured.
+var identitySalt = func() string {
+	if value := os.Getenv("IDENTITY_SALT"); value != "" {
+		return value
+	}
+	return "per-user-web-server-identity-salt"
+}()
 
+// Obfuscates an identity header value (username / email / name) into a salted SHA-256 digest. The same input always
+// produces the same digest, so an app can still recognise a returning user, but can't learn their real identity.
+func obfuscateIdentityValue(theValue string) string {
+	if theValue == "" {
+		return ""
+	}
+	hasher := sha256.New()
+	hasher.Write([]byte(identitySalt))
+	hasher.Write([]byte(":"))
+	hasher.Write([]byte(theValue))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+// Rewrites the identifying "Remote-*" headers on the given request to salted hashes, so that when a user accesses
+// another user's application the app owner can't see the accessing user's real username / email address / name.
+func obfuscateIdentityHeaders(r *http.Request) {
+	for _, header := range []string{"Remote-User", "Remote-Email", "Remote-Name"} {
+		if value := r.Header.Get(header); value != "" {
+			r.Header.Set(header, obfuscateIdentityValue(value))
+		}
+	}
+}
 
 /* We need a separate proxy object for each rclone instance running inisde a user's container. Standard Go maps are not safe for concurrent use,
    therfore we protect our global dictionary using a sync.RWMutex to prevent race conditions when multiple incoming HTTP requests try to read
@@ -35,15 +69,15 @@ const rootPath = "/var/www"
 
 // ProxyRegistry manages our global dictionary of reverse proxies safely.
 type ProxyRegistry struct {
-	mu sync.RWMutex
-	proxies map[string]*httputil.ReverseProxy
+	mu        sync.RWMutex
+	proxies   map[string]*httputil.ReverseProxy
 	passwords map[string]string
 }
 
 // NewProxyRegistry initializes the registry
 func newProxyRegistry() *ProxyRegistry {
 	return &ProxyRegistry{
-		proxies: make(map[string]*httputil.ReverseProxy),
+		proxies:   make(map[string]*httputil.ReverseProxy),
 		passwords: make(map[string]string),
 	}
 }
@@ -52,7 +86,7 @@ func newProxyRegistry() *ProxyRegistry {
 func (pr *ProxyRegistry) get(username string) (*httputil.ReverseProxy, string, bool) {
 	pr.mu.RLock() // Allow multiple readers simultaneously.
 	defer pr.mu.RUnlock()
-	
+
 	proxy, exists := pr.proxies[username]
 	password := pr.passwords[username]
 	return proxy, password, exists
@@ -61,7 +95,7 @@ func (pr *ProxyRegistry) get(username string) (*httputil.ReverseProxy, string, b
 // Call the connectToSession endpoint on the host's Session Manager to ensure that a "desktop" instance (which runs the rclone GUI server) is running for this user. That endpoint returns the user's generated password
 // which we can use for connections.
 // To do: Check the session manager is only accepting calls from this container (and the guacAutoConnect client) so users can't call it to create other users' sessions.
-func connectToSession(username string, startIfNotRunning bool) (string) {
+func connectToSession(username string, startIfNotRunning bool) string {
 	// Define our form data to pass via POST to the sessionManager server, using url.Values...
 	sessionManagerData := url.Values{}
 	sessionManagerData.Set("username", username)
@@ -92,7 +126,7 @@ func connectToSession(username string, startIfNotRunning bool) (string) {
 		return ""
 	}
 	defer sessionManagerResponse.Body.Close()
-	
+
 	// The response should be a string in JSON format, {"port":"..", "password":"..."}, decode that string...
 	var responseData map[string]any
 	json.NewDecoder(sessionManagerResponse.Body).Decode(&responseData)
@@ -111,26 +145,26 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 	}
 	// ...then we can create a new reverse proxy instance to that URL.
 	sessionProxy := httputil.NewSingleHostReverseProxy(proxyTargetURL)
-	
+
 	// Customize the proxy's director to handle headers correctly.
 	originalDirector := sessionProxy.Director
 	sessionProxy.Director = func(req *http.Request) {
 		originalDirector(req)
-		
+
 		// rclone can use basic authentication, so here we can inject the username and password required by rclone
 		// so access is seemless for our (already authenticated) users.
 		req.SetBasicAuth(username, password)
-		
+
 		// Ensure the host header matches the target so Rclone doesn't reject it.
 		req.Host = proxyTargetURL.Host
-		
+
 		// // Pass the original prefix so the downstream app can map static asset MIME types correctly.
 		// req.Header.Set("X-Forwarded-Prefix", "/app/" + username + "/" + targetURLStr)
 	}
-	
+
 	pr.mu.Lock() // Block readers and other writers.
 	defer pr.mu.Unlock()
-	
+
 	pr.proxies[username] = sessionProxy
 	pr.passwords[username] = password
 	return nil
@@ -138,8 +172,6 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 
 // A global instance of the proxy registry to store multiple proxies to user rclone instances.
 var sessionProxies = newProxyRegistry()
-
-
 
 // The HTML page that explains the "/app/username/portnumber/" URL scheme to the user, with a form that
 // helps them construct the URL to their app. Loaded from the "appIndex.html" file at build time using go:embed.
@@ -223,10 +255,10 @@ func fileExists(thePath string) bool {
 func main() {
 	rcloneHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Proxying rclone request: %s %s", r.Method, r.URL.Path)
-		
+
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
-		
+
 		// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
 		proxy, password, exists := sessionProxies.get(username)
 		if exists == false {
@@ -234,24 +266,24 @@ func main() {
 			password = connectToSession(username, true)
 
 			// Create a new proxy object to connect with.
-			sessionProxies.set(username, password, "http://desktop-" + username + ":8090")
+			sessionProxies.set(username, password, "http://desktop-"+username+":8090")
 			proxy, password, exists = sessionProxies.get(username)
 		}
-		
+
 		// // Rewrite the URL to remove the "/rclone" prefix.
 		// r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
-		
+
 		// Redirect the "/" URL to include the (Base64-ed "username:password") login token (if it doesn't already) so the user is logged straight in rather than being shown the "login" screen.
 		if r.URL.Path == "/" && !r.URL.Query().Has("login_token") {
 			log.Printf("Redirecting request: %s %s", r.Method, r.URL.Path)
-			http.Redirect(w, r, "/rclone/?login_token=" + base64.StdEncoding.EncodeToString([]byte(username + ":" + password)), http.StatusSeeOther)
+			http.Redirect(w, r, "/rclone/?login_token="+base64.StdEncoding.EncodeToString([]byte(username+":"+password)), http.StatusSeeOther)
 			return
 		}
-		
+
 		log.Printf("Re-written rclone request: %s %s", r.Method, r.URL.Path)
 		proxy.ServeHTTP(w, r)
 	})
-	
+
 	appHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Proxying app request: %s %s", r.Method, r.URL.Path)
 
@@ -286,27 +318,31 @@ func main() {
 			proxy, password, exists := sessionProxies.get(proxyKey)
 			if exists == false {
 				password = connectToSession(URLUsername, false)
-				
+
 				// If we get a blank password, a session doesn't exist - return an error.
 				if password == "" {
-					http.Error(w, "Application endpoint not found - user session for " + URLUsername + " not running.", http.StatusNotFound)
+					http.Error(w, "Application endpoint not found - user session for "+URLUsername+" not running.", http.StatusNotFound)
 					return
 				} else {
 					// Create a new proxy object to connect with.
-					sessionProxies.set(proxyKey, password, "http://desktop-" + URLUsername + ":" + URLPort)
+					sessionProxies.set(proxyKey, password, "http://desktop-"+URLUsername+":"+URLPort)
 					proxy, password, exists = sessionProxies.get(proxyKey)
 				}
 			}
-			
+
 			// Rewrite the URL to point at the given user's app.
 			r.URL.Path = "/" + URLRemainder
 
 			if r.URL.Path == "/" && !strings.HasSuffix(originalPath, "/") {
 				log.Printf("Redirecting (Error 301) root request with no trailing slash (see RFC 3986): %s %s", r.Method, r.URL.Path)
-				http.Redirect(w, r, "/app/" + originalPath + "/", http.StatusMovedPermanently)
+				http.Redirect(w, r, "/app/"+originalPath+"/", http.StatusMovedPermanently)
 				return
 			}
-			
+
+			// Obfuscate the accessing user's identity before it reaches the target user's app, so the app owner
+			// can't learn other users' real usernames / email addresses from the request headers.
+			obfuscateIdentityHeaders(r)
+
 			log.Printf("Re-written app request: %s %s", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)
 		} else {
@@ -314,7 +350,7 @@ func main() {
 			return
 		}
 	})
-	
+
 	http.Handle("/rclone/", http.StripPrefix("/rclone/", rcloneHandler))
 	http.Handle("/app/", http.StripPrefix("/app/", appHandler))
 	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
@@ -322,7 +358,7 @@ func main() {
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 		serveAppIndex(w, username)
 	})
-	
+
 	// Execution starts here.
 	log.Println("sessionProxy starting on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

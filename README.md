@@ -10,7 +10,7 @@ This project is intended to provide both a solid foundation for an environment w
 - Gives users in your organisation [web-based remote desktop](https://guacamole.apache.org/) access (an [XFCE4](https://www.xfce.org/) GUI desktop or SSH command line) to a [Debian Linux](https://www.debian.org/) software development environment, including (optionally) AI coding tools.
 - Integrates with [Pangolin](https://github.com/fosrl/pangolin) to handle authentication, including OAuth (login-with-Google / Microsoft / etc) providers, so no separate accounts / password to setup or maintain.
 - Integrates with cloud storage (Google Drive, Microsoft OneDrive, etc), [mounting](https://rclone.org/commands/rclone_mount/) each user's cloud storage area as a local file system accessible via standard desktop and command-line tools.
-- User logins can be obfuscated before being passed to user-created applications, useful for schools if allowing access by parents to pupil-created applications.
+- Users can develop and host applications on network ports using common web application frameworks (Python's Flask, Node.js, Go applications, etc), with access controls in place and user logins obfuscated before being passed to user-created applications, useful for schools for allowing access by parents to pupil-created applications.
 - A selection of programming languages, libraries, IDEs, tools and utilities installed in a ready-to-use setup, including:
   - [Python](https://www.python.org/), with common libraries ([Pandas](https://pandas.pydata.org/) for data handling, [NumPy](https://numpy.org/) for scientific / mathematical computing, [Jinja2](https://pypi.org/project/Jinja2/) templates, [OpenCV](https://pypi.org/project/opencv-python/) for computer vision, [Pillow](https://pillow.readthedocs.io/en/stable/) for image handling) and IDE ([Idle](https://en.wikipedia.org/wiki/IDLE)).
   - [Go](https://go.dev/), with common libraries.
@@ -19,7 +19,8 @@ This project is intended to provide both a solid foundation for an environment w
   - The [Hugo](https://gohugo.io/) static site generation tool
   - The [VS Code](https://code.visualstudio.com/) and [Thonny](https://thonny.org/) IDEs.
   - [Google Antigravity](https://antigravity.google/), [OpenCode](https://opencode.ai/) and [Pi](https://pi.dev/) AI coding tools.
-- A built-in web server, able to handle basic static files and CGI scripts, for internal sites and tools. Each user has a "www" folder they can publish materials / applications to. Users can also host applications on network ports using common web application frameworks (Python's Flask, Node.js, Go applications, etc), with a custom reverse proxy to allow access, and an instance of the [Caddy](https://caddyserver.com/) web server for sites / applications the system administrator wishes to make available to the public.
+- A built-in web server, able to handle basic static files and CGI scripts, for internal sites and tools. Each user has a "www" folder they can publish materials / applications to.
+- System administrators can choose to allow general access to web content via an instance of the [Caddy](https://caddyserver.com/) web server, and user apps can be exposed via the Pangolin configuration.
 - A web-based admin control panel, for system administrators only, showing the status of the server: running user sessions / containers and host resource usage.
 - Configuration and setup of components installed is modifiable, so admins can select which items get installed.
 - Self-hostable - an open source project, this project can be installed in your organisation with no setup or ongoing fees.

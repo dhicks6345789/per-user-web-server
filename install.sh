@@ -415,6 +415,32 @@ if [ $INSTALL_PANGOLIN = true ]; then
     # each for the Traefik reverse proxy / router, the main Pangolin server and possibly the Gerbil tunneling component). We now want to add
     # further container images, some of which are standard images (the Cloudflare "tunnel" image, the Guacamole / guacd images), others we build.
 
+    # The public "/rclone/oauth2callback" redirect URI used by rclone's interactive OAuth flow. It must match the
+    # hostname where the session proxy (and its "/rclone" endpoint) is served, e.g. https://users.example.com/rclone/oauth2callback.
+    # Stored in /etc/puws/config.yml so it stays consistent across re-installs; defaults to the server's own hostname.
+    mkdir -p /etc/puws
+    if [ ! -f /etc/puws/config.yml ]; then
+        RCLONE_OAUTH_REDIRECT_URL="https://$SERVERNAME/rclone/oauth2callback"
+        echo "rcloneOauthRedirectUrl: $RCLONE_OAUTH_REDIRECT_URL" > /etc/puws/config.yml
+    elif ! grep -q "^rcloneOauthRedirectUrl:" /etc/puws/config.yml; then
+        RCLONE_OAUTH_REDIRECT_URL="https://$SERVERNAME/rclone/oauth2callback"
+        echo "rcloneOauthRedirectUrl: $RCLONE_OAUTH_REDIRECT_URL" >> /etc/puws/config.yml
+    else
+        RCLONE_OAUTH_REDIRECT_URL=`grep "^rcloneOauthRedirectUrl:" /etc/puws/config.yml | head -1 | cut -d ' ' -f2`
+    fi
+
+    # Build a custom rclone binary with the OAuth callback bound to 0.0.0.0:53682 and redirected to the site's
+    # "/rclone/oauth2callback" endpoint, so interactive OAuth works through the session proxy. Built before the
+    # desktop image so the resulting binary can be copied into it.
+    if [ $BUILD_DESKTOP = true ]; then
+        echo "Building custom rclone (with proxied OAuth support)."
+        bash per-user-web-server/rclone-build/build.sh "$RCLONE_OAUTH_REDIRECT_URL"
+        if [ ! -f "per-user-web-server/rclone-build/rclone" ]; then
+            echo "Problem building custom rclone - stopping."
+            exit 1
+        fi
+    fi
+
     # First, stop any currently-running Docker containers.
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
     

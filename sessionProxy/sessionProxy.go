@@ -252,6 +252,60 @@ func fileExists(thePath string) bool {
 	return true
 }
 
+// The port rclone's OAuth callback webserver listens on inside the user's desktop container. Our custom-built
+// rclone binds this to 0.0.0.0 (upstream uses 127.0.0.1) so it's reachable from this proxy container.
+const rcloneOAuthPort = 53682
+
+// Builds the address of the OAuth callback webserver in a given user's desktop container. A variable so tests can
+// redirect it to a local test server.
+var rcloneOAuthTarget = func(username string) string {
+	return "http://desktop-" + username + ":" + strconv.Itoa(rcloneOAuthPort)
+}
+
+// Handles the "/rclone/oauth2callback" endpoint. When a user adds a cloud remote in the rclone web GUI, the OAuth
+// flow redirects the user's browser back to this URL (which is registered with the OAuth provider). We route it to
+// the OAuth callback webserver running in the requesting user's own desktop container - the one that started the
+// flow - so the handshake completes. The redirect URI is a single, shared URL for the whole site, but it's routed
+// by the "Remote-User" header (injected by Pangolin), so each user's callback always lands in their own container.
+func handleRcloneOAuthCallback(w http.ResponseWriter, r *http.Request) {
+	// Get the current user's username (the "Remote-User" HTTP header value injected by Pangolin).
+	username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
+	if username == "" {
+		log.Print("rclone OAuth callback: no user supplied (missing Remote-User header).")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Route to the user's own desktop container (where the rclone GUI / OAuth flow is running). No session is
+	// started here - a callback only ever arrives while that container already has an active OAuth flow.
+	targetURL, err := url.Parse(rcloneOAuthTarget(username))
+	if err != nil {
+		log.Printf("rclone OAuth callback: error parsing target URL: %v", err)
+		http.Error(w, "Bad gateway", http.StatusBadGateway)
+		return
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	// Customize the proxy's director to forward the callback onto the right path in the container.
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+
+		// Ensure the Host header matches the target so rclone's callback server doesn't reject it.
+		req.Host = targetURL.Host
+
+		// Strip the "/rclone" prefix so the callback lands on "/oauth2callback" inside the container (the
+		// query parameters - state, code, etc - are preserved by the proxy).
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/rclone")
+		if req.URL.Path == "" {
+			req.URL.Path = "/"
+		}
+	}
+
+	log.Printf("rclone OAuth callback for user %s: %s %s", username, r.Method, r.URL.String())
+	proxy.ServeHTTP(w, r)
+}
+
 func main() {
 	rcloneHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Proxying rclone request: %s %s", r.Method, r.URL.Path)
@@ -351,6 +405,10 @@ func main() {
 		}
 	})
 
+	// The rclone OAuth callback is routed to the requesting user's own desktop container (see
+	// handleRcloneOAuthCallback). Registering the exact path means it takes precedence over the
+	// more general "/rclone/" pattern below.
+	http.HandleFunc("/rclone/oauth2callback", handleRcloneOAuthCallback)
 	http.Handle("/rclone/", http.StripPrefix("/rclone/", rcloneHandler))
 	http.Handle("/app/", http.StripPrefix("/app/", appHandler))
 	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {

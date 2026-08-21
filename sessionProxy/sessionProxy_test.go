@@ -2,8 +2,61 @@ package main
 
 import (
 	"net/http"
+	"net/http/httptest"
+	"sync"
 	"testing"
 )
+
+// Without a Remote-User header (which Pangolin injects) we can't know whose container to route the OAuth
+// callback to, so the request should be rejected.
+func TestHandleRcloneOAuthCallbackMissingUser(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/rclone/oauth2callback?state=abc&code=123", nil)
+	rec := httptest.NewRecorder()
+	handleRcloneOAuthCallback(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 without Remote-User, got %d", rec.Code)
+	}
+}
+
+// A valid callback should be proxied to the requesting user's own desktop container, with the "/rclone" prefix
+// stripped and the OAuth query parameters (state, code) preserved.
+func TestHandleRcloneOAuthCallbackProxiesToUser(t *testing.T) {
+	var received struct {
+		mu    sync.Mutex
+		path  string
+		query string
+	}
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		received.mu.Lock()
+		received.path = r.URL.Path
+		received.query = r.URL.RawQuery
+		received.mu.Unlock()
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer testServer.Close()
+
+	// Redirect the callback target to the local test server instead of a real desktop container.
+	original := rcloneOAuthTarget
+	rcloneOAuthTarget = func(username string) string { return testServer.URL }
+	t.Cleanup(func() { rcloneOAuthTarget = original })
+
+	req := httptest.NewRequest(http.MethodGet, "/rclone/oauth2callback?state=abc&code=123", nil)
+	req.Header.Set("Remote-User", "jane.doe@example.com")
+	rec := httptest.NewRecorder()
+	handleRcloneOAuthCallback(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	received.mu.Lock()
+	defer received.mu.Unlock()
+	if received.path != "/oauth2callback" {
+		t.Fatalf("expected callback forwarded to /oauth2callback, got %q", received.path)
+	}
+	if received.query != "state=abc&code=123" {
+		t.Fatalf("expected OAuth query preserved, got %q", received.query)
+	}
+}
 
 // The obfuscated value should be a fixed-length hex digest that is deterministic for the same input, differs
 // between inputs, and is never blank for a non-blank input.

@@ -45,6 +45,21 @@ This project is mostly just an installation script, along with some template con
 - [Docs To Markdown](https://github.com/dhicks6345789/docs-to-markdown/tree/WebconsoleUpdate). A wrapper built around larger tools like [Pandoc](https://pandoc.org/) and [ffmpeg](https://ffmpeg.org/) to convert files in various formats (Word / Google Docs, Excel / Google Sheets, etc, video and audio files) to formats (such as Markdown) and structures usable as input for static site generations tools (like Hugo), letting your users build and edit websites by simply editing content in Google Workspace / Microsoft 365 cloud-based file systems.
 - The [Rclone](https://rclone.org/) file sync tool. Each user site can be built from files hosted on your choice of cloud storage system, handy for schools with users on Google Workspace / Microsoft 365 - each user simply has a "website" folder in their home storage area where they can put / edit HTML / CSS / Javascript files, or Markdown files and Hugo templates, and that folder is published to the web server.
 
+### rclone interactive OAuth (adding personal cloud remotes via the web GUI)
+
+Users can add their own cloud storage remotes through the rclone web GUI (at `https://<users-host>/rclone/`). Because the GUI runs inside each user's desktop container, rclone's interactive OAuth normally fails - its callback webserver binds to `127.0.0.1:53682` and its redirect URI points back at that same localhost address.
+
+To make this work, the installer builds a custom rclone binary with two small patches applied (as search-and-replace strings in `rclone-build/build.sh` - no fork is maintained):
+- the OAuth callback webserver is bound to `0.0.0.0:53682` (reachable from the session proxy), and
+- the OAuth redirect URI is set to `https://<users-host>/rclone/oauth2callback`.
+
+The session proxy routes `/rclone/oauth2callback` to the requesting user's own desktop container (using Pangolin's `Remote-User` header), so each user's OAuth completes in their own container.
+
+Configuration:
+- The redirect URI is stored in `/etc/puws/config.yml` as `rcloneOauthRedirectUrl`. The installer defaults it to `https://<SERVERNAME>/rclone/oauth2callback` - **edit it to the public hostname where the `/rclone` endpoint is served** (e.g. `https://users.example.com/rclone/oauth2callback`), then re-run the installer to rebuild rclone.
+- No shared organisation OAuth client is provided. Each user supplies their own `client_id` / `client_secret` when adding a remote in the GUI, and must register `https://<users-host>/rclone/oauth2callback` as a redirect URI on their own OAuth client (e.g. Google Cloud Console).
+- The existing institutional Google Drive mount (via the service-account `gdrive` remote) is unaffected; per-user remotes are in addition to it.
+
 ## Installation
 The instllation is split into two parts, the Pangolin setup and the web server setup. This is so the two operations can be carried out on separate servers, although running both on a single server is also fine.
 

@@ -103,6 +103,11 @@ RUN apt-get install -y code
 
 
 
+# Copy in the custom-built rclone, which has its interactive OAuth callback bound to 0.0.0.0:53682 and redirected
+# to the site's "/rclone/oauth2callback" endpoint so OAuth works through the session proxy. This overrides the
+# standard rclone installed by the root image (at /usr/local/bin/rclone).
+COPY per-user-web-server/rclone-build/rclone /usr/local/bin/rclone
+
 # Copy in the startup scripts. Further setup is done after startup by these scripts rather than here as we create a separate named user in each container instance and need to
 # match up UIDs with the host, which we don't know until container creation time.
 COPY per-user-web-server/docker-desktop-xstartup /root/docker-desktop-xstartup

@@ -4,6 +4,10 @@ sessionProxy/sessionProxy
 sessionManager/sessionManager
 www/wwwServer
 
+# Custom rclone build output (the rclone source tree and the built binary).
+rclone-build/rclone
+rclone-build/src/
+
 # Maven build output.
 guacAutoConnect/target/
 guacAutoConnect/dependency-reduced-pom.xml

@@ -7,7 +7,6 @@ Schools / education establishments are an intended target market (along with sma
 ---
 
 ## To-Do
-- [x] Obfuscate usernames / email addresses when passed through via headers, to aid with data protection / safeguarding in school environments.
 - [ ] /rclone endpoint:
   - [ ] Works to redirect web interface, but needs to be able to redirect separate port (consistent port number?) to receive OAuth data. Might need custom-compiled version of rclone (which we already have, just needs adding in).
   - [ ] Might want to add auto-mount of added rclone remotes. Would mean watching central rclone.config directory for user changes, then running mount operation on trigger.
@@ -51,3 +50,4 @@ Schools / education establishments are an intended target market (along with sma
 - [x] User app publishing - needs a proxy that can handle redirection of requests for user's self-published apps to particular ports. Might be best to re-work the sessionProxy into a more general reverse proxy so this function and others (/webconsole) can be added.
 - [x] Start menu - served at users.example.com, needs to be populated with icons on first row pointing at per-user endpoints. Other sections can be general items to act as a handy general start menu for users.
   - [x] Added functionality to pick up user-specific menus (by group membership as provided by Pangolin header) from an endpoint, fall back to file / data.
+- [x] Obfuscate usernames / email addresses when passed through via headers, to aid with data protection / safeguarding in school environments.

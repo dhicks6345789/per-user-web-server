@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -112,6 +113,28 @@ func TestRewriteGUIHTML(t *testing.T) {
 	}
 	if cc := resp.Header.Get("Cache-Control"); cc != "no-store" {
 		t.Fatalf("expected HTML response to be non-cacheable, got %q", cc)
+	}
+
+	// A gzip-encoded HTML response must be decompressed, rewritten, and the encoding cleared so the browser receives
+	// the rewritten (uncompressed) HTML with the correct asset paths.
+	var gzBuf bytes.Buffer
+	gz := gzip.NewWriter(&gzBuf)
+	gz.Write([]byte(html))
+	gz.Close()
+	respGz := &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"text/html"}, "Content-Encoding": []string{"gzip"}},
+		Body:       io.NopCloser(bytes.NewReader(gzBuf.Bytes())),
+	}
+	if err := rewriteGUIHTML(respGz); err != nil {
+		t.Fatal(err)
+	}
+	if enc := respGz.Header.Get("Content-Encoding"); enc != "" {
+		t.Fatalf("expected gzip encoding to be cleared, got %q", enc)
+	}
+	outGz, _ := io.ReadAll(respGz.Body)
+	if !strings.Contains(string(outGz), `src="/rclone/assets/index-abc.js"`) {
+		t.Fatalf("expected gzip HTML to be rewritten, got %q", string(outGz))
 	}
 
 	// Non-HTML responses must be passed through unchanged.

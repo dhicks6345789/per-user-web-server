@@ -7,6 +7,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/sha256"
 	_ "embed"
 	"encoding/hex"
@@ -184,7 +185,20 @@ func rewriteGUIHTML(resp *http.Response) error {
 	if !strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "text/html") {
 		return nil
 	}
-	body, err := io.ReadAll(resp.Body)
+
+	// The GUI server compresses HTML when the client advertises gzip support. We must rewrite the decompressed content,
+	// so transparently decompress the body if it arrives gzip-encoded, then serve the rewritten HTML uncompressed.
+	var bodyReader io.Reader = resp.Body
+	if strings.Contains(resp.Header.Get("Content-Encoding"), "gzip") {
+		gz, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			return err
+		}
+		defer gz.Close()
+		bodyReader = gz
+	}
+
+	body, err := io.ReadAll(bodyReader)
 	if err != nil {
 		return err
 	}
@@ -198,9 +212,12 @@ func rewriteGUIHTML(resp *http.Response) error {
 	resp.Body = io.NopCloser(bytes.NewBufferString(rewritten))
 	resp.ContentLength = int64(len(rewritten))
 	resp.Header.Set("Content-Length", strconv.Itoa(len(rewritten)))
-	// The HTML is rewritten per-request (asset URLs depend on the serving prefix), so it must never be cached. We also
-	// drop the backend's revalidation headers: the rewritten body differs from the on-disk file, so an unchanged
-	// Last-Modified/ETag could otherwise let a browser revalidate to a 304 and keep stale, un-rewritten asset paths.
+	// The rewritten HTML is served uncompressed and rewritten per-request (asset URLs depend on the serving prefix), so
+	// clear the encoding and never cache it. We also drop the backend's revalidation headers: the rewritten body differs
+	// from the on-disk file, so an unchanged Last-Modified/ETag could otherwise let a browser revalidate to a 304 and
+	// keep stale, un-rewritten asset paths.
+	resp.Header.Del("Content-Encoding")
+	resp.Header.Del("Content-Length")
 	resp.Header.Set("Cache-Control", "no-store")
 	resp.Header.Del("Last-Modified")
 	resp.Header.Del("ETag")

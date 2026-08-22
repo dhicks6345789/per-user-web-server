@@ -143,16 +143,16 @@ func TestRcloneRCATarget(t *testing.T) {
 	}
 }
 
-// rewriteGUIHTML should prefix root-absolute asset URLs in an HTML response with the "/rclone" sub-path, but leave
-// non-HTML responses (e.g. the SPA's JS bundle) untouched.
-func TestRewriteGUIHTML(t *testing.T) {
+// rewriteGUIGUI should prefix root-absolute asset URLs in HTML and JS responses with the "/rclone" sub-path, and leave
+// other response types (CSS, images, etc.) untouched.
+func TestRewriteGUIGUI(t *testing.T) {
 	html := `<!doctype html><link rel="icon" href="/icon.svg"><script src="/assets/index-abc.js"></script>`
 	resp := &http.Response{
 		StatusCode: http.StatusOK,
 		Header:     http.Header{"Content-Type": []string{"text/html; charset=utf-8"}},
 		Body:       io.NopCloser(strings.NewReader(html)),
 	}
-	if err := rewriteGUIHTML(resp); err != nil {
+	if err := rewriteGUIGUI(resp); err != nil {
 		t.Fatal(err)
 	}
 	out, _ := io.ReadAll(resp.Body)
@@ -177,7 +177,7 @@ func TestRewriteGUIHTML(t *testing.T) {
 		Header:     http.Header{"Content-Type": []string{"text/html"}, "Content-Encoding": []string{"gzip"}},
 		Body:       io.NopCloser(bytes.NewReader(gzBuf.Bytes())),
 	}
-	if err := rewriteGUIHTML(respGz); err != nil {
+	if err := rewriteGUIGUI(respGz); err != nil {
 		t.Fatal(err)
 	}
 	if enc := respGz.Header.Get("Content-Encoding"); enc != "" {
@@ -188,19 +188,39 @@ func TestRewriteGUIHTML(t *testing.T) {
 		t.Fatalf("expected gzip HTML to be rewritten, got %q", string(outGz))
 	}
 
-	// Non-HTML responses must be passed through unchanged.
-	js := `var x = "/assets/index-abc.js";`
+	// The JS bundle renders the logo as "/icon.svg" (root-absolute); it must be prefixed too, while other JS content
+	// (e.g. "/assets/..." module paths) is left alone since the browser loads those via the rewritten HTML.
+	js := `var logo = '<img src="/icon.svg">', mod = "/assets/index-abc.js";`
 	respJS := &http.Response{
 		StatusCode: http.StatusOK,
 		Header:     http.Header{"Content-Type": []string{"application/javascript"}},
 		Body:       io.NopCloser(bytes.NewBufferString(js)),
 	}
-	if err := rewriteGUIHTML(respJS); err != nil {
+	if err := rewriteGUIGUI(respJS); err != nil {
 		t.Fatal(err)
 	}
 	outJS, _ := io.ReadAll(respJS.Body)
-	if string(outJS) != js {
-		t.Fatalf("non-HTML response was modified: %q", string(outJS))
+	gotJS := string(outJS)
+	if !strings.Contains(gotJS, `"/rclone/icon.svg"`) {
+		t.Fatalf("expected JS logo path to be rewritten, got %q", gotJS)
+	}
+	if strings.Contains(gotJS, `"/rclone/assets/index-abc.js"`) {
+		t.Fatalf("expected JS module path to be left unchanged, got %q", gotJS)
+	}
+
+	// Non-HTML/JS responses (e.g. CSS) must be passed through unchanged.
+	css := `.x { background: url("/icon.svg"); }`
+	respCSS := &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"text/css"}},
+		Body:       io.NopCloser(bytes.NewBufferString(css)),
+	}
+	if err := rewriteGUIGUI(respCSS); err != nil {
+		t.Fatal(err)
+	}
+	outCSS, _ := io.ReadAll(respCSS.Body)
+	if string(outCSS) != css {
+		t.Fatalf("non-HTML/JS response was modified: %q", string(outCSS))
 	}
 }
 

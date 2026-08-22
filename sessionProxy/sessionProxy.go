@@ -168,7 +168,7 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 	// "/icon.svg"). Served behind a path prefix, a browser would resolve those against the domain root and miss the proxy
 	// route. When set, we rewrite those paths in HTML responses to add the "/rclone" prefix so the assets load correctly.
 	if rewriteHTML {
-		sessionProxy.ModifyResponse = rewriteGUIHTML
+		sessionProxy.ModifyResponse = rewriteGUIGUI
 	}
 
 	pr.mu.Lock() // Block readers and other writers.
@@ -179,15 +179,21 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 	return nil
 }
 
-// rewriteGUIHTML rewrites a response's root-absolute asset URLs to include the "/rclone" path prefix, so the SPA's
-// static assets load correctly when the GUI is served behind that prefix. Only HTML responses are rewritten.
-func rewriteGUIHTML(resp *http.Response) error {
-	if !strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "text/html") {
+// rewriteGUIGUI rewrites responses from the rclone web GUI so its root-absolute references work behind the "/rclone"
+// path prefix. The SPA is built for the domain root, so both its HTML shell and its (React-rendered) JS bundle use
+// root-absolute asset paths (e.g. "/assets/...", "/icon.svg"). We rewrite those to add the "/rclone" prefix, and also
+// inject a small OAuth helper into the HTML. Only HTML and JavaScript responses are rewritten; everything else passes
+// through unchanged.
+func rewriteGUIGUI(resp *http.Response) error {
+	contentType := strings.ToLower(resp.Header.Get("Content-Type"))
+	isHTML := strings.Contains(contentType, "text/html")
+	isJS := strings.Contains(contentType, "application/javascript")
+	if !isHTML && !isJS {
 		return nil
 	}
 
-	// The GUI server compresses HTML when the client advertises gzip support. We must rewrite the decompressed content,
-	// so transparently decompress the body if it arrives gzip-encoded, then serve the rewritten HTML uncompressed.
+	// The GUI server compresses responses when the client advertises gzip support. We must rewrite the decompressed
+	// content, so transparently decompress the body if it arrives gzip-encoded, then serve it uncompressed.
 	var bodyReader io.Reader = resp.Body
 	if strings.Contains(resp.Header.Get("Content-Encoding"), "gzip") {
 		gz, err := gzip.NewReader(resp.Body)
@@ -204,23 +210,24 @@ func rewriteGUIHTML(resp *http.Response) error {
 	}
 	resp.Body.Close()
 
-	bodyStr := string(body)
-
-	rewritten := strings.ReplaceAll(bodyStr, `"/assets/`, `"/rclone/assets/`)
+	rewritten := string(body)
+	if isHTML {
+		rewritten = strings.ReplaceAll(rewritten, `"/assets/`, `"/rclone/assets/`)
+		// Inject a small OAuth helper: when an OAuth remote is being created, rclone's config/create blocks while its
+		// auth server runs, but it exposes the auth URL via config/oauthstatus. This script polls that endpoint and
+		// shows the user a clickable link to complete the OAuth handshake (rewritten to go through this proxy).
+		rewritten = strings.Replace(rewritten, "</body>", oauthHelperScript()+"</body>", 1)
+	}
+	// The HTML shell and the JS-rendered GUI both reference the favicon/logo as "/icon.svg" (root-absolute); prefix it.
 	rewritten = strings.ReplaceAll(rewritten, `"/icon.svg"`, `"/rclone/icon.svg"`)
-
-	// Inject a small OAuth helper: when an OAuth remote is being created, rclone's config/create blocks while its
-	// auth server runs, but it exposes the auth URL via config/oauthstatus. This script polls that endpoint and shows
-	// the user a clickable link to complete the OAuth handshake (the URL is rewritten to go through this proxy).
-	rewritten = strings.Replace(rewritten, "</body>", oauthHelperScript()+"</body>", 1)
 
 	resp.Body = io.NopCloser(bytes.NewBufferString(rewritten))
 	resp.ContentLength = int64(len(rewritten))
 	resp.Header.Set("Content-Length", strconv.Itoa(len(rewritten)))
-	// The rewritten HTML is served uncompressed and rewritten per-request (asset URLs depend on the serving prefix), so
-	// clear the encoding and never cache it. We also drop the backend's revalidation headers: the rewritten body differs
-	// from the on-disk file, so an unchanged Last-Modified/ETag could otherwise let a browser revalidate to a 304 and
-	// keep stale, un-rewritten asset paths.
+	// The rewritten content is served uncompressed and rewritten per-request (asset URLs depend on the serving prefix),
+	// so clear the encoding and never cache it. We also drop the backend's revalidation headers: the rewritten body
+	// differs from the on-disk file, so an unchanged Last-Modified/ETag could otherwise let a browser revalidate to a
+	// 304 and keep stale, un-rewritten asset paths.
 	resp.Header.Del("Content-Encoding")
 	resp.Header.Del("Content-Length")
 	resp.Header.Set("Cache-Control", "no-store")

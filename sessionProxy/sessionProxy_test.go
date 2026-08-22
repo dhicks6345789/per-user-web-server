@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 )
@@ -78,6 +81,49 @@ func TestObfuscateIdentityValue(t *testing.T) {
 	// The digest must not contain the original value (i.e. it is actually hashed).
 	if other := obfuscateIdentityValue("jane.doe@example.com"); containsIdentity(other, "jane.doe") {
 		t.Fatalf("digest unexpectedly contains the original identity: %q", other)
+	}
+}
+
+// The RC API target for a user points at their desktop container's RC API port (5572).
+func TestRcloneRCATarget(t *testing.T) {
+	if got := rcloneRCATarget("jane.doe"); got != "http://desktop-jane.doe:5572" {
+		t.Fatalf("unexpected RC API target %q", got)
+	}
+}
+
+// rewriteGUIHTML should prefix root-absolute asset URLs in an HTML response with the "/rclone" sub-path, but leave
+// non-HTML responses (e.g. the SPA's JS bundle) untouched.
+func TestRewriteGUIHTML(t *testing.T) {
+	html := `<!doctype html><link rel="icon" href="/icon.svg"><script src="/assets/index-abc.js"></script>`
+	resp := &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"text/html; charset=utf-8"}},
+		Body:       io.NopCloser(strings.NewReader(html)),
+	}
+	if err := rewriteGUIHTML(resp); err != nil {
+		t.Fatal(err)
+	}
+	out, _ := io.ReadAll(resp.Body)
+	got := string(out)
+	for _, want := range []string{`href="/rclone/icon.svg"`, `src="/rclone/assets/index-abc.js"`} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("expected rewritten HTML to contain %q, got %q", want, got)
+		}
+	}
+
+	// Non-HTML responses must be passed through unchanged.
+	js := `var x = "/assets/index-abc.js";`
+	respJS := &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/javascript"}},
+		Body:       io.NopCloser(bytes.NewBufferString(js)),
+	}
+	if err := rewriteGUIHTML(respJS); err != nil {
+		t.Fatal(err)
+	}
+	outJS, _ := io.ReadAll(respJS.Body)
+	if string(outJS) != js {
+		t.Fatalf("non-HTML response was modified: %q", string(outJS))
 	}
 }
 

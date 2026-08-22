@@ -16,10 +16,15 @@ fi
 
 # Run rclone in "GUI" mode as a service. This lets the user connect to a (web based) graphical user interface to use rclone.
 # A separate container provides a per-user proxy for that GUI interface, so users can connect to the rclone GUI via the Pangolin gateway.
-# We use "0.0.0.0" as the IP address so the rclone application binds to the local network interface and allows connections from other
-# machines (in this case, our rclone proxy container) - if we used "localhost" or "127.0.0.1" only local connections will be accepted.
-echo "Starting rclone GUI server, username $1, password $4 on port 8090."
-rclone rcd --rc-web-gui --rc-addr 0.0.0.0:8090 --rc-web-gui-no-open-browser --rc-user $1 --rc-pass $4 --rc-serve &
+#
+# Since rclone v1.74 the old single-port "rclone rcd --rc-web-gui" has been replaced by the "rclone gui" command, which serves
+# the web GUI and the remote control (RC) API on two SEPARATE ports. Our session proxy therefore needs both ports:
+#   - port 8090 hosts the embedded web GUI (the interface the user sees in their browser)
+#   - port 5572 hosts the RC API, which the web GUI talks to. The proxy routes "/rclone/rc" to this port.
+# The ports are fixed so the session proxy can find them. We bind to "0.0.0.0" so the (separate) session proxy container,
+# on the same Docker network, can reach them - if we used "localhost" or "127.0.0.1" only local connections would be accepted.
+echo "Starting rclone GUI server (GUI on port 8090, RC API on port 5572), username $1."
+rclone gui --addr 0.0.0.0:8090 --api-addr 0.0.0.0:5572 --user $1 --pass $4 --no-open-browser &
 
 if [ -f "/home/$1/startup.sh" ]; then
   HOME=/home/$1 bash /home/$1/startup.sh $1 $2 $3 $4 $5

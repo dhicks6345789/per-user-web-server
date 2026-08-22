@@ -47,7 +47,15 @@ This project is mostly just an installation script, along with some template con
 
 ### rclone interactive OAuth (adding personal cloud remotes via the web GUI)
 
-Users can add their own cloud storage remotes through the rclone web GUI (at `https://<users-host>/rclone/`). Because the GUI runs inside each user's desktop container, rclone's interactive OAuth normally fails - its callback webserver binds to `127.0.0.1:53682` and its redirect URI points back at that same localhost address.
+Users can add their own cloud storage remotes through the rclone web GUI (at `https://<users-host>/rclone/`). The GUI runs inside each user's desktop container. Since rclone **v1.74** the old single-port `rclone rcd --rc-web-gui` was replaced by the `rclone gui` command, which serves the web GUI and the remote control (RC) API on **two separate ports**. The startup script (`docker-desktop-user-startup.sh`) therefore launches it with a fixed GUI port (`8090`) and a fixed RC API port (`5572`), and the session proxy routes both:
+
+- `/rclone/` → the GUI server on port `8090` of the user's desktop container
+- `/rclone/rc/...` → the RC API server on port `5572` of the user's desktop container
+- `/rclone/oauth2callback` → the OAuth callback webserver on port `53682` of the user's desktop container
+
+The GUI is a single-page app built with root-absolute asset URLs, so the session proxy rewrites the served HTML to prefix those with `/rclone/` and redirects the `/rclone/` root to the GUI's auto-login page (`/rclone/login?url=/rclone/rc&user=...&pass=...`), pointing the frontend at the same-origin RC API path.
+
+Because the GUI runs inside a container, rclone's interactive OAuth normally fails - its callback webserver binds to `127.0.0.1:53682` and its redirect URI points back at that same localhost address.
 
 To make this work, the installer builds a custom rclone binary with two small patches applied (as search-and-replace strings in `rclone-build/build.sh` - no fork is maintained):
 - the OAuth callback webserver is bound to `0.0.0.0:53682` (reachable from the session proxy), and

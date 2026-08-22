@@ -6,13 +6,14 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	_ "embed"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -137,7 +138,7 @@ func connectToSession(username string, startIfNotRunning bool) string {
 }
 
 // Adds or updates a proxy in the global dictionary.
-func (pr *ProxyRegistry) set(username string, password string, targetURLStr string) error {
+func (pr *ProxyRegistry) set(username string, password string, targetURLStr string, rewriteHTML bool) error {
 	// Now we have the password to use when we create the new Proxy object. First we have to create a URL...
 	proxyTargetURL, err := url.Parse(targetURLStr)
 	if err != nil {
@@ -162,6 +163,13 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 		// req.Header.Set("X-Forwarded-Prefix", "/app/" + username + "/" + targetURLStr)
 	}
 
+	// The rclone web GUI (served at "/rclone") is a single-page app built with root-absolute asset URLs (e.g. "/assets/...",
+	// "/icon.svg"). Served behind a path prefix, a browser would resolve those against the domain root and miss the proxy
+	// route. When set, we rewrite those paths in HTML responses to add the "/rclone" prefix so the assets load correctly.
+	if rewriteHTML {
+		sessionProxy.ModifyResponse = rewriteGUIHTML
+	}
+
 	pr.mu.Lock() // Block readers and other writers.
 	defer pr.mu.Unlock()
 
@@ -170,8 +178,34 @@ func (pr *ProxyRegistry) set(username string, password string, targetURLStr stri
 	return nil
 }
 
+// rewriteGUIHTML rewrites a response's root-absolute asset URLs to include the "/rclone" path prefix, so the SPA's
+// static assets load correctly when the GUI is served behind that prefix. Only HTML responses are rewritten.
+func rewriteGUIHTML(resp *http.Response) error {
+	if !strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "text/html") {
+		return nil
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	bodyStr := string(body)
+
+	rewritten := strings.ReplaceAll(bodyStr, `"/assets/`, `"/rclone/assets/`)
+	rewritten = strings.ReplaceAll(rewritten, `"/icon.svg"`, `"/rclone/icon.svg"`)
+
+	resp.Body = io.NopCloser(bytes.NewBufferString(rewritten))
+	resp.ContentLength = int64(len(rewritten))
+	resp.Header.Set("Content-Length", strconv.Itoa(len(rewritten)))
+	return nil
+}
+
 // A global instance of the proxy registry to store multiple proxies to user rclone instances.
 var sessionProxies = newProxyRegistry()
+
+// A separate registry for the per-user rclone RC API servers (which, unlike the GUI server, are keyed only by username).
+var rcloneRCProxies = newProxyRegistry()
 
 // The HTML page that explains the "/app/username/portnumber/" URL scheme to the user, with a form that
 // helps them construct the URL to their app. Loaded from the "appIndex.html" file at build time using go:embed.
@@ -262,6 +296,17 @@ var rcloneOAuthTarget = func(username string) string {
 	return "http://desktop-" + username + ":" + strconv.Itoa(rcloneOAuthPort)
 }
 
+// The port rclone's remote control (RC) API server listens on inside the user's desktop container. Since rclone v1.74
+// the "rclone gui" command serves the web GUI and the RC API on two separate ports. This is the fixed RC API port the
+// startup script binds, so this proxy can forward "/rclone/rc" requests to it.
+const rcloneRCAPIPort = 5572
+
+// Builds the address of the RC API server in a given user's desktop container. A variable so tests can redirect it to
+// a local test server.
+var rcloneRCATarget = func(username string) string {
+	return "http://desktop-" + username + ":" + strconv.Itoa(rcloneRCAPIPort)
+}
+
 // Handles the "/rclone/oauth2callback" endpoint. When a user adds a cloud remote in the rclone web GUI, the OAuth
 // flow redirects the user's browser back to this URL (which is registered with the OAuth provider). We route it to
 // the OAuth callback webserver running in the requesting user's own desktop container - the one that started the
@@ -313,29 +358,56 @@ func main() {
 		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
 		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
 
-		// Make sure a proxy object to the user's Desktop Docker container (which is where rclone will be running) exists.
-		proxy, password, exists := sessionProxies.get(username)
-		if exists == false {
+		// Make sure proxy objects to the user's Desktop Docker container (which is where rclone is running) exist for
+		// both the web GUI (port 8090) and the RC API (port 5572). The two proxies share the same session and password.
+		guiProxy, _, guiExists := sessionProxies.get(username)
+		_, password, rcExists := rcloneRCProxies.get(username)
+		if guiExists == false || rcExists == false {
 			// If we don't have an existing session, make sure one is started, getting the connection password to use in the process.
 			password = connectToSession(username, true)
 
-			// Create a new proxy object to connect with.
-			sessionProxies.set(username, password, "http://desktop-"+username+":8090")
-			proxy, password, exists = sessionProxies.get(username)
+			// Create proxy objects to connect with - one for the GUI server and one for the RC API server.
+			sessionProxies.set(username, password, "http://desktop-"+username+":8090", true)
+			rcloneRCProxies.set(username, password, rcloneRCATarget(username), false)
+			guiProxy, _, _ = sessionProxies.get(username)
 		}
 
-		// // Rewrite the URL to remove the "/rclone" prefix.
-		// r.URL.Path = strings.TrimPrefix(r.URL.Path, "/rclone")
-
-		// Redirect the "/" URL to include the (Base64-ed "username:password") login token (if it doesn't already) so the user is logged straight in rather than being shown the "login" screen.
-		if r.URL.Path == "/" && !r.URL.Query().Has("login_token") {
+		// Redirect the "/" URL to the GUI's auto-login page, telling the frontend where its RC API lives. Since rclone
+		// v1.74 the web GUI and RC API run on separate ports, so we point the frontend at a same-origin path ("/rclone/rc")
+		// that this proxy forwards to the user's RC API server (see rcloneRCHandler below). The frontend is handed the
+		// username/password so it can authenticate to the RC API seamlessly.
+		if (r.URL.Path == "/" || r.URL.Path == "") && !r.URL.Query().Has("url") {
 			log.Printf("Redirecting request: %s %s", r.Method, r.URL.Path)
-			http.Redirect(w, r, "/rclone/?login_token="+base64.StdEncoding.EncodeToString([]byte(username+":"+password)), http.StatusSeeOther)
+			loginQuery := url.Values{}
+			loginQuery.Set("url", "/rclone/rc")
+			loginQuery.Set("user", username)
+			loginQuery.Set("pass", password)
+			http.Redirect(w, r, "/rclone/login?"+loginQuery.Encode(), http.StatusSeeOther)
 			return
 		}
 
 		log.Printf("Re-written rclone request: %s %s", r.Method, r.URL.Path)
-		proxy.ServeHTTP(w, r)
+		guiProxy.ServeHTTP(w, r)
+	})
+
+	// Proxies requests to a user's rclone RC API server (port 5572 in their desktop container). The GUI frontend makes
+	// all its remote-control calls here (paths like "/rclone/rc/rc/noop", i.e. the "/rclone/rc" prefix from its login
+	// URL followed by the RC method path), so this handler strips that prefix and forwards to the RC API root.
+	rcloneRCHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Proxying rclone RC request: %s %s", r.Method, r.URL.Path)
+
+		// Get the username ("Remote-User" HTTP header value injected by Pangolin).
+		username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
+
+		// Make sure a proxy object to the user's RC API server exists (starting their session if necessary).
+		rcProxy, _, exists := rcloneRCProxies.get(username)
+		if exists == false {
+			password := connectToSession(username, true)
+			rcloneRCProxies.set(username, password, rcloneRCATarget(username), false)
+			rcProxy, _, _ = rcloneRCProxies.get(username)
+		}
+
+		rcProxy.ServeHTTP(w, r)
 	})
 
 	appHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -379,7 +451,7 @@ func main() {
 					return
 				} else {
 					// Create a new proxy object to connect with.
-					sessionProxies.set(proxyKey, password, "http://desktop-"+URLUsername+":"+URLPort)
+					sessionProxies.set(proxyKey, password, "http://desktop-"+URLUsername+":"+URLPort, false)
 					proxy, password, exists = sessionProxies.get(proxyKey)
 				}
 			}
@@ -409,6 +481,9 @@ func main() {
 	// handleRcloneOAuthCallback). Registering the exact path means it takes precedence over the
 	// more general "/rclone/" pattern below.
 	http.HandleFunc("/rclone/oauth2callback", handleRcloneOAuthCallback)
+	// The more specific "/rclone/rc/" pattern (registered before "/rclone/") takes precedence over it, so requests to
+	// a user's RC API are sent to rcloneRCHandler while everything else under "/rclone" goes to the GUI server.
+	http.Handle("/rclone/rc/", http.StripPrefix("/rclone/rc", rcloneRCHandler))
 	http.Handle("/rclone/", http.StripPrefix("/rclone/", rcloneHandler))
 	http.Handle("/app/", http.StripPrefix("/app/", appHandler))
 	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {

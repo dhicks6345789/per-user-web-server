@@ -110,7 +110,7 @@ func TestRewriteGUIHTML(t *testing.T) {
 			t.Fatalf("expected rewritten HTML to contain %q, got %q", want, got)
 		}
 	}
-	if cc := resp.Header.Get("Cache-Control"); cc != "no-cache" {
+	if cc := resp.Header.Get("Cache-Control"); cc != "no-store" {
 		t.Fatalf("expected HTML response to be non-cacheable, got %q", cc)
 	}
 

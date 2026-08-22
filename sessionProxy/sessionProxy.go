@@ -198,9 +198,13 @@ func rewriteGUIHTML(resp *http.Response) error {
 	resp.Body = io.NopCloser(bytes.NewBufferString(rewritten))
 	resp.ContentLength = int64(len(rewritten))
 	resp.Header.Set("Content-Length", strconv.Itoa(len(rewritten)))
-	// The HTML is rewritten per-request (asset URLs depend on the serving prefix), so it must not be cached or a
-	// browser could keep serving stale, un-rewritten asset paths. The hashed static assets themselves stay cacheable.
-	resp.Header.Set("Cache-Control", "no-cache")
+	// The HTML is rewritten per-request (asset URLs depend on the serving prefix), so it must never be cached. We also
+	// drop the backend's revalidation headers: the rewritten body differs from the on-disk file, so an unchanged
+	// Last-Modified/ETag could otherwise let a browser revalidate to a 304 and keep stale, un-rewritten asset paths.
+	resp.Header.Set("Cache-Control", "no-store")
+	resp.Header.Del("Last-Modified")
+	resp.Header.Del("ETag")
+	resp.Header.Del("Expires")
 	return nil
 }
 

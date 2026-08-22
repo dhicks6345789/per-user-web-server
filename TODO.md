@@ -15,7 +15,6 @@ Schools / education establishments are an intended target market (along with sma
   - [ ] WebConsole should run in each user context, needs some example new item scripts to add new Flask project, new Go project, etc.
 - [ ] Arrange YAML files into sub-folder, root of project is getting rather cluttered.
 - [ ] Loading spinner for desktop / ssh connection - initial connection can take 30(?) seconds, needs some progress indication.
-- [ ] Possibly add a separate start menu at public.example.com, constructed from the Caddy config file(?).
 - [ ] Customise the Start toolbar on XFCE4 desktop to add browser, IDEs, etc.
 - [ ] User instance culling / suspension to free up resources - maybe see example Go project (URL?...)
 - [ ] Persistant SSH sessions? VNC is currently persistant (I think?), SSH opens a new session even if Guacamole disconnects for a few seconds.

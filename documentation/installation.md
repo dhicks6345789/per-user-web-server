@@ -53,13 +53,17 @@ Users can add their own cloud storage remotes through the rclone web GUI (at `ht
 - `/rclone/rc/...` → the RC API server on port `5572` of the user's desktop container
 - `/rclone/oauth2callback` → the OAuth callback webserver on port `53682` of the user's desktop container
 
-The GUI is a single-page app built with root-absolute asset URLs, so the session proxy rewrites the served HTML to prefix those with `/rclone/` and redirects the `/rclone/` root to the GUI's auto-login page (`/rclone/login?url=/rclone/rc&user=...&pass=...`), pointing the frontend at the same-origin RC API path.
+The GUI is a single-page app (React Router) that the session proxy serves behind the `/rclone` path prefix. Three things make that work:
+- The GUI is built with root-absolute asset URLs, so the session proxy rewrites the served HTML to prefix those with `/rclone/`.
+- The `/rclone/` root is redirected to the GUI's auto-login page (`/rclone/login?url=/rclone/rc&user=...&pass=...`), pointing the frontend at the same-origin RC API path.
+- The GUI's React Router uses `basename "/"`, which would break client-side routing behind a sub-path (the app shows "Unexpected Application Error! 404 Not Found"). So the custom rclone build sets the router basename to `/rclone` (see below).
 
 Because the GUI runs inside a container, rclone's interactive OAuth normally fails - its callback webserver binds to `127.0.0.1:53682` and its redirect URI points back at that same localhost address.
 
-To make this work, the installer builds a custom rclone binary with two small patches applied (as search-and-replace strings in `rclone-build/build.sh` - no fork is maintained):
+To make this work, the installer builds a custom rclone binary with small patches applied at build time (as search-and-replace steps in `rclone-build/build.sh` - no fork is maintained):
 - the OAuth callback webserver is bound to `0.0.0.0:53682` (reachable from the session proxy), and
 - the OAuth redirect URI is set to `https://<users-host>/rclone/oauth2callback`.
+- the embedded GUI's React Router basename is set to `/rclone` (via `rclone-build/patch-gui-dist.py`, which modifies the embedded `dist.zip`).
 
 The session proxy routes `/rclone/oauth2callback` to the requesting user's own desktop container (using Pangolin's `Remote-User` header), so each user's OAuth completes in their own container.
 

@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# Build a custom rclone binary with two small patches so that interactive OAuth (adding a
-# remote such as Google Drive via the web GUI) works through the session proxy. rclone's
-# OAuth callback webserver is made to bind to all interfaces (0.0.0.0:53682) and its
-# redirect URI is set to the site's public "/rclone/oauth2callback" URL, so a user's
-# browser can be redirected back through the session proxy, which forwards the callback
-# into the user's own desktop container.
+# Build a custom rclone binary with small patches so that interactive OAuth (adding a
+# remote such as Google Drive via the web GUI) works through the session proxy, and so the
+# embedded web GUI can be served behind a path prefix. Patches applied at build time:
+#   - bind the OAuth callback webserver to all interfaces (0.0.0.0:53682)
+#   - point the OAuth redirect URI at the site's "/rclone/oauth2callback" endpoint
+#   - set the embedded GUI's React Router basename to "/rclone" so its client-side routing
+#     works when it's served behind the "/rclone" path by the session proxy
 #
-# We don't maintain a fork - we just clone / pull the current upstream rclone and apply
-# the two changes as simple search-and-replace strings here, at build time.
+# We don't maintain a fork - we just clone / pull the current upstream rclone (and its
+# pre-built GUI bundle) and apply these changes as simple search-and-replace steps here,
+# at build time.
 #
 # Usage: build.sh <rcloneOauthRedirectUrl>
 #   <rcloneOauthRedirectUrl> e.g. https://users.example.com/rclone/oauth2callback
@@ -65,12 +67,34 @@ if ! grep -q "RedirectURL = \"${RCLONE_OAUTH_REDIRECT_URL}\"" "$SRCDIR/lib/oauth
     exit 1
 fi
 
-# Build rclone as a self-contained binary suitable for copying into the desktop container.
-( cd "$SRCDIR" && go build -trimpath -ldflags="-s -w" -o "$OUTBIN" )
+# Patch 3: the embedded web GUI (dist.zip) is a compiled React SPA built with a hard-coded React Router
+# basename of "/". When the session proxy serves it behind the "/rclone" path prefix the browser URL no
+# longer matches any client-side route, so we default the router basename to the "/rclone" prefix at build
+# time. This bakes the fix into the embedded bundle (no runtime rewriting needed).
+# Note: this relies on the minified router factory string; if the GUI bundle layout changes the script
+# refuses to write a possibly-broken dist and fails the build loudly.
+if command -v python3 >/dev/null 2>&1; then
+    python3 "$BUILDDIR/patch-gui-dist.py" "$SRCDIR/cmd/gui/dist.zip" "/rclone"
+    if [ $? -ne 0 ]; then
+        echo "Failed to patch GUI dist basename." >&2
+        exit 1
+    fi
+else
+    echo "python3 not found - skipping GUI dist basename patch (GUI routing behind /rclone will be broken)." >&2
+fi
 
-if [ ! -f "$OUTBIN" ]; then
+# Build rclone as a self-contained binary suitable for copying into the desktop container.
+# Build to a temporary file first so a failed build can't leave a stale binary in place that
+# later steps would silently use.
+OUTBIN_TMP="$OUTBIN.tmp.$$"
+( cd "$SRCDIR" && go build -trimpath -ldflags="-s -w" -o "$OUTBIN_TMP" )
+BUILD_RC=$?
+
+if [ $BUILD_RC -ne 0 ] || [ ! -f "$OUTBIN_TMP" ]; then
     echo "Failed to build rclone." >&2
+    rm -f "$OUTBIN_TMP"
     exit 1
 fi
 
+mv "$OUTBIN_TMP" "$OUTBIN"
 echo "Built custom rclone to $OUTBIN"

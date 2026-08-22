@@ -54,8 +54,9 @@ func TestHandleRcloneOAuthCallbackProxiesToUser(t *testing.T) {
 	}
 	received.mu.Lock()
 	defer received.mu.Unlock()
-	if received.path != "/oauth2callback" {
-		t.Fatalf("expected callback forwarded to /oauth2callback, got %q", received.path)
+	// rclone's OAuth auth server handles the callback at its root path, regardless of the public redirect URI path.
+	if received.path != "/" {
+		t.Fatalf("expected callback forwarded to the auth server root, got %q", received.path)
 	}
 	if received.query != "state=abc&code=123" {
 		t.Fatalf("expected OAuth query preserved, got %q", received.query)
@@ -82,6 +83,56 @@ func TestObfuscateIdentityValue(t *testing.T) {
 	// The digest must not contain the original value (i.e. it is actually hashed).
 	if other := obfuscateIdentityValue("jane.doe@example.com"); containsIdentity(other, "jane.doe") {
 		t.Fatalf("digest unexpectedly contains the original identity: %q", other)
+	}
+}
+
+// The "/rclone/auth" endpoint should be proxied to the requesting user's own desktop container, with the
+// "/rclone" prefix stripped so it lands on "/auth" on the OAuth auth server, preserving the query (state).
+func TestHandleRcloneOAuthAuthProxiesToUser(t *testing.T) {
+	var received struct {
+		mu    sync.Mutex
+		path  string
+		query string
+	}
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		received.mu.Lock()
+		received.path = r.URL.Path
+		received.query = r.URL.RawQuery
+		received.mu.Unlock()
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer testServer.Close()
+
+	original := rcloneOAuthTarget
+	rcloneOAuthTarget = func(username string) string { return testServer.URL }
+	t.Cleanup(func() { rcloneOAuthTarget = original })
+
+	req := httptest.NewRequest(http.MethodGet, "/rclone/auth?state=abc", nil)
+	req.Header.Set("Remote-User", "jane.doe@example.com")
+	rec := httptest.NewRecorder()
+	handleRcloneOAuthAuth(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	received.mu.Lock()
+	defer received.mu.Unlock()
+	if received.path != "/auth" {
+		t.Fatalf("expected auth forwarded to /auth, got %q", received.path)
+	}
+	if received.query != "state=abc" {
+		t.Fatalf("expected auth query preserved, got %q", received.query)
+	}
+}
+
+// The OAuth helper script (injected into the GUI HTML) must contain the polling fetch to config/oauthstatus and the
+// public-path rewrite of the auth URL.
+func TestOAuthHelperScript(t *testing.T) {
+	s := oauthHelperScript()
+	for _, want := range []string{"config/oauthstatus", `"/rclone"`, "Complete OAuth"} {
+		if !strings.Contains(s, want) {
+			t.Fatalf("expected OAuth helper script to contain %q", want)
+		}
 	}
 }
 

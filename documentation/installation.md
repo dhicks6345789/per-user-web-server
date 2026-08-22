@@ -67,6 +67,17 @@ To make this work, the installer builds a custom rclone binary with small patche
 
 The session proxy routes `/rclone/oauth2callback` to the requesting user's own desktop container (using Pangolin's `Remote-User` header), so each user's OAuth completes in their own container.
 
+### Creating OAuth remotes (Google Drive etc.) via the GUI
+
+The embedded rclone GUI relies on rclone opening a browser to start the OAuth handshake, which can't happen in a headless container, and it doesn't itself show the auth URL. The session proxy bridges that gap:
+
+- When a user creates an OAuth remote, rclone's `config/create` starts its auth server (port `53682`) and blocks; the GUI shows a spinner.
+- The session proxy injects a small script into the served GUI page that polls rclone's RC `config/oauthstatus` endpoint and, once a flow is running, shows a **"Complete OAuth"** button linking to the auth URL (rewritten to the public `/rclone/auth?state=...` path).
+- The session proxy routes `/rclone/auth` to the user's desktop container's auth server, which verifies the state and redirects the browser to the OAuth provider (`redirect_uri` = `https://<users-host>/rclone/oauth2callback`).
+- After the user authenticates, the provider redirects to `/rclone/oauth2callback`, which the session proxy forwards to the auth server's root (the callback handler), completing the handshake and creating the remote.
+
+Note: users must register their own OAuth `client_id` / `client_secret` (on Google Cloud Console etc.) that lists `https://<users-host>/rclone/oauth2callback` as an allowed redirect URI — rclone's default client will not permit this redirect URI.
+
 Configuration:
 - The redirect URI is stored in `/etc/puws/config.yml` as `rcloneOauthRedirectUrl`. The installer defaults it to `https://<SERVERNAME>/rclone/oauth2callback` - **edit it to the public hostname where the `/rclone` endpoint is served** (e.g. `https://users.example.com/rclone/oauth2callback`), then re-run the installer to rebuild rclone.
 - No shared organisation OAuth client is provided. Each user supplies their own `client_id` / `client_secret` when adding a remote in the GUI, and must register `https://<users-host>/rclone/oauth2callback` as a redirect URI on their own OAuth client (e.g. Google Cloud Console).

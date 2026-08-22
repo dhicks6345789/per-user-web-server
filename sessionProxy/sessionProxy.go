@@ -209,6 +209,11 @@ func rewriteGUIHTML(resp *http.Response) error {
 	rewritten := strings.ReplaceAll(bodyStr, `"/assets/`, `"/rclone/assets/`)
 	rewritten = strings.ReplaceAll(rewritten, `"/icon.svg"`, `"/rclone/icon.svg"`)
 
+	// Inject a small OAuth helper: when an OAuth remote is being created, rclone's config/create blocks while its
+	// auth server runs, but it exposes the auth URL via config/oauthstatus. This script polls that endpoint and shows
+	// the user a clickable link to complete the OAuth handshake (the URL is rewritten to go through this proxy).
+	rewritten = strings.Replace(rewritten, "</body>", oauthHelperScript()+"</body>", 1)
+
 	resp.Body = io.NopCloser(bytes.NewBufferString(rewritten))
 	resp.ContentLength = int64(len(rewritten))
 	resp.Header.Set("Content-Length", strconv.Itoa(len(rewritten)))
@@ -223,6 +228,59 @@ func rewriteGUIHTML(resp *http.Response) error {
 	resp.Header.Del("ETag")
 	resp.Header.Del("Expires")
 	return nil
+}
+
+// oauthHelperScript returns the HTML-injected script that surfaces the rclone OAuth auth URL to the user. The embedded
+// rclone GUI doesn't open a browser or show the auth URL (it relies on rclone opening one, which can't happen headless),
+// so we poll rclone's RC "config/oauthstatus" endpoint while a remote is being created and, when a flow is running,
+// present the (proxied) auth URL as a clickable button.
+func oauthHelperScript() string {
+	return `<script>
+(function () {
+    var box = null;
+    var link = null;
+    function show(url) {
+        if (!box) {
+            box = document.createElement("div");
+            box.id = "rclone-oauth-helper";
+            box.style.cssText = "position:fixed;bottom:20px;right:20px;z-index:99999;background:#fff;border:1px solid #bbb;" +
+                "border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.25);padding:14px 16px;font-family:system-ui,sans-serif;" +
+                "font-size:14px;max-width:340px;";
+            box.innerHTML = '<strong style="display:block;margin-bottom:8px;">OAuth required</strong>' +
+                '<span style="display:block;margin-bottom:10px;color:#444;">Click to authorize this remote.</span>';
+            link = document.createElement("a");
+            link.target = "_blank";
+            link.rel = "noopener";
+            link.textContent = "Complete OAuth";
+            link.style.cssText = "display:inline-block;background:#1976d2;color:#fff;padding:8px 14px;border-radius:4px;" +
+                "text-decoration:none;font-weight:600;";
+            box.appendChild(link);
+            document.body.appendChild(box);
+        }
+        link.href = url;
+        box.style.display = "block";
+    }
+    function hide() {
+        if (box) box.style.display = "none";
+    }
+    function poll() {
+        fetch("/rclone/rc/config/oauthstatus", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: "{}"
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d && d.status === "running" && d.authUrl) {
+                // authUrl looks like "http://0.0.0.0:53682/auth?state=..."; rewrite to this proxy's path.
+                show(d.authUrl.replace(/^https?:\/\/[^/]+/, window.location.origin + "/rclone"));
+            } else {
+                hide();
+            }
+        }).catch(function () { hide(); });
+    }
+    poll();
+    setInterval(poll, 2000);
+})();
+</script>`
 }
 
 // A global instance of the proxy registry to store multiple proxies to user rclone instances.
@@ -363,15 +421,50 @@ func handleRcloneOAuthCallback(w http.ResponseWriter, r *http.Request) {
 		// Ensure the Host header matches the target so rclone's callback server doesn't reject it.
 		req.Host = targetURL.Host
 
-		// Strip the "/rclone" prefix so the callback lands on "/oauth2callback" inside the container (the
-		// query parameters - state, code, etc - are preserved by the proxy).
+		// rclone's OAuth auth server handles the callback at its root path ("/"), regardless of the public
+		// redirect URI path. Land the callback there (the query parameters - state, code, etc - are preserved).
+		req.URL.Path = "/"
+	}
+
+	log.Printf("rclone OAuth callback for user %s: %s %s", username, r.Method, r.URL.String())
+	proxy.ServeHTTP(w, r)
+}
+
+// Handles the "/rclone/auth" endpoint - the first step of rclone's interactive OAuth. When a user creates an
+// OAuth remote in the web GUI, rclone starts an auth server in their container and generates an auth URL
+// ("http://0.0.0.0:53682/auth?state=..."). We rewrite that to the public "/rclone/auth?state=..." path so the
+// user's browser can reach it, then forward it here to the auth server in their own desktop container, which
+// verifies the state and redirects the browser to the OAuth provider.
+func handleRcloneOAuthAuth(w http.ResponseWriter, r *http.Request) {
+	// Get the current user's username (the "Remote-User" HTTP header value injected by Pangolin).
+	username := strings.Split(r.Header.Get("Remote-User"), "@")[0]
+	if username == "" {
+		log.Print("rclone OAuth auth: no user supplied (missing Remote-User header).")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Route to the user's own desktop container (where the rclone GUI / OAuth flow is running).
+	targetURL, err := url.Parse(rcloneOAuthTarget(username))
+	if err != nil {
+		log.Printf("rclone OAuth auth: error parsing target URL: %v", err)
+		http.Error(w, "Bad gateway", http.StatusBadGateway)
+		return
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		req.Host = targetURL.Host
+		// "/rclone/auth" -> "/auth" on the auth server (the "/auth" handler redirects to the OAuth provider).
 		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/rclone")
 		if req.URL.Path == "" {
 			req.URL.Path = "/"
 		}
 	}
 
-	log.Printf("rclone OAuth callback for user %s: %s %s", username, r.Method, r.URL.String())
+	log.Printf("rclone OAuth auth for user %s: %s %s", username, r.Method, r.URL.String())
 	proxy.ServeHTTP(w, r)
 }
 
@@ -505,6 +598,7 @@ func main() {
 	// handleRcloneOAuthCallback). Registering the exact path means it takes precedence over the
 	// more general "/rclone/" pattern below.
 	http.HandleFunc("/rclone/oauth2callback", handleRcloneOAuthCallback)
+	http.HandleFunc("/rclone/auth", handleRcloneOAuthAuth)
 	// The more specific "/rclone/rc/" pattern (registered before "/rclone/") takes precedence over it, so requests to
 	// a user's RC API are sent to rcloneRCHandler while everything else under "/rclone" goes to the GUI server.
 	http.Handle("/rclone/rc/", http.StripPrefix("/rclone/rc", rcloneRCHandler))

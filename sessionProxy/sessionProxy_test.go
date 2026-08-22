@@ -110,6 +110,9 @@ func TestRewriteGUIHTML(t *testing.T) {
 			t.Fatalf("expected rewritten HTML to contain %q, got %q", want, got)
 		}
 	}
+	if cc := resp.Header.Get("Cache-Control"); cc != "no-cache" {
+		t.Fatalf("expected HTML response to be non-cacheable, got %q", cc)
+	}
 
 	// Non-HTML responses must be passed through unchanged.
 	js := `var x = "/assets/index-abc.js";`

@@ -29,10 +29,12 @@ def main() -> int:
 
     # The minified React Router data-router factory that the app calls without options,
     # so its basename option is undefined and falls back to "/". We default it to our prefix.
-    # Careful: react-router may reference a config's basename elsewhere; this exact string
-    # (the factory default) appears exactly once in the bundle.
-    search = "basename:n?.basename,"
-    replace = f'basename:n?.basename||"{basename}",'
+    # The minifier renames the factory's options argument on every React Router release
+    # (e.g. "basename:n?.basename," before v7.18, "basename:r?.basename,getContext:..."
+    # after), so we anchor on the stable parts around it instead: the factory only ever
+    # reads basename and getContext like this. This site appears exactly once in the bundle.
+    search = "?.basename,getContext:r?.getContext"
+    replace = f'?.basename||"{basename}",getContext:r?.getContext'
 
     src = zipfile.ZipFile(zip_path, "r")
     names = src.namelist()

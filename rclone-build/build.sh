@@ -45,7 +45,13 @@ export GOCACHE="$GOCACHE"
 if [ ! -d "$SRCDIR/.git" ]; then
     git clone --depth 1 https://github.com/rclone/rclone "$SRCDIR"
 else
-    git -C "$SRCDIR" pull --ff-only
+    # The working tree always carries our uncommitted build-time patches (we never commit
+    # them - changes to rclone's code stay local-only, we don't push to upstream rclone).
+    # A "pull" would therefore abort with "Please commit your changes or stash them before
+    # you merge". The patches are re-applied from scratch below, so instead just fetch the
+    # latest upstream commit and hard-reset this disposable tree onto it.
+    git -C "$SRCDIR" fetch --depth 1 origin master
+    git -C "$SRCDIR" reset --hard FETCH_HEAD
 fi
 
 # Patch 1: bind the OAuth callback webserver to all interfaces so the session proxy container can reach it.

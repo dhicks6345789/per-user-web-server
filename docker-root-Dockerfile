@@ -12,10 +12,17 @@ RUN apt-get update
 # Install some basic utilities.
 RUN apt-get install -y curl sudo wget nano procps unzip p7zip rsync dos2unix ca-certificates gnupg
 
-# Install rclone, a tool for handling cloud / remote file systems. Debian does include a packaged version of rclone,
-# but as of May 2026 that version is older than the one we want to use - we want a version with the built-in GUI capability.
-# Therefore, we install using rclone's own install script rather than via apt.
+
+
+# Install rclone, a tool for handling cloud / remote file systems. We are going to install our own custom-compile version
+# (newer than the version packaged with Debian, and has its interactive OAuth callback bound to 0.0.0.0:53682 and redirected
+# to the site's "/rclone/oauth2callback" endpoint so OAuth works through the session proxy). First, we run the rclone's
+# install script...
 RUN curl https://rclone.org/install.sh | bash
+# ...and then we copy in our own custom executable.
+COPY per-user-web-server/rclone-build/rclone /usr/local/bin/rclone
+
+
 
 # Install Poppler, a PDF rendering engine.
 RUN apt-get install -y poppler-utils

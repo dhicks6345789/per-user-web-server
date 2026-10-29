@@ -70,8 +70,8 @@ RUN apt-get install -y python3-pil
 
 
 
-# Install a Node.js development environment.
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+# Install a Node.js development environment (LTS version).
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
 RUN apt-get install -y nodejs
 
 
@@ -91,7 +91,9 @@ RUN apt-get install -y php php-cli php-common php-mysql php-xml php-mbstring php
 
 
 # Install OpenCode, a terminal-based AI agent development tool.
-RUN npm install -g opencode-ai
+#RUN npm install -g opencode-ai
+# Install the OpenCode 2.0 CLI, a terminal-based AI agent development tool, globally.
+RUN npm install -g @opencode/cli
 
 # Install Pi, a lighter-weight terminal-based AI coding agent.
 RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent

@@ -84,9 +84,9 @@ RUN GOBIN=/usr/local/bin go install github.com/swaggo/swag/cmd/swag@latest
 
 
 
-# Install a PHP development environment. This should be PHP along with common extensions like MySQL support,
-# JSON, XML, and Mbstring
-apt-get install php php-cli php-common php-mysql php-xml php-mbstring php-curl
+# Install a PHP development environment. This should be PHP along with common
+# extensions like MySQL support, JSON, XML, and Mbstring
+RUN apt-get install php php-cli php-common php-mysql php-xml php-mbstring php-curl
 
 
 

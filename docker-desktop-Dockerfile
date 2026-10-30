@@ -111,5 +111,9 @@ COPY per-user-web-server/docker-desktop-custom-WebBrowser.desktop /root/docker-d
 COPY per-user-web-server/docker-desktop-root-startup.sh /root/docker-desktop-root-startup.sh
 COPY per-user-web-server/docker-desktop-user-startup.sh /root/docker-desktop-user-startup.sh
 
+# Copy in the OpenCode config files that point the OpenCode client at our custom proxy server.
+COPY per-user-web-server/opencode.jsonc /root/opencode.jsonc
+COPY per-user-web-server/opencode-auth.json /root/opencode-auth.json
+
 # Clean up apt repository lists.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

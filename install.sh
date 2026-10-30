@@ -12,7 +12,7 @@ DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 DOCKERWEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-dockerwebconsole:0.1-beta.3"
 DOCKERSESSIONPROXY_DOCKER_IMAGE="sansay.co.uk-dockersessionproxy:0.1-beta.3"
-DOCKEROPENAIPROXY_DOCKER_IMAGE="alpine:latest"
+DOCKEROPENAIPROXY_DOCKER_IMAGE="sansay.co.uk-dockeropenaiproxy:0.1-beta.3"
 DOCKERADMINPANEL_DOCKER_IMAGE="sansay.co.uk-dockeradminpanel:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
@@ -284,15 +284,6 @@ cd ace-builds
 git pull
 cd ..
 
-# Build OpenAI Proxy (acts as a proxy between AI client tools and servers, adding filtering, logging and billing).
-if [ ! -d "openai-proxy" ]; then
-    git clone https://github.com/dhicks6345789/openai-proxy.git
-fi
-cd openai-proxy
-git pull
-bash build.sh
-cd ..
-
 # Build Web Console (runs server-side scripts with a simple user interface, also acts as a basic web server) via Git.
 if [ ! -d "web-console" ]; then
     git clone https://github.com/dhicks6345789/web-console.git
@@ -338,6 +329,15 @@ if [ ! -f "per-user-web-server/sessionProxy/sessionProxy" ]; then
     echo "Problem building the Go session proxy router server - stopping."
     exit 1
 fi
+
+echo Building the OpenAI Proxy.
+if [ ! -d "openai-proxy" ]; then
+    git clone https://github.com/dhicks6345789/openai-proxy.git
+fi
+cd openai-proxy
+git pull
+bash build.sh
+cd ..
 
 echo Building the Go admin control panel.
 cd per-user-web-server/adminPanel
@@ -511,6 +511,10 @@ if [ $INSTALL_PANGOLIN = true ]; then
     echo "Building our Docker image for the custom session proxy router."
     cp per-user-web-server/docker-sessionProxy-Dockerfile .
     docker build -f docker-sessionProxy-Dockerfile --progress=plain --tag=$DOCKERSESSIONPROXY_DOCKER_IMAGE . 2>&1
+
+    echo "Building our Docker image for the OpenAI proxy router."
+    cp per-user-web-server/docker-openaiProxy-Dockerfile .
+    docker build -f docker-openaiProxy-Dockerfile --progress=plain --tag=$DOCKEROPENAIPROXY_DOCKER_IMAGE . 2>&1
 
     echo "Building our Docker image for the admin control panel."
     cp per-user-web-server/docker-adminPanel-Dockerfile .

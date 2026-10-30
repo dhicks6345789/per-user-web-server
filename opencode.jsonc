@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "local-proxy": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://openaiproxy:8317/v1"
+      },
+      "models": {
+        "your-model-name": {
+          "name": "Your Model Display Name"
+        }
+      }
+    }
+  },
+  "model": "local-proxy/your-model-name"
+}

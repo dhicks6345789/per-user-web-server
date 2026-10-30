@@ -90,8 +90,6 @@ RUN apt-get install -y php php-cli php-common php-mysql php-xml php-mbstring php
 
 
 
-# Install OpenCode, a terminal-based AI agent development tool.
-#RUN npm install -g opencode-ai
 # Install the OpenCode 2.0 CLI, a terminal-based AI agent development tool, globally.
 RUN npm install -g @opencode/cli
 

@@ -565,6 +565,7 @@ if [ $INSTALL_PANGOLIN = true ]; then
     sed -i "s/{{DOCKERWEBCONSOLE_DOCKER_IMAGE}}/$DOCKERWEBCONSOLE_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERWWWSERVER_DOCKER_IMAGE}}/$DOCKERWWWSERVER_DOCKER_IMAGE/g" docker-compose.yml
     sed -i "s/{{DOCKERSESSIONPROXY_DOCKER_IMAGE}}/$DOCKERSESSIONPROXY_DOCKER_IMAGE/g" docker-compose.yml
+    sed -i "s/{{DOCKEROPENAIPROXY_DOCKER_IMAG}}/$DOCKEROPENAIPROXY_DOCKER_IMAG/g" docker-compose.yml
     sed -i "s/{{DOCKERADMINPANEL_DOCKER_IMAGE}}/$DOCKERADMINPANEL_DOCKER_IMAGE/g" docker-compose.yml
 
     # Make sure the Session Manager config file (/etc/puws/config.yml) has an admin key set. This is the shared

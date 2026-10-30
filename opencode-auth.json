@@ -1,0 +1,6 @@
+{
+  "local-proxy": {
+    "type": "api",
+    "key": "{{PASSWORD}}"
+  }
+}

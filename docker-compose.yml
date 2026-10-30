@@ -124,8 +124,8 @@ services:
   # filtering and billing funcationality.
   openaiproxy:
     image: {{DOCKEROPENAIPROXY_DOCKER_IMAGE}}
-    # command: /usr/local/bin/openai-proxy --mode server --port 8080
-    command: tail -f /dev/null
+    command: /usr/local/bin/openai-proxy --mode server --port 8080
+    # command: tail -f /dev/null
     container_name: openaiproxy
     restart: no
     expose:

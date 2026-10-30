@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 
 # Install some basic utilities.
-RUN apt-get install -y curl sudo wget nano procps unzip p7zip rsync dos2unix ca-certificates gnupg
+RUN apt-get install -y curl sudo wget nano procps unzip p7zip rsync dos2unix ca-certificates gnupg iputils-ping
 
 
 

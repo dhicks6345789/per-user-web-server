@@ -126,7 +126,7 @@ services:
     image: {{DOCKEROPENAIPROXY_DOCKER_IMAGE}}
     command: /usr/local/bin/openai-proxy --mode server --port 8080
     container_name: openaiproxy
-    restart: unless-stopped
+    restart: no
     expose:
       - "8080"
     networks:

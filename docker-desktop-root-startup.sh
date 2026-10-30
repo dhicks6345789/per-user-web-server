@@ -57,7 +57,7 @@ mkdir -p /home/$1/.config/opencode
 cp /root/opencode.jsonc /home/$1/.config/opencode/opencode.jsonc
 chown $1:$1 /home/$1/.config/opencode/opencode.jsonc
 cp /root/opencode-auth.json /home/$1/.config/opencode/auth.json
-
+sed -i "s/{{PASSWORD}}/$4/g" /home/$1/.config/opencode/auth.json
 chown $1:$1 /home/$1/.config/opencode/auth.json
 
 

@@ -12,6 +12,7 @@ DOCKERDESKTOP_DOCKER_IMAGE="sansay.co.uk-dockerdesktop:0.1-beta.3"
 DOCKERWWWSERVER_DOCKER_IMAGE="sansay.co.uk-dockerwwwserver:0.1-beta.3"
 DOCKERWEBCONSOLE_DOCKER_IMAGE="sansay.co.uk-dockerwebconsole:0.1-beta.3"
 DOCKERSESSIONPROXY_DOCKER_IMAGE="sansay.co.uk-dockersessionproxy:0.1-beta.3"
+DOCKEROPENAIPROXY_DOCKER_IMAGE="alpine:latest"
 DOCKERADMINPANEL_DOCKER_IMAGE="sansay.co.uk-dockeradminpanel:0.1-beta.3"
 DOCKERWINE_DOCKER_IMAGE="sansay.co.uk-dockerwine:0.1-beta.3"
 DOCKERCALC_DOCKER_IMAGE="sansay.co.uk-dockercalc:0.1-beta.3"
@@ -281,6 +282,15 @@ if [ ! -d "ace-builds" ]; then
 fi
 cd ace-builds
 git pull
+cd ..
+
+# Build OpenAI Proxy (acts as a proxy between AI client tools and servers, adding filtering, logging and billing).
+if [ ! -d "openai-proxy" ]; then
+    git clone https://github.com/dhicks6345789/openai-proxy.git
+fi
+cd openai-proxy
+git pull
+bash build.sh
 cd ..
 
 # Build Web Console (runs server-side scripts with a simple user interface, also acts as a basic web server) via Git.

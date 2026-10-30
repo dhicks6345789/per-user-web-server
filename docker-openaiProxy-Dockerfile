@@ -1,0 +1,5 @@
+# This container just needs to run our own custom Go application, so the minimal Alpine image should do nicely.
+FROM alpine:latest
+
+COPY openai-proxy/openai-proxy /usr/local/bin/openai-proxy
+EXPOSE 8080
